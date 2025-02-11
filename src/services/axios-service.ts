@@ -1,0 +1,35 @@
+import axios, { AxiosInstance } from 'axios';
+
+export class AxiosService<T> {
+  private readonly api: AxiosInstance;
+  private readonly path: string;
+
+  constructor(baseURL: string, path: string) {
+    this.api = axios.create({ baseURL });
+    this.path = path;
+  }
+
+  async getAll(): Promise<T[]> {
+    const response = await this.api.get<T[]>(this.path);
+    return response.data;
+  }
+
+  async getById(id: number | string): Promise<T> {
+    const response = await this.api.get<T>(`${this.path}/${id}`);
+    return response.data;
+  }
+
+  async create(data: T): Promise<T> {
+    const response = await this.api.post<T>(this.path, data);
+    return response.data;
+  }
+
+  async update(id: number | string, data: Partial<T>): Promise<T> {
+    const response = await this.api.put<T>(`${this.path}/${id}`, data);
+    return response.data;
+  }
+
+  async delete(id: number | string): Promise<void> {
+    await this.api.delete(`${this.path}/${id}`);
+  }
+}
