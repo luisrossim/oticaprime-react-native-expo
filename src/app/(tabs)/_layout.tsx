@@ -12,11 +12,11 @@ export default function Layout(){
             screenOptions={{
                 sceneStyle: { backgroundColor: "#FFF" },
                 headerShown: true,
-                tabBarShowLabel: false,
-                tabBarActiveTintColor: colors.black,
+                tabBarShowLabel: true,
+                tabBarActiveTintColor: "#000",
                 tabBarInactiveTintColor: colors.gray[400],
                 header: ({ route }) => (
-                    <CustomHeader title={"Empresa 1"} />
+                    <CustomHeader />
                 ),
                 tabBarButton: (props) => (
                     <Pressable {...props}

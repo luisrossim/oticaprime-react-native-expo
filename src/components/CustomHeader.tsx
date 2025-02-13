@@ -1,57 +1,31 @@
 import { colors } from "@/constants/colors";
-import { Feather } from "@expo/vector-icons";
-import { router } from 'expo-router'
-import { useState } from "react";
-import { View, Text, StyleSheet, Pressable, SafeAreaView, Modal } from "react-native";
+import { View, StyleSheet, SafeAreaView, Text } from "react-native";
+import React from "react";
+import { useEmpresa } from "@/context/EmpresaContext";
 
-export function CustomHeader({ tintColor, title }: { tintColor?: string, title?: string }) {
-    const [selectedEmpresa, setSelectedEmpresa] = useState<string>("Empresa 1");
-    const [modalVisible, setModalVisible] = useState<boolean>(false);
+export function CustomHeader() {
+    const { selectedCompany, updateCompany } = useEmpresa();
 
-    const empresas = ["Empresa 1", "Empresa 2", "Empresa 3"];
+    const data = [
+        { label: 'Item 1', value: '1' },
+        { label: 'Item 2', value: '2' },
+        { label: 'Item 3', value: '3' },
+        { label: 'Item 4', value: '4' },
+        { label: 'Item 5', value: '5' },
+        { label: 'Item 6', value: '6' },
+        { label: 'Item 7', value: '7' },
+        { label: 'Ótica Prime Linhares', value: '8' },
+    ];
 
     return (
         <SafeAreaView>
             <View style={styles.container}>
-                {/* Simula um Picker manualmente */}
-                <Pressable style={styles.pickerButton} onPress={() => setModalVisible(true)}>
-                    <Text style={styles.pickerText}>{selectedEmpresa}</Text>
-                </Pressable>
+                <Text style={styles.title}>ATIP</Text>
 
-                {/* Ícones de notificações e configurações */}
-                <View style={styles.subcontainer}>
-                    <Pressable style={styles.pressable} onPress={() => router.push("/modal")}>
-                        <Feather name="bell" size={20} color={colors.gray[600]} />
-                    </Pressable>
-                    <Pressable style={styles.pressable} onPress={() => router.push("/modal")}>
-                        <Feather name="settings" size={20} color={colors.gray[600]} />
-                    </Pressable>
+                <View style={{ width: 200 }}>
+                    <Text>Teste</Text>
                 </View>
             </View>
-
-            {/* Modal para seleção de empresa */}
-            <Modal visible={modalVisible} transparent animationType="fade">
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={{paddingBottom: 20, fontWeight: 600}}>Selecione uma empresa</Text>
-                        {empresas.map((empresa) => (
-                            <Pressable
-                                key={empresa}
-                                style={styles.modalItem}
-                                onPress={() => {
-                                    setSelectedEmpresa(empresa);
-                                    setModalVisible(false);
-                                }}
-                            >
-                                <Text style={styles.modalText}>{empresa}</Text>
-                            </Pressable>
-                        ))}
-                        <Pressable onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                            <Text style={styles.closeButtonText}>Cancelar</Text>
-                        </Pressable>
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }
@@ -67,53 +41,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 15
     },
-    subcontainer: {
-        flexDirection: 'row',
-        gap: 12
-    },
-    pickerButton: {
-        width: "50%",
-        backgroundColor: colors.gray[100],
-        padding: 10,
-        borderRadius: 5
-    },
-    pickerText: {
-        fontSize: 14,
-        fontWeight: "600"
-    },
-    pressable: {
-        padding: 5
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.5)"
-    },
-    modalContent: {
-        width: "80%",
-        backgroundColor: "#fff",
-        borderRadius: 10,
-        padding: 20,
-        alignItems: "center"
-    },
-    modalItem: {
-        paddingVertical: 15,
-        width: "100%",
-        alignItems: "center",
-        marginVertical: 5,
-        backgroundColor: colors.gray[100],
-        borderRadius: 50
-    },
-    modalText: {
-        fontSize: 14
-    },
-    closeButton: {
-        marginTop: 10
-    },
-    closeButtonText: {
-        color: colors.gray[600],
+    title: {
+        fontWeight: '900',
         fontSize: 16,
-        paddingTop: 20
+        fontStyle: "italic"
+    },
+    dropdown: {
+        height: 50,
+        borderWidth: 0.5,
+        borderColor: colors.gray[200],
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        color: colors.gray[200]
     }
 });
