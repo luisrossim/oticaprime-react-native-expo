@@ -5,8 +5,6 @@ import { CustomHeader } from "@/components/CustomHeader";
 import { Pressable } from "react-native";
 
 export default function Layout(){
-    const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-
     return (
         <Tabs
             screenOptions={{
@@ -15,7 +13,7 @@ export default function Layout(){
                 tabBarShowLabel: true,
                 tabBarActiveTintColor: "#000",
                 tabBarInactiveTintColor: colors.gray[400],
-                header: ({ route }) => (
+                header: () => (
                     <CustomHeader />
                 ),
                 tabBarButton: (props) => (

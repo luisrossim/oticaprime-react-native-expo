@@ -1,23 +1,29 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Company } from "@/models/company";
 
 type EmpresaContextType = {
-    selectedCompany: string;
-    updateCompany: (company: string) => Promise<void>;
+    selectedCompany: Company | null;
+    updateCompany: (company: Company) => Promise<void>;
 };
 
 const EmpresaContext = createContext<EmpresaContextType | undefined>(undefined);
 
 export const EmpresaProvider = ({ children }: { children: React.ReactNode }) => {
-    const [selectedCompany, setSelectedCompany] = useState<string>("");
+    const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
     useEffect(() => {
         const loadCompany = async () => {
             try {
                 const savedCompany = await AsyncStorage.getItem("@selectedCompany");
-                if (savedCompany) {
-                    setSelectedCompany(savedCompany);
+
+                if (!savedCompany) {
+                    setSelectedCompany(null);
+                    return;
                 }
+
+                setSelectedCompany(JSON.parse(savedCompany));
+                
             } catch (error) {
                 console.error("Erro ao carregar a empresa:", error);
             }
@@ -26,9 +32,9 @@ export const EmpresaProvider = ({ children }: { children: React.ReactNode }) => 
         loadCompany();
     }, []);
 
-    const updateCompany = async (company: string) => {
+    const updateCompany = async (company: Company) => {
         try {
-            await AsyncStorage.setItem("@selectedCompany", company);
+            await AsyncStorage.setItem("@selectedCompany", JSON.stringify(company));
             setSelectedCompany(company);
         } catch (error) {
             console.error("Erro ao salvar a empresa:", error);
