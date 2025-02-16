@@ -17,7 +17,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
             name={icon as keyof typeof Feather.glyphMap} 
             size={15}
             color="#FFF"
-            style={{padding: 6, backgroundColor: iconColor, borderRadius: 2}}
+            style={{padding: 6, backgroundColor: iconColor, borderRadius: 50}}
           />
 
           <Text style={styles.buttonText}>
@@ -33,7 +33,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
 const styles = StyleSheet.create({
     button: {
       flexDirection: 'row',
-      paddingVertical: 15,
+      paddingVertical: 12,
       paddingHorizontal: 15,
       borderRadius: 5,
       justifyContent: 'space-between',

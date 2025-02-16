@@ -4,14 +4,14 @@ import { useEmpresa } from "@/context/EmpresaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { colors } from "@/constants/colors";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Company } from "@/models/company";
 import { SettingsButton } from "@/components/SettingsButton";
 
-export default function Modal() {
+export default function Settings() {
     const bottomSheetRef = useRef<BottomSheet>(null);
     const { selectedCompany, updateCompany } = useEmpresa();
-    const snapPoints = useMemo(() => ['80%'], []);
+    const snapPoints = useMemo(() => ['75%'], []);
 
     const renderBackdrop = useCallback(
         (props: any) => (
@@ -40,47 +40,33 @@ export default function Modal() {
     ];
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#FFF" }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.gray[100] }}>
       <View style={styles.container}>
         <View style={styles.profile}>
-          <FontAwesome5 name="building" size={40} />
+          <MaterialCommunityIcons name="office-building-cog-outline" size={40} />
           <View style={{gap: 2}}>
-            <Text style={{fontSize: 20, fontWeight: 600}}>
+            <Text style={{fontSize: 20, textAlign: 'center', fontWeight: 600}}>
               {selectedCompany?.nome || ""}
             </Text>
-            <Text style={{fontSize: 14, fontWeight: 400, color: colors.gray[500]}}>
+            <Text style={{fontSize: 13, fontWeight: 400, textAlign: 'center', color: colors.gray[500]}}>
               {selectedCompany?.endereco || ""}
             </Text>
           </View>
         </View>
 
         <View 
-          style={{flexDirection: 'column', gap: 2, backgroundColor: colors.gray[50], paddingHorizontal: 20, marginBottom: 20}}
+          style={{flexDirection: 'column', backgroundColor: "#FFF", paddingHorizontal: 10, marginBottom: 20}}
         >
           <SettingsButton
             icon="check-circle"
             title="Selecionar empresa"
-            iconColor={colors.sky[500]}
+            iconColor={colors.blue[500]}
             onPress={handleChangeProfile} 
           />
-
-          <SettingsButton 
-            icon="edit" 
-            title="Alterar informações" 
-            iconColor={colors.orange[500]}
-            onPress={() => {}} 
-          />
-
-          <SettingsButton 
-            icon="plus-circle"
-            title="Adicionar nova empresa" 
-            iconColor={colors.green[500]}
-            onPress={() => {}} 
-          />  
         </View>
 
         <View 
-          style={{flexDirection: 'column', gap: 2, backgroundColor: colors.gray[50], paddingHorizontal: 20}}
+          style={{flexDirection: 'column', backgroundColor: "#FFF", paddingHorizontal: 10}}
         >
           <SettingsButton
             icon="log-out"
@@ -99,8 +85,11 @@ export default function Modal() {
           backdropComponent={renderBackdrop}
       >
           <BottomSheetView style={styles.contentContainer}>
-              <Text style={{fontSize: 20, fontWeight: "500", marginBottom: 15}}>
+              <Text style={{fontSize: 22, fontWeight: "600", marginBottom: 5}}>
                 Selecionar empresa:
+              </Text>
+              <Text style={{fontSize: 13, fontWeight: "300", color: colors.gray[500], marginBottom: 20}}>
+                Os dados serão sincronizados e exibidos de acordo com a empresa selecionada.
               </Text>
 
               {profiles.map((profile) => (
@@ -142,8 +131,9 @@ const styles = StyleSheet.create({
       gap: 10
   },
   profile: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 10,
+    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 30,
     marginBottom: 30
@@ -160,8 +150,9 @@ const styles = StyleSheet.create({
   contentContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: 6,
-      padding: 20,
+      gap: 2,
+      paddingHorizontal: 20,
+      paddingVertical: 30
   },
   profileTitle: {
       fontSize: 18,
@@ -171,26 +162,26 @@ const styles = StyleSheet.create({
   radioButtonContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 15,
-      borderRadius: 10
+      padding: 20,
+      borderRadius: 5
   },
   radioButton: {
       width: 20,
       height: 20,
       borderRadius: 10,
       borderWidth: 2,
-      borderColor: colors.gray[400],
+      borderColor: colors.blue[500],
       marginRight: 10,
   },
   selectedRadioButton: {
-      backgroundColor: colors.sky[100]
+      backgroundColor: colors.blue[50]
   },
   selectedInnerRadioButton: {
-      backgroundColor: colors.sky[500]
+      backgroundColor: colors.blue[500]
   },
   radioButtonText: {
-      fontSize: 16,
-      color: colors.gray[700]
+      fontSize: 13,
+      color: colors.gray[800]
   },
   subcontainer: {
     display: 'flex',

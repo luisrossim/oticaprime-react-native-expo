@@ -7,6 +7,21 @@ export class AxiosService<T> {
   constructor(baseURL: string, path: string) {
     this.api = axios.create({ baseURL });
     this.path = path;
+
+    this.api.interceptors.request.use(
+      (config) => {
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6Imx1aXNyb3NzaW0yM0BnbWFpbC5jb20iLCJpYXQiOjE3Mzk2Mjg2MzQsImV4cCI6MTczOTYzMjIzNH0.j_wjRG1HsYnTNXO-Knc288pWbXc2TY0l9blhsEb2ZYI";
+
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
   }
 
   async getAll(): Promise<T[]> {
@@ -16,6 +31,11 @@ export class AxiosService<T> {
 
   async getById(id: number | string): Promise<T> {
     const response = await this.api.get<T>(`${this.path}/${id}`);
+    return response.data;
+  }
+
+  async getWithParams(params: Record<string, string | number>): Promise<T[]> {
+    const response = await this.api.get<T[]>(this.path, { params });
     return response.data;
   }
 

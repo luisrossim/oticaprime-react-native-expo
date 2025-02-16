@@ -1,3 +1,4 @@
+import { colors } from '@/constants/colors'
 import { View, Text, StyleSheet } from 'react-native'
 
 export default function Recebimentos(){
@@ -9,13 +10,14 @@ export default function Recebimentos(){
 }
 
 const styles = StyleSheet.create({
-    container: {
+   container: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center"
+        paddingHorizontal: 20,
+        paddingVertical: 30,
+        backgroundColor: colors.gray[100]
     },
     title: {
-        fontSize: 22,
-        fontWeight: 600
+        fontSize: 28,
+        fontWeight: '700',
     }
 })

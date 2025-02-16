@@ -2,7 +2,7 @@ import React from "react";
 import { colors } from "@/constants/colors";
 import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity } from "react-native";
 import { useEmpresa } from "@/context/EmpresaContext";
-import { Feather } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 export function CustomHeader() {
@@ -13,13 +13,13 @@ export function CustomHeader() {
             <View style={styles.container}>
                 <Text style={styles.title}>ATIP</Text>
                 <TouchableOpacity 
-                    onPress={() => router.push("/modal")} 
+                    onPress={() => router.push("/settings")} 
                     style={styles.subcontainer}
                 >
                     <Text style={styles.profileText}>
                         {selectedCompany?.nome || ''}
                     </Text>
-                    <Feather name="settings" size={15} />
+                    <MaterialCommunityIcons name="office-building-cog-outline" size={18} color={colors.gray[500]} />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -34,9 +34,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: 0.5,
         backgroundColor: '#FFF',
-        borderBottomColor: colors.gray[300],
+        borderBottomColor: colors.gray[400],
         paddingHorizontal: 20,
-        paddingVertical: 10
+        paddingVertical: 3
     },
     subcontainer: {
         display: 'flex',
@@ -57,6 +57,8 @@ const styles = StyleSheet.create({
         gap: 10
     },
     profileText: {
-        fontSize: 14
+        fontWeight: '300',
+        fontSize: 14,
+        color: colors.gray[600]
     }
 });

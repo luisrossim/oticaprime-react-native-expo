@@ -1,3 +1,24 @@
 export interface Venda {
-    id: string
+    COD_VEN: number
+    DATA_VEN: string
+    NOME_CLI: string
+    NOME_VEND: string
+    NOME_MEDICO: string
+    NOME_TPV: string
+    TOTAL_VEN: number,
+}
+
+export interface FormaPagamentoVenda {
+    VALOR: number
+    DESCRICAO: string
+}
+
+export interface ItemVenda {
+    ORDEM: number
+    QUANT: number
+    VALOR: number
+    DESCONTO: number
+    VALOR_TOTAL: number
+    NOME_PRO: string
+    UNIDADE_MEDIDA: string
 }
