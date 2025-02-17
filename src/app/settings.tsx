@@ -4,7 +4,7 @@ import { useEmpresa } from "@/context/EmpresaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { colors } from "@/constants/colors";
-import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Company } from "@/models/company";
 import { SettingsButton } from "@/components/SettingsButton";
 
@@ -33,10 +33,10 @@ export default function Settings() {
     };
 
     const profiles: Company[] = [
-        { id: 1, nome: 'Empresa Ótica 1', endereco: 'Nova Venécia (ES)' },
-        { id: 2, nome: 'Empresa Ótica 2', endereco: 'Colatina (ES)' },
-        { id: 3, nome: 'Empresa Ótica 3', endereco: 'Vila Velha (ES)' },
-        { id: 4, nome: 'Empresa Ótica 4', endereco: 'Linhares (ES)' },
+        { COD_EMP: 4, RAZAO_EMP: 'Empresa Ótica 4' },
+        { COD_EMP: 5, RAZAO_EMP: 'Empresa Ótica 5' },
+        { COD_EMP: 6, RAZAO_EMP: 'Empresa Ótica 6' },
+        { COD_EMP: 9, RAZAO_EMP: 'Empresa Ótica 9' },
     ];
 
   return (
@@ -45,11 +45,13 @@ export default function Settings() {
         <View style={styles.profile}>
           <MaterialCommunityIcons name="office-building-cog-outline" size={40} />
           <View style={{gap: 2}}>
-            <Text style={{fontSize: 20, textAlign: 'center', fontWeight: 600}}>
-              {selectedCompany?.nome || ""}
+            <Text style={{fontSize: 18, textAlign: 'center', fontWeight: 600}}>
+              {selectedCompany?.RAZAO_EMP || ""}
             </Text>
-            <Text style={{fontSize: 13, fontWeight: 400, textAlign: 'center', color: colors.gray[500]}}>
-              {selectedCompany?.endereco || ""}
+            <Text 
+              style={{fontSize: 12, fontWeight: 400, textAlign: 'center', color: colors.gray[500]}}
+            >
+              luisrossim23@gmail.com
             </Text>
           </View>
         </View>
@@ -63,11 +65,7 @@ export default function Settings() {
             iconColor={colors.blue[500]}
             onPress={handleChangeProfile} 
           />
-        </View>
 
-        <View 
-          style={{flexDirection: 'column', backgroundColor: "#FFF", paddingHorizontal: 10}}
-        >
           <SettingsButton
             icon="log-out"
             title="Sair"
@@ -86,7 +84,7 @@ export default function Settings() {
       >
           <BottomSheetView style={styles.contentContainer}>
               <Text style={{fontSize: 22, fontWeight: "600", marginBottom: 5}}>
-                Selecionar empresa:
+                Selecionar empresa
               </Text>
               <Text style={{fontSize: 13, fontWeight: "300", color: colors.gray[500], marginBottom: 20}}>
                 Os dados serão sincronizados e exibidos de acordo com a empresa selecionada.
@@ -94,20 +92,20 @@ export default function Settings() {
 
               {profiles.map((profile) => (
                   <TouchableOpacity
-                      key={profile.id}
+                      key={profile.COD_EMP}
                       style={[
                           styles.radioButtonContainer,
-                          selectedCompany?.id === profile.id && styles.selectedRadioButton
+                          selectedCompany?.COD_EMP === profile.COD_EMP && styles.selectedRadioButton
                       ]}
                       onPress={() => handleSelectProfile(profile)}
                   >
                       <View
                           style={[
                               styles.radioButton,
-                              selectedCompany?.id === profile.id && styles.selectedInnerRadioButton
+                              selectedCompany?.COD_EMP === profile.COD_EMP && styles.selectedInnerRadioButton
                           ]}
                       />
-                      <Text style={styles.radioButtonText}>{profile.nome}</Text>
+                      <Text style={styles.radioButtonText}>{profile.RAZAO_EMP}</Text>
                   </TouchableOpacity>
               ))}
           </BottomSheetView>
@@ -162,8 +160,8 @@ const styles = StyleSheet.create({
   radioButtonContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 20,
-      borderRadius: 5
+      padding: 15,
+      borderRadius: 50
   },
   radioButton: {
       width: 20,
@@ -180,7 +178,7 @@ const styles = StyleSheet.create({
       backgroundColor: colors.blue[500]
   },
   radioButtonText: {
-      fontSize: 13,
+      fontSize: 14,
       color: colors.gray[800]
   },
   subcontainer: {

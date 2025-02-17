@@ -17,7 +17,7 @@ export function CustomHeader() {
                     style={styles.subcontainer}
                 >
                     <Text style={styles.profileText}>
-                        {selectedCompany?.nome || ''}
+                        {selectedCompany?.RAZAO_EMP || ''}
                     </Text>
                     <MaterialCommunityIcons name="office-building-cog-outline" size={18} color={colors.gray[500]} />
                 </TouchableOpacity>

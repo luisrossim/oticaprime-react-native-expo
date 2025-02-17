@@ -1,5 +1,4 @@
 export interface Company {
-    id: number,
-    nome: string,
-    endereco: string
+    COD_EMP: number,
+    RAZAO_EMP: string  
 }

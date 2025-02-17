@@ -1,11 +1,11 @@
 export interface Venda {
     COD_VEN: number
-    DATA_VEN: string
     NOME_CLI: string
     NOME_VEND: string
     NOME_MEDICO: string
     NOME_TPV: string
-    TOTAL_VEN: number,
+    TOTAL_VEN: number
+    DATA_VEN: string
 }
 
 export interface FormaPagamentoVenda {
