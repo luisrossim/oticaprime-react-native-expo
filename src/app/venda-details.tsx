@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { colors } from '@/constants/colors';
 import { VendaService } from '@/services/venda-service';
 import { Venda } from '@/models/venda';
-import { Feather, FontAwesome6 } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { VendaDetailsItem } from '@/components/VendaDetailsItem';
 import { UtilitiesService } from '@/utils/utilities-service';
 
@@ -60,7 +60,7 @@ export default function VendaDetails() {
 
     if (venda) {
         return (
-            <ScrollView style={styles.container}>
+            <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 50}}>
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Venda #{id}</Text>
                     <Feather 
@@ -91,7 +91,7 @@ export default function VendaDetails() {
                             <View style={{ gap: 20, padding: 15 }}>
                                 {venda.ITENS.map((item, index) => (
                                     <View key={`${index}`} style={{flex: 1, flexDirection: 'row', gap: 10}}>
-                                        <Feather size={16} name="shopping-bag" color={colors.slate[700]} />
+                                        <Feather style={{marginTop: 3}} size={16} name="shopping-bag" color={colors.slate[700]} />
                                         <View style={styles.itemDetails}>
                                             <Text style={styles.itemNome}>{item.NOME_PRO}</Text>
                                             <Text style={styles.itemInfo}>
@@ -113,7 +113,7 @@ export default function VendaDetails() {
                     }
                 </View>
 
-                <View style={[styles.vendaDetails, {marginBottom: 40}]}>
+                <View style={styles.vendaDetails}>
                     <Text style={styles.detailTitle}>
                         Formas de Pagamento
                     </Text>
@@ -157,7 +157,7 @@ export default function VendaDetails() {
 const styles = StyleSheet.create({
     container: { 
         flex: 1, 
-        paddingTop: 50,
+        paddingVertical: 50,
         paddingHorizontal: 20, 
         backgroundColor: "#FFF", 
         borderTopWidth: 0.5, 

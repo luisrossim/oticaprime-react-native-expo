@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useEmpresa } from "@/context/EmpresaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -8,23 +8,17 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { Company } from "@/models/company";
 import { SettingsButton } from "@/components/SettingsButton";
 import { EmpresaService } from "@/services/empresa-service";
-import { LoadingIndicator } from "@/components/LoadingIndicator";
-import { ErrorMessage } from "@/components/ErrorMessage";
 
 export default function Settings() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [empresas, setEmpresas] = useState<Company[]>([]);
-  const {selectedCompany, updateCompany} = useEmpresa();
-  const [loading, setLoading] = useState(true);
+  const { selectedCompany, updateCompany } = useEmpresa();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const snapPoints = useMemo(() => ['75%'], []);
-
-
-  useEffect(() => {
-    fetchEmpresasAtivas();
-  }, [])
+  const snapPoints = useMemo(() => ['80%'], []);
 
   const fetchEmpresasAtivas = async () => {
+    setLoading(true);
     try {
       const empresaService = new EmpresaService();
       const data = await empresaService.getAll();
@@ -34,15 +28,16 @@ export default function Settings() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const handleChangeProfile = () => {
-      bottomSheetRef.current?.expand();
+    bottomSheetRef.current?.expand();
+    fetchEmpresasAtivas();
   };
 
   const handleSelectProfile = async (profile: Company) => {
-      await updateCompany(profile);
-      bottomSheetRef.current?.close();
+    await updateCompany(profile);
+    bottomSheetRef.current?.close();
   };
 
   const renderBackdrop = useCallback(
@@ -53,98 +48,88 @@ export default function Settings() {
             appearsOnIndex={0}
         />
     ), []
-  );
+);
 
-
-  if (loading) {
-    return <LoadingIndicator />
-  }
-
-  if (error) {
-    return <ErrorMessage error={error} />
-  }
-
-
+  
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#FFF" }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#FFF"}}>
       <View style={styles.container}>
         <View style={styles.profile}>
           <FontAwesome6 name="store" size={40} />
-          <View style={{gap: 2}}>
-            <Text style={{fontSize: 18, textAlign: 'center', fontWeight: 600}}>
+          <View style={{ gap: 2 }}>
+            <Text style={{ fontSize: 18, textAlign: "center", fontWeight: "600" }}>
               {selectedCompany?.RAZAO_EMP || ""}
             </Text>
-            <Text 
-              style={{fontSize: 12, fontWeight: 400, textAlign: 'center', color: colors.gray[500]}}
+            <Text
+              style={{ fontSize: 12, fontWeight: "400", textAlign: "center", color: colors.gray[500] }}
             >
-              luisrossim23@gmail.com
+              luis_teste_app@gmail.com
             </Text>
           </View>
         </View>
 
-        <View 
-          style={styles.options}
-        >
+        <View style={styles.options}>
           <SettingsButton
             icon="check-circle"
             title="Selecionar empresa"
             iconColor={colors.sky[700]}
-            onPress={handleChangeProfile} 
+            onPress={handleChangeProfile}
           />
 
-          <SettingsButton
-            icon="log-out"
-            title="Sair"
-            iconColor={colors.red[600]}
-            onPress={() => {}} 
-          />
+          <SettingsButton icon="log-out" title="Sair" iconColor={colors.red[600]} onPress={() => {}} />
         </View>
       </View>
 
       <BottomSheet
-          ref={bottomSheetRef}
-          index={-1}
-          snapPoints={snapPoints}
-          enablePanDownToClose={true}
-          backdropComponent={renderBackdrop}
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+        backdropComponent={renderBackdrop}
       >
-          <BottomSheetView style={styles.contentContainer}>
-              <Text style={{fontSize: 22, fontWeight: "600", marginBottom: 5}}>
-                Selecionar empresa
-              </Text>
-              <Text style={{fontSize: 13, fontWeight: "300", color: colors.gray[500], marginBottom: 20}}>
-                Os dados serão sincronizados e exibidos de acordo com a empresa selecionada.
-              </Text>
+        <BottomSheetView style={styles.contentContainer}>
+          <Text style={{ fontSize: 22, fontWeight: "600", marginBottom: 5 }}>Selecionar empresa</Text>
+          <Text
+            style={{ fontSize: 13, fontWeight: "300", color: colors.gray[500], marginBottom: 20 }}
+          >
+            Os dados serão sincronizados e exibidos de acordo com a empresa selecionada.
+          </Text>
 
-              {empresas.map((empresa) => (
-                  <TouchableOpacity
-                      key={empresa.COD_EMP}
-                      onPress={() => handleSelectProfile(empresa)}
-                      style={[
-                          styles.radioButtonContainer,
-                          selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedRadioButton
-                      ]}
-                  >
-                      <View
-                          style={[
-                              styles.radioButton,
-                              selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedInnerRadioButton
-                          ]}
-                      />
-                      <Text style={[
-                          styles.radioButtonText,
-                          selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedText
-                        ]}
-                      >
-                        {empresa.RAZAO_EMP}
-                      </Text>
-                  </TouchableOpacity>
-              ))}
-          </BottomSheetView>
+          {loading ? (
+            <ActivityIndicator size="large" color={colors.sky[700]} />
+          ) : (
+            empresas.map((empresa) => (
+              <TouchableOpacity
+                key={empresa.COD_EMP}
+                onPress={() => handleSelectProfile(empresa)}
+                style={[
+                  styles.radioButtonContainer,
+                  selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedRadioButton,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.radioButton,
+                    selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedInnerRadioButton,
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.radioButtonText,
+                    selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedText,
+                  ]}
+                >
+                  {empresa.RAZAO_EMP}
+                </Text>
+              </TouchableOpacity>
+            ))
+          )}
+        </BottomSheetView>
       </BottomSheet>
-  </GestureHandlerRootView>
+    </GestureHandlerRootView>
   );
 }
+
 
 
 const styles = StyleSheet.create({

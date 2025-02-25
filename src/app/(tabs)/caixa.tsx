@@ -1,4 +1,3 @@
-import { colors } from '@/constants/colors'
 import { View, Text, StyleSheet } from 'react-native'
 
 export default function Caixa(){
@@ -13,8 +12,7 @@ const styles = StyleSheet.create({
    container: {
         flex: 1,
         paddingHorizontal: 20,
-        paddingVertical: 30,
-        backgroundColor: colors.gray[100]
+        paddingVertical: 50
     },
     title: {
         fontSize: 32,

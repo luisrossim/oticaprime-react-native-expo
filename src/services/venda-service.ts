@@ -3,7 +3,7 @@ import { AxiosService } from "./axios-service";
 
 export class VendaService extends AxiosService<Venda> {
     constructor() {
-        super('http://192.168.1.7:3000/api', '/venda');
+        super('/venda');
     }
 
     async getWithPageable(params: Record<string, any>): Promise<VendasPaginadas> {

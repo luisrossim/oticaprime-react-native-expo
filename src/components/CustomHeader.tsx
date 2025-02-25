@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFF',
         borderBottomColor: colors.slate[300],
         paddingHorizontal: 20,
-        paddingVertical: 3
+        paddingVertical: 8
     },
     subcontainer: {
         display: 'flex',

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Button } from 'react-native';
 import { VendaService } from '@/services/venda-service';
 import { colors } from '@/constants/colors';
 import { VendaSummary } from '@/models/venda';
@@ -15,6 +15,7 @@ export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [totalVendas, setTotalVendas] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const { selectedCompany } = useEmpresa();
 
     const [isDatePickerInicialVisible, setDatePickerInicialVisibility] = useState(false);
@@ -51,7 +52,7 @@ export default function Vendas() {
     }, [selectedCompany, dataInicial, dataFinal])
 
     const fetchVendas = async (pagina: number) => {
-        if (loading || isFetchingMore || isCompleted) return;
+        if (loading || isFetchingMore) return
 
         if (pagina === 1) {
             setLoading(true);
@@ -70,14 +71,16 @@ export default function Vendas() {
 
             const data = await vendaService.getWithPageable(params);
 
+            setTotalVendas(data.pageable.totalResults);
+            setTotalPages(data.pageable.totalPages);
+
             if (pagina === 1) {
-                setTotalVendas(data.pageable.totalResults);
                 setVendasPaginadas(data.vendas);
             } else {
                 setVendasPaginadas((prev) => [...prev, ...data.vendas]);
             }
 
-            if (data.vendas.length === 0) {
+            if (totalPages == pagina) {
                 setIsCompleted(true);
             } else {
                 setPaginaAtual(pagina);
@@ -92,7 +95,8 @@ export default function Vendas() {
     };
 
     const carregarMaisVendas = () => {
-        if (!isFetchingMore && !isCompleted) {
+        if (!isFetchingMore && !isCompleted && paginaAtual < totalPages) {
+            setIsFetchingMore(true); 
             fetchVendas(paginaAtual + 1);
         }
     };
@@ -136,7 +140,7 @@ export default function Vendas() {
     ));
 
     const renderItem = useCallback(({ item }: { item: VendaSummary }) => (
-        <ItemVenda item={item} onPress={() => router.push(`/venda-details?id=${item.COD_VEN}`)} />
+        <ItemVenda key={item.COD_VEN} item={item} onPress={() => router.push(`/venda-details?id=${item.COD_VEN}`)} />
     ), [router]);
 
     
@@ -210,14 +214,16 @@ export default function Vendas() {
 
             <FlatList
                 data={vendasPaginadas}
-                keyExtractor={(item) => String(item.COD_VEN)}
-                onEndReached={carregarMaisVendas}
-                onEndReachedThreshold={0.1}
+                keyExtractor={(item, index) => String(item.COD_VEN) + "_" + index}
+                initialNumToRender={20}
+                maxToRenderPerBatch={20}
                 ListFooterComponent={
                     isFetchingMore ? (
                         <View style={{ padding: 10 }}>
                             <LoadingIndicator />
                         </View>
+                    ) : !isCompleted ? (
+                        <Button title='Carregar mais' color="black" onPress={carregarMaisVendas} />
                     ) : null
                 }
                 ListEmptyComponent={() => (
@@ -240,7 +246,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         fontWeight: '700',
-        marginBottom: 15
+        marginBottom: 12
     },
     error: {
         fontSize: 16,
@@ -259,7 +265,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         borderRadius: 20,
         gap: 10,
-        marginBottom: 10,
+        marginBottom: 12,
     },
     datePickerContainer: {
         flexDirection: 'row',

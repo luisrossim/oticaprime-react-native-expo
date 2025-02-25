@@ -1,16 +1,20 @@
+import { EnvironmentDev } from '@/environments/environment-dev';
 import axios, { AxiosInstance } from 'axios';
 
 export class AxiosService<T> {
   protected readonly api: AxiosInstance;
   protected readonly path: string;
 
-  constructor(baseURL: string, path: string) {
-    this.api = axios.create({ baseURL });
+  constructor(path: string) {
     this.path = path;
+    
+    this.api = axios.create({
+      baseURL: EnvironmentDev.urlBase
+    });
 
     this.api.interceptors.request.use(
       (config) => {
-        const token = "";
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6Imx1aXNyb3NzaW0yM0BnbWFpbC5jb20iLCJpYXQiOjE3NDA1MTQ0MjcsImV4cCI6MTc0MDY4NzIyN30.c704VGPHn_LoUJbYZ_KULryjiKKQIf-3dYoOKauir1c";
 
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
