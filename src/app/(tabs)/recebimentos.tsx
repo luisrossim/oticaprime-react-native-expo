@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native'
 export default function Recebimentos(){
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Recebimentos</Text>
+            <Text style={styles.title}>Recebimentos de Crediário</Text>
         </View>
     )
 }
@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.gray[100]
     },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: '700',
     }
 })

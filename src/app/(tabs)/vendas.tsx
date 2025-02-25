@@ -1,93 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SectionList, TouchableOpacity, Button, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { VendaService } from '@/services/venda-service';
 import { colors } from '@/constants/colors';
-import { Venda } from '@/models/venda';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { VendaSummary } from '@/models/venda';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-
-const vendasMock = [
-    {
-      "COD_VEN": 1,
-      "NOME_CLI": "João Silva",
-      "NOME_VEND": "Carlos Pereira",
-      "NOME_MEDICO": "Dr. Ricardo Mendes",
-      "NOME_TPV": "Cartão de Crédito",
-      "TOTAL_VEN": 250.75,
-      "DATA_VEN": "2024-02-17"
-    },
-    {
-      "COD_VEN": 2,
-      "NOME_CLI": "Maria Oliveira",
-      "NOME_VEND": "Fernanda Souza",
-      "NOME_MEDICO": "Dra. Ana Lima",
-      "NOME_TPV": "Dinheiro",
-      "TOTAL_VEN": 120.50,
-      "DATA_VEN": "2024-02-16"
-    },
-    {
-      "COD_VEN": 3,
-      "NOME_CLI": "Carlos Santos",
-      "NOME_VEND": "Pedro Almeida",
-      "NOME_MEDICO": "Dr. Eduardo Rocha",
-      "NOME_TPV": "Boleto",
-      "TOTAL_VEN": 320.00,
-      "DATA_VEN": "2024-02-15"
-    },
-    {
-      "COD_VEN": 4,
-      "NOME_CLI": "Fernanda Lima",
-      "NOME_VEND": "Mariana Duarte",
-      "NOME_MEDICO": "Dra. Patrícia Gomes",
-      "NOME_TPV": "Pix",
-      "TOTAL_VEN": 180.90,
-      "DATA_VEN": "2024-02-14"
-    },
-    {
-      "COD_VEN": 5,
-      "NOME_CLI": "Roberto Almeida",
-      "NOME_VEND": "Juliana Matos",
-      "NOME_MEDICO": "Dr. Luiz Fernandes",
-      "NOME_TPV": "Cartão de Débito",
-      "TOTAL_VEN": 290.30,
-      "DATA_VEN": "2024-02-13"
-    },
-    {
-      "COD_VEN": 6,
-      "NOME_CLI": "Paula Souza",
-      "NOME_VEND": "Thiago Ramos",
-      "NOME_MEDICO": "Dra. Vanessa Castro",
-      "NOME_TPV": "Cartão de Crédito",
-      "TOTAL_VEN": 410.60,
-      "DATA_VEN": "2024-02-12"
-    },
-    {
-      "COD_VEN": 7,
-      "NOME_CLI": "Eduardo Ferreira",
-      "NOME_VEND": "Beatriz Oliveira",
-      "NOME_MEDICO": "Dr. Marcelo Vieira",
-      "NOME_TPV": "Transferência",
-      "TOTAL_VEN": 150.00,
-      "DATA_VEN": "2024-02-11"
-    },
-    {
-      "COD_VEN": 8,
-      "NOME_CLI": "Aline Martins",
-      "NOME_VEND": "Ricardo Nunes",
-      "NOME_MEDICO": "Dra. Camila Costa",
-      "NOME_TPV": "Pix",
-      "TOTAL_VEN": 275.45,
-      "DATA_VEN": "2024-02-10"
-    }
-  ]
-  
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { LoadingIndicator } from '@/components/LoadingIndicator';
+import { useEmpresa } from '@/context/EmpresaContext';
+import { UtilitiesService } from '@/utils/utilities-service';
 
 export default function Vendas() {
-    const [vendas, setVendas] = useState<Venda[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
+    const [paginaAtual, setPaginaAtual] = useState(1);
+    const { selectedCompany } = useEmpresa();
+
+    const [isDatePickerInicialVisible, setDatePickerInicialVisibility] = useState(false);
+    const [isDatePickerFinalVisible, setDatePickerFinalVisibility] = useState(false);
+
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
     const hoje = new Date();
     const dataInicialPadrao = new Date();
@@ -96,167 +31,206 @@ export default function Vendas() {
     const [dataInicial, setDataInicial] = useState(dataInicialPadrao);
     const [dataFinal, setDataFinal] = useState(hoje);
 
-    useEffect(() => {
-        setVendas(vendasMock);
-        fetchVendas();
-    }, []);
-
-    const showDatePicker = () => {
-        setDatePickerVisibility(true);
-    };
-
-    const hideDatePicker = () => {
-        setDatePickerVisibility(false);
-    };
-
-    const handleConfirm = (date: Date) => {
-        hideDatePicker();
-    };
+    const showDatePickerInicial = () => setDatePickerInicialVisibility(true);
+    const hideDatePickerInicial = () => setDatePickerInicialVisibility(false);
+    const showDatePickerFinal = () => setDatePickerFinalVisibility(true);
+    const hideDatePickerFinal = () => setDatePickerFinalVisibility(false);
 
     const formatarData = (data: Date): string => {
         return data.toLocaleDateString();
     };
 
-    const fetchVendas = async () => {
+
+
+    useEffect(() => {
+        setPaginaAtual(1);
+        setVendasPaginadas([]);
+        setIsCompleted(false);
+        fetchVendas(1);
+    }, [selectedCompany, dataInicial, dataFinal])
+
+    const fetchVendas = async (pagina: number) => {
+        if (loading || isFetchingMore || isCompleted) return;
+
+        if (pagina === 1) {
+            setLoading(true);
+        } else {
+            setIsFetchingMore(true);
+        }
+
         try {
-            const service = new VendaService();
+            const vendaService = new VendaService();
             const params = {
                 dataInicial: formatarData(dataInicial),
                 dataFinal: formatarData(dataFinal),
+                empId: selectedCompany?.COD_EMP,
+                page: pagina
             };
 
-            const data = await service.getWithParams(params);
-            setVendas(data);
+            const data = await vendaService.getWithPageable(params);
+
+            if (pagina === 1) {
+                setVendasPaginadas(data.vendas);
+            } else {
+                setVendasPaginadas((prev) => [...prev, ...data.vendas]);
+            }
+
+            if (data.vendas.length === 0) {
+                setIsCompleted(true);
+            } else {
+                setPaginaAtual(pagina);
+            }
+
         } catch (err) {
-            setError('Erro ao carregar vendas.');
-            console.error(err);
+            setError("Erro ao buscar vendas.");
         } finally {
             setLoading(false);
+            setIsFetchingMore(false);
         }
     };
 
-    const formatarFormaPagamento = (forma: string) => {
-        const formas = {
-            CARTAO_CREDITO: 'Cartão de Crédito',
-            CARTAO_DEBITO: 'Cartão de Débito',
-            DINHEIRO: 'Dinheiro',
-            PIX: 'PIX',
-            BOLETO: 'Boleto',
-        };
-        return formas[forma as keyof typeof formas] || forma;
+    const carregarMaisVendas = () => {
+        if (!isFetchingMore && !isCompleted) {
+            fetchVendas(paginaAtual + 1);
+        }
     };
 
-    const groupVendasByDate = (vendas: Venda[]) => {
-        vendas.sort((a, b) => new Date(a.DATA_VEN).getTime() - new Date(b.DATA_VEN).getTime());
+    const renderItem = useCallback(({ item }: { item: VendaSummary }) => (
+        <TouchableOpacity
+            style={styles.vendaCard}
+            onPress={() => router.push(`/venda-details?id=${item.COD_VEN}`)}
+        >
+            <View style={styles.cardContent}>
+                <View style={styles.iconColumn}>
+                    <Feather 
+                        name={
+                            item.NOME_TPV.includes("A PRAZO") || ["CARTAO", "A VISTA"].includes(item.NOME_TPV)
+                                ? "dollar-sign" 
+                                : "star"
+                        } 
+                        size={20} 
+                        style={styles.iconElement} 
+                    />
+                </View>
 
-        const groupedVendas: { title: string, data: Venda[] }[] = [];
+                <View style={styles.infoColumn}>
+                    <Text style={styles.vendedor}>{item.NOME_VEND}</Text>
 
-        vendas.forEach((venda) => {
-            const vendaDate = new Date(venda.DATA_VEN);
-            const dateString = vendaDate.toLocaleDateString();
-            
-            const existingSection = groupedVendas.find((section) => section.title === dateString);
-            if (existingSection) {
-                existingSection.data.push(venda);
-            } else {
-                groupedVendas.push({ title: dateString, data: [venda] });
-            }
-        });
+                    <Text style={styles.cliente}>
+                        {item.NOME_CLI.length > 16 ? item.NOME_CLI.slice(0, 16) + "..." : item.NOME_CLI}
+                    </Text>
 
-        return groupedVendas;
-    };
+                    <Text style={styles.valor}>
+                        {UtilitiesService.formatarValor(item.TOTAL_VEN)}
+                    </Text>
 
-    // if (loading) {
-    //     return (
-    //         <View style={styles.loading}>
-    //             <ActivityIndicator size="large" color={colors.sky[500]} />
-    //         </View>
-    //     );
-    // }
+                    <Text style={styles.formaPagamento}>
+                        {item.NOME_TPV.startsWith("A PRAZO") ? "A PRAZO" : item.NOME_TPV}
+                    </Text>
+                </View>
 
-    if (error) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.error}>{error}</Text>
+                <View style={styles.dateColumn}>
+                    <Text style={styles.dataVenda}>{new Date(item.DATA_VEN).toLocaleDateString()}</Text>
+                </View>
             </View>
-        );
+        </TouchableOpacity>
+    ), [router]);
+
+    
+
+    if (loading && paginaAtual === 1) {
+        return <LoadingIndicator />;
     }
 
-    const groupedVendas = groupVendasByDate(vendas);
+    if (error) {
+        return <ErrorMessage error={error} />;
+    }
 
     return (
         <View style={styles.container}>
-            <View style={{paddingHorizontal: 20}}>
+            <View style={{ paddingHorizontal: 20 }}>
                 <Text style={styles.title}>Vendas</Text>
             </View>
 
             <View style={styles.datePickerContainer}>
-                <Button title="Show Date Picker" onPress={showDatePicker} />
+                <Feather name="calendar" size={20} color={colors.sky[600]} />
+
+                <TouchableOpacity
+                    onPress={showDatePickerInicial}
+                    style={styles.datePickerElement}
+                >
+                    <Text style={styles.datePickerLabel}>{dataInicial.toLocaleDateString()}</Text>
+                </TouchableOpacity>
+
                 <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
+                    isVisible={isDatePickerInicialVisible}
                     mode="date"
-                    display='spinner'
+                    display="spinner"
+                    date={dataInicial}
                     locale="pt-BR"
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePicker}
+                    onConfirm={(date) => {
+                        setDataInicial(date);
+                        hideDatePickerInicial();
+                    }}
+                    onCancel={hideDatePickerInicial}
                 />
 
-                <TouchableOpacity style={styles.filterButton} onPress={fetchVendas}>
-                    <Feather name="search" size={16} color="#FFF" />
+                <Feather name="minus" color={colors.sky[600]} />
+
+                <TouchableOpacity
+                    onPress={showDatePickerFinal}
+                    style={styles.datePickerElement}
+                >
+                    <Text style={styles.datePickerLabel}>{dataFinal.toLocaleDateString()}</Text>
                 </TouchableOpacity>
+
+                <DateTimePickerModal
+                    isVisible={isDatePickerFinalVisible}
+                    mode="date"
+                    display="spinner"
+                    locale="pt-BR"
+                    date={dataFinal}
+                    onConfirm={(date) => {
+                        setDataFinal(date);
+                        hideDatePickerFinal();
+                    }}
+                    onCancel={hideDatePickerFinal}
+                />
             </View>
 
-            <SectionList
-                sections={groupedVendas}
+            <FlatList
+                data={vendasPaginadas}
                 keyExtractor={(item) => String(item.COD_VEN)}
-                showsVerticalScrollIndicator={false}
+                onEndReached={carregarMaisVendas}
+                onEndReachedThreshold={0.1}
+                ListFooterComponent={
+                    isFetchingMore ? (
+                        <View style={{ padding: 10 }}>
+                            <LoadingIndicator />
+                        </View>
+                    ) : null
+                }
                 ListEmptyComponent={() => (
                     <View style={styles.emptyContainer}>
-                        <Feather name="frown" size={50} color="#ccc" />
                         <Text style={styles.emptyText}>Nenhuma venda encontrada.</Text>
                     </View>
                 )}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        style={styles.card}
-                        onPress={() => router.push("/venda-details")} 
-                    >
-                        <View style={styles.cardHeader}>
-                            <Text style={styles.vendedor}>{item.NOME_VEND}</Text>
-                        </View>
-
-                        <Text style={styles.formaPagamento}>
-                            <Feather name="credit-card" size={14} color={colors.gray[500]} /> {formatarFormaPagamento(item.NOME_TPV)}
-                        </Text>
-
-                        <View style={styles.cardFooter}>
-                            <Text style={styles.data}>
-                                <Feather name="calendar" size={14} color={colors.gray[500]} /> {new Date(item.DATA_VEN).toLocaleDateString()}
-                            </Text>
-                            <Text style={styles.valor}>R$ {item.TOTAL_VEN.toFixed(2)}</Text>
-                        </View>
-                    </TouchableOpacity>
-                )}
-                renderSectionHeader={({ section: { title } }) => (
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>{title}</Text>
-                    </View>
-                )}
+                renderItem={renderItem}
             />
         </View>
     );
 }
 
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 30,
-        backgroundColor: colors.gray[100],
+        paddingTop: 50
     },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: '700',
-        marginBottom: 20
+        marginBottom: 15
     },
     error: {
         fontSize: 16,
@@ -272,42 +246,23 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
+        marginHorizontal: 20,
+        borderRadius: 20,
+        paddingVertical: 5,
         paddingHorizontal: 10,
-        gap: 2,
-        marginBottom: 20,
-    },
-    card: {
-        backgroundColor: "#FFF",
-        paddingVertical: 12,
-        paddingHorizontal: 22,
+        gap: 5,
+        marginBottom: 15,
         borderWidth: 1,
-        borderColor: colors.gray[100]
+        borderColor: colors.slate[200],
+        backgroundColor: colors.slate[100]
     },
-    vendedor: {
-        fontSize: 17,
-        fontWeight: '600'
+    datePickerElement: {
+        padding: 6
     },
-    valor: {
-        fontSize: 16,
-        fontWeight: 600,
-        color: colors.emerald[600],
-    },
-    formaPagamento: {
-        fontSize: 14,
-        color: colors.gray[500],
-    },
-    data: {
-        fontSize: 14,
-        color: colors.gray[500],
-    },
-    filterButton: {
-        backgroundColor: colors.blue[500],
-        padding: 8,
-        width: 60,
-        marginLeft: 17,
-        borderRadius: 50,
-        alignItems: 'center',
-        justifyContent: 'center'
+    datePickerLabel: {
+        fontSize: 15,
+        color: colors.sky[600],
+        fontWeight: 500
     },
     emptyContainer: {
         alignItems: 'center',
@@ -317,26 +272,61 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: colors.gray[700],
-        fontStyle: 'italic',
+        color: colors.slate[500],
     },
-    cardHeader: {
+    vendaCard: {
+        flexDirection: 'row',
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.slate[200],
+    },
+    cardContent: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 5,
+        alignItems: 'center',
+        width: '100%'
     },
-    cardFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 8,
+    iconColumn: {
+        width: '18%',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start'
     },
-    sectionHeader: {
-        backgroundColor: colors.gray[100],
-        paddingVertical: 20,
-        paddingHorizontal: 22,
+    infoColumn: {
+        width: '57%',
+        justifyContent: 'center',
+        gap: 3
     },
-    sectionTitle: {
-        fontSize: 14,
-        fontWeight: 300
-    }
+    dateColumn: {
+        width: '25%',
+        justifyContent: 'flex-start',
+        alignSelf: 'flex-start'
+    },
+    iconElement: {
+        backgroundColor: colors.emerald[300],
+        borderRadius: 999,
+        color: colors.slate[900],
+        padding: 10
+    },
+    vendedor: {
+        fontWeight: 'bold',
+        fontSize: 15,
+        color: colors.slate[800]
+    },
+    cliente: {
+        fontSize: 15,
+        color: colors.slate[500]
+    },
+    formaPagamento: {
+        fontSize: 12,
+        color: colors.slate[500],
+        marginTop: 5
+    },
+    valor: {
+        fontSize: 15,
+        color: colors.slate[500]
+    },
+    dataVenda: {
+        fontSize: 13,
+        color: colors.slate[500]
+    },
 });

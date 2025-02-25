@@ -17,7 +17,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
             name={icon as keyof typeof Feather.glyphMap} 
             size={15}
             color="#FFF"
-            style={{padding: 6, backgroundColor: iconColor, borderRadius: 50}}
+            style={{padding: 6, backgroundColor: iconColor, borderRadius: 5}}
           />
 
           <Text style={styles.buttonText}>
@@ -25,7 +25,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
           </Text>
         </View>
 
-        <Feather name="chevron-right" size={20} color={colors.gray[500]} />
+        <Feather name="chevron-right" size={20} color={colors.gray[400]} />
       </TouchableOpacity>
     );
 };
@@ -33,7 +33,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
 const styles = StyleSheet.create({
     button: {
       flexDirection: 'row',
-      paddingVertical: 12,
+      paddingVertical: 10,
       paddingHorizontal: 15,
       borderRadius: 5,
       justifyContent: 'space-between',

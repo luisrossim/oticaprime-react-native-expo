@@ -3,7 +3,6 @@ import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
 import { EmpresaProvider } from "@/context/EmpresaContext";
 
-// app/_layout.tsx
 export default function Layout() {
     return (
         <EmpresaProvider>
@@ -30,7 +29,7 @@ export default function Layout() {
                     name="venda-details" 
                     options={{
                         headerShown: true,
-                        headerTitle: 'Detalhes da Venda',
+                        headerTitle: 'Detalhes',
                         headerBackTitle: 'Vendas'
                     }} 
                 />

@@ -2,24 +2,33 @@ import React from "react";
 import { colors } from "@/constants/colors";
 import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity } from "react-native";
 import { useEmpresa } from "@/context/EmpresaContext";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { FontAwesome6 } from "@expo/vector-icons";
 
 export function CustomHeader() {
     const { selectedCompany } = useEmpresa();
 
+    const getNomeAposOtico = (razaoSocial: string | undefined): string => {
+        if (!razaoSocial) return "";
+        
+        const match = razaoSocial.match(/(?:OTICO)\s+(.+)/i);
+        return match ? match[1] : "";
+    };
+
     return (
         <SafeAreaView>
             <View style={styles.container}>
-                <Text style={styles.title}>ATIP</Text>
+                <Text style={styles.title}>
+                    ATIP
+                </Text>
                 <TouchableOpacity 
                     onPress={() => router.push("/settings")} 
                     style={styles.subcontainer}
                 >
                     <Text style={styles.profileText}>
-                        {selectedCompany?.RAZAO_EMP || ''}
+                        {getNomeAposOtico(selectedCompany?.RAZAO_EMP)}
                     </Text>
-                    <MaterialCommunityIcons name="office-building-cog-outline" size={18} color={colors.gray[500]} />
+                    <FontAwesome6 name="store" size={18} color={colors.gray[500]} />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -34,7 +43,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: 0.5,
         backgroundColor: '#FFF',
-        borderBottomColor: colors.gray[400],
+        borderBottomColor: colors.slate[300],
         paddingHorizontal: 20,
         paddingVertical: 3
     },
@@ -47,7 +56,8 @@ const styles = StyleSheet.create({
     },
     title: {
         fontWeight: '900',
-        fontSize: 16,
+        fontSize: 12,
+        color: colors.slate[900],
         fontStyle: "italic"
     },
     profileContainer: {
@@ -57,8 +67,6 @@ const styles = StyleSheet.create({
         gap: 10
     },
     profileText: {
-        fontWeight: '300',
-        fontSize: 14,
-        color: colors.gray[600]
+        color: colors.slate[600]
     }
 });

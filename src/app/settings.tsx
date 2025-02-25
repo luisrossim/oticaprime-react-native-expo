@@ -1,49 +1,75 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEmpresa } from "@/context/EmpresaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { colors } from "@/constants/colors";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome6 } from "@expo/vector-icons";
 import { Company } from "@/models/company";
 import { SettingsButton } from "@/components/SettingsButton";
+import { EmpresaService } from "@/services/empresa-service";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
+import { ErrorMessage } from "@/components/ErrorMessage";
 
 export default function Settings() {
-    const bottomSheetRef = useRef<BottomSheet>(null);
-    const { selectedCompany, updateCompany } = useEmpresa();
-    const snapPoints = useMemo(() => ['75%'], []);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [empresas, setEmpresas] = useState<Company[]>([]);
+  const {selectedCompany, updateCompany} = useEmpresa();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const snapPoints = useMemo(() => ['75%'], []);
 
-    const renderBackdrop = useCallback(
-        (props: any) => (
-            <BottomSheetBackdrop
-                {...props}
-                disappearsOnIndex={-1}
-                appearsOnIndex={0}
-            />
-        ), []
-    );
 
-    const handleChangeProfile = () => {
-        bottomSheetRef.current?.expand();
-    };
+  useEffect(() => {
+    fetchEmpresasAtivas();
+  }, [])
 
-    const handleSelectProfile = async (profile: Company) => {
-        await updateCompany(profile);
-        bottomSheetRef.current?.close();
-    };
+  const fetchEmpresasAtivas = async () => {
+    try {
+      const empresaService = new EmpresaService();
+      const data = await empresaService.getAll();
+      setEmpresas(data);
+    } catch (err) {
+      setError('Erro ao buscar empresas.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
-    const profiles: Company[] = [
-        { COD_EMP: 4, RAZAO_EMP: 'Empresa Ótica 4' },
-        { COD_EMP: 5, RAZAO_EMP: 'Empresa Ótica 5' },
-        { COD_EMP: 6, RAZAO_EMP: 'Empresa Ótica 6' },
-        { COD_EMP: 9, RAZAO_EMP: 'Empresa Ótica 9' },
-    ];
+  const handleChangeProfile = () => {
+      bottomSheetRef.current?.expand();
+  };
+
+  const handleSelectProfile = async (profile: Company) => {
+      await updateCompany(profile);
+      bottomSheetRef.current?.close();
+  };
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+        <BottomSheetBackdrop
+            {...props}
+            disappearsOnIndex={-1}
+            appearsOnIndex={0}
+        />
+    ), []
+  );
+
+
+  if (loading) {
+    return <LoadingIndicator />
+  }
+
+  if (error) {
+    return <ErrorMessage error={error} />
+  }
+
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.gray[100] }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#FFF" }}>
       <View style={styles.container}>
         <View style={styles.profile}>
-          <MaterialCommunityIcons name="office-building-cog-outline" size={40} />
+          <FontAwesome6 name="store" size={40} />
           <View style={{gap: 2}}>
             <Text style={{fontSize: 18, textAlign: 'center', fontWeight: 600}}>
               {selectedCompany?.RAZAO_EMP || ""}
@@ -57,12 +83,12 @@ export default function Settings() {
         </View>
 
         <View 
-          style={{flexDirection: 'column', backgroundColor: "#FFF", paddingHorizontal: 10, marginBottom: 20}}
+          style={styles.options}
         >
           <SettingsButton
             icon="check-circle"
             title="Selecionar empresa"
-            iconColor={colors.blue[500]}
+            iconColor={colors.sky[700]}
             onPress={handleChangeProfile} 
           />
 
@@ -90,22 +116,28 @@ export default function Settings() {
                 Os dados serão sincronizados e exibidos de acordo com a empresa selecionada.
               </Text>
 
-              {profiles.map((profile) => (
+              {empresas.map((empresa) => (
                   <TouchableOpacity
-                      key={profile.COD_EMP}
+                      key={empresa.COD_EMP}
+                      onPress={() => handleSelectProfile(empresa)}
                       style={[
                           styles.radioButtonContainer,
-                          selectedCompany?.COD_EMP === profile.COD_EMP && styles.selectedRadioButton
+                          selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedRadioButton
                       ]}
-                      onPress={() => handleSelectProfile(profile)}
                   >
                       <View
                           style={[
                               styles.radioButton,
-                              selectedCompany?.COD_EMP === profile.COD_EMP && styles.selectedInnerRadioButton
+                              selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedInnerRadioButton
                           ]}
                       />
-                      <Text style={styles.radioButtonText}>{profile.RAZAO_EMP}</Text>
+                      <Text style={[
+                          styles.radioButtonText,
+                          selectedCompany?.COD_EMP === empresa.COD_EMP && styles.selectedText
+                        ]}
+                      >
+                        {empresa.RAZAO_EMP}
+                      </Text>
                   </TouchableOpacity>
               ))}
           </BottomSheetView>
@@ -114,19 +146,22 @@ export default function Settings() {
   );
 }
 
+
 const styles = StyleSheet.create({
   header: {
-      width: '100%',
-      flexDirection: 'row',
-      gap: 10,
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingVertical: 10
+    width: '100%',
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10
   },
   container: {
-      flex: 1,
-      paddingTop: 50,
-      gap: 10
+    flex: 1,
+    paddingTop: 50,
+    gap: 10,
+    borderTopWidth: 0.5, 
+    borderTopColor: colors.slate[300] 
   },
   profile: {
     flexDirection: 'column',
@@ -137,49 +172,53 @@ const styles = StyleSheet.create({
     marginBottom: 30
   },
   title: {
-      fontSize: 22,
-      fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '600',
   },
   selectedProfileText: {
-      marginTop: 20,
-      fontSize: 16,
-      color: '#555',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#555',
   },
   contentContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 2,
-      paddingHorizontal: 20,
-      paddingVertical: 30
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    paddingHorizontal: 20,
+    paddingVertical: 30
   },
   profileTitle: {
-      fontSize: 18,
-      marginBottom: 20,
-      fontWeight: '500',
+    fontSize: 18,
+    marginBottom: 20,
+    fontWeight: '500',
   },
   radioButtonContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 15,
-      borderRadius: 50
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    borderRadius: 10
   },
   radioButton: {
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      borderWidth: 2,
-      borderColor: colors.blue[500],
-      marginRight: 10,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.sky[800],
+    marginRight: 10,
   },
   selectedRadioButton: {
-      backgroundColor: colors.blue[50]
+    backgroundColor: colors.sky[100]
+  },
+  selectedText: {
+    color: colors.sky[800],
+    fontWeight: 600
   },
   selectedInnerRadioButton: {
-      backgroundColor: colors.blue[500]
+    backgroundColor: colors.sky[700]
   },
   radioButtonText: {
-      fontSize: 14,
-      color: colors.gray[800]
+    fontSize: 14,
+    color: colors.slate[800]
   },
   subcontainer: {
     display: 'flex',
@@ -187,5 +226,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     padding: 10
+  },
+  options: {
+    flexDirection: 'column', 
+    backgroundColor: colors.slate[100], 
+    paddingHorizontal: 10,
+    marginBottom: 20
   }
 });

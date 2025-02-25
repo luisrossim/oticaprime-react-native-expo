@@ -1,16 +1,27 @@
+import { Pageable } from "./pageable"
+
 export interface Venda {
     COD_VEN: number
-    NOME_CLI: string
+    DATA_VEN: string
     NOME_VEND: string
+    NOME_CLI: string
     NOME_MEDICO: string
+    RAZAO_EMP: string
     NOME_TPV: string
     TOTAL_VEN: number
-    DATA_VEN: string
+    FORMAS_PAGAMENTO: FormaPagamentoVenda[]
+    ITENS: ItemVenda[]
 }
 
-export interface FormaPagamentoVenda {
-    VALOR: number
-    DESCRICAO: string
+export interface VendaSummary {
+    COD_VEN: number
+    DATA_VEN: string
+    NOME_VEND: string
+    NOME_CLI: string
+    NOME_MEDICO: string
+    RAZAO_EMP: string
+    NOME_TPV: string
+    TOTAL_VEN: number
 }
 
 export interface ItemVenda {
@@ -21,4 +32,14 @@ export interface ItemVenda {
     VALOR_TOTAL: number
     NOME_PRO: string
     UNIDADE_MEDIDA: string
+}
+
+export interface FormaPagamentoVenda {
+    VALOR: number
+    DESCRICAO: string
+}
+
+export interface VendasPaginadas {
+    vendas: VendaSummary[]
+    pageable: Pageable
 }

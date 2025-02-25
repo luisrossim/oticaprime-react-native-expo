@@ -11,7 +11,8 @@ export default function Layout(){
                 sceneStyle: { backgroundColor: "#FFF" },
                 headerShown: true,
                 tabBarShowLabel: true,
-                tabBarInactiveTintColor: colors.gray[900],
+                tabBarActiveTintColor: colors.gray[900],
+                tabBarInactiveTintColor: colors.gray[400],
                 header: () => (
                     <CustomHeader />
                 ),
