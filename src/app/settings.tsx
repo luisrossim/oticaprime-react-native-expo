@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: colors.sky[800],
+    borderColor: colors.sky[700],
     marginRight: 10,
   },
   selectedRadioButton: {

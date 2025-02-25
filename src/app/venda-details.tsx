@@ -40,6 +40,11 @@ export default function VendaDetails() {
         }
     };
 
+    const handlePaymentLabel = (total: number, tipo: string) => {
+        const totalFormatado = UtilitiesService.formatarValor(total);
+        return `${totalFormatado} (${tipo})`
+    }
+
 
     if (loading) {
         return <ActivityIndicator style={styles.loading} size="large" />;
@@ -72,7 +77,7 @@ export default function VendaDetails() {
                     <VendaDetailsItem icon="user" detail={venda.NOME_CLI} />
                     <VendaDetailsItem icon="user-nurse" detail={venda.NOME_MEDICO} />
                     <VendaDetailsItem icon="calendar-day" detail={new Date(venda!.DATA_VEN).toLocaleDateString()} />
-                    <VendaDetailsItem icon="sack-dollar" detail={UtilitiesService.formatarValor(venda.TOTAL_VEN)} />
+                    <VendaDetailsItem icon="sack-dollar" detail={handlePaymentLabel(venda.TOTAL_VEN, venda.NOME_TPV)} />
                     <VendaDetailsItem icon="building-columns" detail={venda.RAZAO_EMP} />
                 </View>
 
@@ -84,10 +89,10 @@ export default function VendaDetails() {
                     { venda.ITENS.length > 0 
                         ? (
                             <View style={{ gap: 20, padding: 15 }}>
-                                {venda.ITENS.map((item) => (
-                                    <View style={{flex: 1, flexDirection: 'row', gap: 10}}>
+                                {venda.ITENS.map((item, index) => (
+                                    <View key={`${index}`} style={{flex: 1, flexDirection: 'row', gap: 10}}>
                                         <Feather size={16} name="shopping-bag" color={colors.slate[700]} />
-                                        <View key={item.ORDEM} style={styles.itemDetails}>
+                                        <View style={styles.itemDetails}>
                                             <Text style={styles.itemNome}>{item.NOME_PRO}</Text>
                                             <Text style={styles.itemInfo}>
                                                 {item.QUANT} {item.UNIDADE_MEDIDA} - {UtilitiesService.formatarValor(item.VALOR)}

@@ -14,6 +14,7 @@ import { UtilitiesService } from '@/utils/utilities-service';
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
     const [paginaAtual, setPaginaAtual] = useState(1);
+    const [totalVendas, setTotalVendas] = useState(0);
     const { selectedCompany } = useEmpresa();
 
     const [isDatePickerInicialVisible, setDatePickerInicialVisibility] = useState(false);
@@ -70,6 +71,7 @@ export default function Vendas() {
             const data = await vendaService.getWithPageable(params);
 
             if (pagina === 1) {
+                setTotalVendas(data.pageable.totalResults);
                 setVendasPaginadas(data.vendas);
             } else {
                 setVendasPaginadas((prev) => [...prev, ...data.vendas]);
@@ -95,11 +97,8 @@ export default function Vendas() {
         }
     };
 
-    const renderItem = useCallback(({ item }: { item: VendaSummary }) => (
-        <TouchableOpacity
-            style={styles.vendaCard}
-            onPress={() => router.push(`/venda-details?id=${item.COD_VEN}`)}
-        >
+    const ItemVenda = React.memo(({ item, onPress }: { item: VendaSummary, onPress: () => void }) => (
+        <TouchableOpacity style={styles.vendaCard} onPress={onPress}>
             <View style={styles.cardContent}>
                 <View style={styles.iconColumn}>
                     <Feather 
@@ -112,28 +111,32 @@ export default function Vendas() {
                         style={styles.iconElement} 
                     />
                 </View>
-
+    
                 <View style={styles.infoColumn}>
                     <Text style={styles.vendedor}>{item.NOME_VEND}</Text>
-
+    
                     <Text style={styles.cliente}>
                         {item.NOME_CLI.length > 16 ? item.NOME_CLI.slice(0, 16) + "..." : item.NOME_CLI}
                     </Text>
-
+    
                     <Text style={styles.valor}>
                         {UtilitiesService.formatarValor(item.TOTAL_VEN)}
                     </Text>
-
+    
                     <Text style={styles.formaPagamento}>
                         {item.NOME_TPV.startsWith("A PRAZO") ? "A PRAZO" : item.NOME_TPV}
                     </Text>
                 </View>
-
+    
                 <View style={styles.dateColumn}>
                     <Text style={styles.dataVenda}>{new Date(item.DATA_VEN).toLocaleDateString()}</Text>
                 </View>
             </View>
         </TouchableOpacity>
+    ));
+
+    const renderItem = useCallback(({ item }: { item: VendaSummary }) => (
+        <ItemVenda item={item} onPress={() => router.push(`/venda-details?id=${item.COD_VEN}`)} />
     ), [router]);
 
     
@@ -153,7 +156,7 @@ export default function Vendas() {
             </View>
 
             <View style={styles.datePickerContainer}>
-                <Feather name="calendar" size={20} color={colors.sky[600]} />
+                <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.slate[500]} />
 
                 <TouchableOpacity
                     onPress={showDatePickerInicial}
@@ -175,7 +178,7 @@ export default function Vendas() {
                     onCancel={hideDatePickerInicial}
                 />
 
-                <Feather name="minus" color={colors.sky[600]} />
+                <Feather name="minus" color={colors.slate[500]} />
 
                 <TouchableOpacity
                     onPress={showDatePickerFinal}
@@ -197,6 +200,13 @@ export default function Vendas() {
                     onCancel={hideDatePickerFinal}
                 />
             </View>
+
+            { totalVendas > 0 && (
+                <View style={styles.totalResults}>
+                    <Feather name="filter" size={20} color={colors.slate[500]} />
+                    <Text style={{color: colors.slate[500]}}>{totalVendas} vendas</Text>
+                </View>
+            ) }
 
             <FlatList
                 data={vendasPaginadas}
@@ -242,26 +252,34 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    totalResults: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        marginHorizontal: 20,
+        borderRadius: 20,
+        gap: 10,
+        marginBottom: 10,
+    },
     datePickerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
         marginHorizontal: 20,
         borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        gap: 5,
-        marginBottom: 15,
-        borderWidth: 1,
-        borderColor: colors.slate[200],
-        backgroundColor: colors.slate[100]
+        marginBottom: 2
     },
     datePickerElement: {
         padding: 6
     },
     datePickerLabel: {
         fontSize: 15,
-        color: colors.sky[600],
+        borderWidth: 0.5,
+        borderColor: colors.slate[400],
+        padding: 5,
+        borderRadius: 5,
+        backgroundColor: colors.slate[100],
+        color: colors.slate[500],
         fontWeight: 500
     },
     emptyContainer: {
