@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { VendaService } from '@/services/venda-service';
-import { colors } from '@/constants/colors';
+import { colors } from '@/utils/constants/colors';
 import { VendaSummary } from '@/models/venda';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -87,7 +87,7 @@ export default function Vendas() {
             }
 
         } catch (err) {
-            setError("Erro ao buscar vendas.");
+            setError(`Erro ao buscar vendas.`);
         } finally {
             setLoading(false);
             setIsFetchingMore(false);
@@ -172,7 +172,7 @@ export default function Vendas() {
                 <DateTimePickerModal
                     isVisible={isDatePickerInicialVisible}
                     mode="date"
-                    display="spinner"
+                    display="inline"
                     date={dataInicial}
                     locale="pt-BR"
                     onConfirm={(date) => {
@@ -194,7 +194,7 @@ export default function Vendas() {
                 <DateTimePickerModal
                     isVisible={isDatePickerFinalVisible}
                     mode="date"
-                    display="spinner"
+                    display="inline"
                     locale="pt-BR"
                     date={dataFinal}
                     onConfirm={(date) => {
@@ -222,8 +222,13 @@ export default function Vendas() {
                         <View style={{ padding: 10 }}>
                             <LoadingIndicator />
                         </View>
-                    ) : !isCompleted ? (
-                        <Button title='Carregar mais' color="black" onPress={carregarMaisVendas} />
+                    ) : !isCompleted && vendasPaginadas.length > 0 ? (
+                        <TouchableOpacity 
+                            style={styles.pageButton}
+                            onPress={carregarMaisVendas} 
+                        >
+                            <Feather size={18} color="green" name="plus" />
+                        </TouchableOpacity>
                     ) : null
                 }
                 ListEmptyComponent={() => (
@@ -292,7 +297,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
-        paddingVertical: 20,
+        paddingTop: 50,
     },
     emptyText: {
         fontSize: 16,
@@ -353,4 +358,9 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: colors.slate[500]
     },
+    pageButton:{
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 30
+    }
 });

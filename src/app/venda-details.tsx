@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { colors } from '@/constants/colors';
+import { colors } from '@/utils/constants/colors';
 import { VendaService } from '@/services/venda-service';
 import { Venda } from '@/models/venda';
 import { Feather } from '@expo/vector-icons';
@@ -60,7 +60,7 @@ export default function VendaDetails() {
 
     if (venda) {
         return (
-            <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 50}}>
+            <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Venda #{id}</Text>
                     <Feather 
@@ -183,8 +183,9 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         borderRadius: 10,
         borderWidth: 1,
-        backgroundColor: colors.slate[100],
-        borderColor: colors.slate[300],
+        gap: 5,
+        backgroundColor: colors.slate[50],
+        borderColor: colors.slate[200],
         marginBottom: 30
     },
     detailTitle: { 
@@ -194,9 +195,9 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 10,
         borderTopLeftRadius: 10,
         borderBottomWidth: 1,
-        borderBottomColor: colors.slate[300],
-        backgroundColor: colors.slate[200],
-        color: colors.slate[900]
+        borderBottomColor: colors.slate[200],
+        color: colors.slate[900],
+        backgroundColor: colors.slate[200]
     },
     paymentRow: {
         flexDirection: "row",
@@ -207,9 +208,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        borderTopWidth: 1,
-        paddingTop: 10,
-        borderTopColor: colors.slate[200]
+        paddingTop: 10
     },
     paymentTextTotal: {
         flex: 1,

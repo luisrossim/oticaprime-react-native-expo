@@ -1,4 +1,4 @@
-import { colors } from "@/constants/colors";
+import { colors } from "@/utils/constants/colors";
 import { View, Text, StyleSheet } from "react-native";
 
 interface ErrorMessage {

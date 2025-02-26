@@ -3,7 +3,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useEmpresa } from "@/context/EmpresaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { colors } from "@/constants/colors";
+import { colors } from "@/utils/constants/colors";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { Company } from "@/models/company";
 import { SettingsButton } from "@/components/SettingsButton";
@@ -56,12 +56,12 @@ export default function Settings() {
       <View style={styles.container}>
         <View style={styles.profile}>
           <FontAwesome6 name="store" size={40} />
-          <View style={{ gap: 2 }}>
-            <Text style={{ fontSize: 18, textAlign: "center", fontWeight: "600" }}>
+          <View style={{ gap: 5 }}>
+            <Text style={{ fontSize: 18, fontWeight: "600", textAlign: 'center' }}>
               {selectedCompany?.RAZAO_EMP || ""}
             </Text>
             <Text
-              style={{ fontSize: 12, fontWeight: "400", textAlign: "center", color: colors.gray[500] }}
+              style={{ fontSize: 12, fontWeight: "400", color: colors.gray[500], textAlign: 'center' }}
             >
               luis_teste_app@gmail.com
             </Text>
@@ -76,7 +76,19 @@ export default function Settings() {
             onPress={handleChangeProfile}
           />
 
-          <SettingsButton icon="log-out" title="Sair" iconColor={colors.red[600]} onPress={() => {}} />
+          <SettingsButton 
+            icon="help-circle" 
+            title="Ajuda" 
+            iconColor={colors.green[600]} 
+            onPress={() => {}} 
+          />
+
+          <SettingsButton 
+            icon="log-out" 
+            title="Sair da conta" 
+            iconColor={colors.red[600]} 
+            onPress={() => {}} 
+          />
         </View>
       </View>
 
@@ -88,9 +100,10 @@ export default function Settings() {
         backdropComponent={renderBackdrop}
       >
         <BottomSheetView style={styles.contentContainer}>
-          <Text style={{ fontSize: 22, fontWeight: "600", marginBottom: 5 }}>Selecionar empresa</Text>
+          <Text style={{ fontSize: 22, fontWeight: "600", marginBottom: 5 }}>
+            Selecionar empresa</Text>
           <Text
-            style={{ fontSize: 13, fontWeight: "300", color: colors.gray[500], marginBottom: 20 }}
+            style={{ fontSize: 14, fontWeight: "300", color: colors.slate[500], marginBottom: 20 }}
           >
             Os dados serão sincronizados e exibidos de acordo com a empresa selecionada.
           </Text>
@@ -133,14 +146,6 @@ export default function Settings() {
 
 
 const styles = StyleSheet.create({
-  header: {
-    width: '100%',
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10
-  },
   container: {
     flex: 1,
     paddingTop: 50,
@@ -151,10 +156,10 @@ const styles = StyleSheet.create({
   profile: {
     flexDirection: 'column',
     gap: 10,
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 30,
-    marginBottom: 30
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 30
   },
   title: {
     fontSize: 22,
@@ -181,29 +186,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 15,
-    borderRadius: 10
+    borderRadius: 5
   },
   radioButton: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: colors.sky[700],
+    borderColor: colors.slate[100],
+    backgroundColor: colors.slate[100],
     marginRight: 10,
   },
   selectedRadioButton: {
-    backgroundColor: colors.sky[100]
+    backgroundColor: colors.sky[700]
   },
   selectedText: {
-    color: colors.sky[800],
+    color: colors.sky[100],
     fontWeight: 600
   },
   selectedInnerRadioButton: {
-    backgroundColor: colors.sky[700]
+    borderColor: colors.sky[500],
+    backgroundColor: colors.sky[500]
   },
   radioButtonText: {
-    fontSize: 14,
-    color: colors.slate[800]
+    fontSize: 13,
+    color: colors.slate[600]
   },
   subcontainer: {
     display: 'flex',
@@ -213,9 +220,6 @@ const styles = StyleSheet.create({
     padding: 10
   },
   options: {
-    flexDirection: 'column', 
-    backgroundColor: colors.slate[100], 
-    paddingHorizontal: 10,
-    marginBottom: 20
+    paddingHorizontal: 20
   }
 });

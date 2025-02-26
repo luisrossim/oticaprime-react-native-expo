@@ -1,4 +1,4 @@
-import { colors } from "@/constants/colors";
+import { colors } from "@/utils/constants/colors";
 import { Feather } from "@expo/vector-icons";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 
@@ -17,7 +17,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
             name={icon as keyof typeof Feather.glyphMap} 
             size={15}
             color="#FFF"
-            style={{padding: 6, backgroundColor: iconColor, borderRadius: 50}}
+            style={{padding: 6, backgroundColor: iconColor, borderRadius: 5}}
           />
 
           <Text style={styles.buttonText}>
@@ -33,10 +33,15 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
 const styles = StyleSheet.create({
     button: {
       flexDirection: 'row',
-      paddingVertical: 10,
-      paddingHorizontal: 15,
+      paddingVertical: 15,
+      paddingHorizontal: 20,
       justifyContent: 'space-between',
-      alignItems: 'center'
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.slate[200],
+      backgroundColor: colors.slate[50],
+      marginBottom: 5,
+      borderRadius: 5
     },
     buttonText: {
       color: colors.gray[700],

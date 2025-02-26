@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
-import { colors } from "@/constants/colors";
+import { colors } from "@/utils/constants/colors";
 import { CustomHeader } from "@/components/CustomHeader";
 import { Pressable } from "react-native";
 

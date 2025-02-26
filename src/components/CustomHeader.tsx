@@ -1,6 +1,6 @@
 import React from "react";
-import { colors } from "@/constants/colors";
-import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity } from "react-native";
+import { colors } from "@/utils/constants/colors";
+import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Image } from "react-native";
 import { useEmpresa } from "@/context/EmpresaContext";
 import { router } from "expo-router";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -18,9 +18,10 @@ export function CustomHeader() {
     return (
         <SafeAreaView>
             <View style={styles.container}>
-                <Text style={styles.title}>
-                    ATIP
-                </Text>
+                <Image
+                    source={{ uri: 'https://github.com/letter.png' }}
+                    style={styles.image}
+                />
                 <TouchableOpacity 
                     onPress={() => router.push("/settings")} 
                     style={styles.subcontainer}
@@ -28,7 +29,7 @@ export function CustomHeader() {
                     <Text style={styles.profileText}>
                         {getNomeAposOtico(selectedCompany?.RAZAO_EMP)}
                     </Text>
-                    <FontAwesome6 name="store" size={18} color={colors.gray[500]} />
+                    <FontAwesome6 name="store" size={16} color={colors.gray[500]} />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -54,12 +55,6 @@ const styles = StyleSheet.create({
         gap: 10,
         padding: 10
     },
-    title: {
-        fontWeight: '900',
-        fontSize: 12,
-        color: colors.slate[900],
-        fontStyle: "italic"
-    },
     profileContainer: {
         display: 'flex',
         flexDirection: 'row',
@@ -68,5 +63,10 @@ const styles = StyleSheet.create({
     },
     profileText: {
         color: colors.slate[600]
+    },
+    image: { 
+        width: 35, 
+        height: 35, 
+        borderRadius: 50,
     }
 });
