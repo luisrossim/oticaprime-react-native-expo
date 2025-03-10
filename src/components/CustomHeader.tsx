@@ -33,7 +33,7 @@ export function CustomHeader() {
                             style={styles.image}
                         />
 
-                        <Feather name="settings" size={10} style={styles.settingsIcon} />
+                        <Feather name="settings" size={12} style={styles.settingsIcon} />
                     </View>
 
                     <View style={{flexDirection: "column", alignItems: "flex-start", gap: 1}}>
@@ -45,7 +45,7 @@ export function CustomHeader() {
                         </Text>
                     </View>
                 </TouchableOpacity>
-                <Feather name="bell" size={20} color={colors.gray[900]} />
+                <Feather name="bell" size={20} color={colors.gray[500]} />
             </View>
         </SafeAreaView>
     );
@@ -87,9 +87,9 @@ const styles = StyleSheet.create({
     },
     settingsIcon: {
         position: "absolute", 
-        bottom: 0, 
-        right: 0,
-        padding: 1,
+        bottom: -2, 
+        right: -2,
+        padding: 2,
         color: colors.gray[600],
         borderRadius: 50,
         backgroundColor: "#FFF"

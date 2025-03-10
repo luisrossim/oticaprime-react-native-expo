@@ -17,12 +17,14 @@ export function ErrorMessage({ error }: ErrorMessage){
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
+        flexDirection: "row",
+        alignItems: 'center',
+        backgroundColor: colors.red[200],
+        padding: 10,
+        marginBottom: 10
     },
     error: {
-        fontSize: 14,
-        color: colors.red[500]
+        fontSize: 13,
+        color: colors.red[600]
     }
 })

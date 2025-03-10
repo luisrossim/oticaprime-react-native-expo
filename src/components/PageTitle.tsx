@@ -15,6 +15,7 @@ export function PageTitle({ title, size }: PageTitleProps){
 const styles = StyleSheet.create({
     title: {
         fontWeight: 700,
-        color: colors.gray[900]
+        color: colors.gray[900],
+        marginBottom: 10
     }
 })

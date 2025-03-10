@@ -33,7 +33,7 @@ export default function Layout(){
                 options={{
                     tabBarLabel: "Dashboard",
                     tabBarIcon: ({ color, size, focused }) => (
-                        <Feather name="pie-chart" style={focused ? {color: colors.yellow[500]} : ""} size={size} color={color} />
+                        <Feather name="pie-chart" style={focused ? {color: colors.indigo[600]} : ""} size={size} color={color} />
                     )
                }} 
             />
@@ -43,7 +43,7 @@ export default function Layout(){
                 options={{
                     tabBarLabel: "Vendas",
                     tabBarIcon: ({ color, size, focused }) => (
-                        <Feather name="dollar-sign" style={focused ? {color: colors.green[500]} : ""} size={size} color={color} />
+                        <Feather name="dollar-sign" style={focused ? {color: colors.green[600]} : ""} size={size} color={color} />
                     )
                }} 
             />
@@ -53,7 +53,7 @@ export default function Layout(){
                 options={{
                     tabBarLabel: "Caixa",
                     tabBarIcon: ({ color, size, focused }) => (
-                        <Feather name="box" style={focused ? {color: colors.fuchsia[500]} : ""} size={size} color={color} />
+                        <Feather name="box" style={focused ? {color: colors.fuchsia[600]} : ""} size={size} color={color} />
                     )
                }} 
             />
@@ -63,7 +63,7 @@ export default function Layout(){
                 options={{
                     tabBarLabel: "Recebimentos",
                     tabBarIcon: ({ color, size, focused }) => (
-                        <Feather name="arrow-down-right" style={focused ? {color: colors.cyan[500]} : ""} size={size} color={color} />
+                        <Feather name="arrow-down-right" style={focused ? {color: colors.cyan[600]} : ""} size={size} color={color} />
                     )
                }} 
             />

@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { VendaService } from '@/services/venda-service';
 import { colors } from '@/utils/constants/colors';
@@ -11,6 +10,7 @@ import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { PageTitle } from '@/components/PageTitle';
+import { DatePickerContainer } from '@/components/DatePicker';
 
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
@@ -18,9 +18,6 @@ export default function Vendas() {
     const [totalVendas, setTotalVendas] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const { selectedEmpresa } = useEmpresaCaixa();
-
-    const [isDatePickerInicialVisible, setDatePickerInicialVisibility] = useState(false);
-    const [isDatePickerFinalVisible, setDatePickerFinalVisibility] = useState(false);
 
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
@@ -34,16 +31,6 @@ export default function Vendas() {
     const [dataInicial, setDataInicial] = useState(dataInicialPadrao);
     const [dataFinal, setDataFinal] = useState(hoje);
 
-    const showDatePickerInicial = () => setDatePickerInicialVisibility(true);
-    const hideDatePickerInicial = () => setDatePickerInicialVisibility(false);
-    const showDatePickerFinal = () => setDatePickerFinalVisibility(true);
-    const hideDatePickerFinal = () => setDatePickerFinalVisibility(false);
-
-    const formatarData = (data: Date): string => {
-        return data.toLocaleDateString();
-    };
-
-
 
     useEffect(() => {
         setPaginaAtual(1);
@@ -53,7 +40,10 @@ export default function Vendas() {
     }, [selectedEmpresa, dataInicial, dataFinal])
 
     const fetchVendas = async (pagina: number) => {
-        if (loading || isFetchingMore) return
+        if (loading || isFetchingMore) return;
+
+        setLoading(true);
+        setError(null);
 
         if (pagina === 1) {
             setLoading(true);
@@ -64,8 +54,8 @@ export default function Vendas() {
         try {
             const vendaService = new VendaService();
             const params = {
-                dataInicial: formatarData(dataInicial),
-                dataFinal: formatarData(dataFinal),
+                dataInicial: UtilitiesService.formatarData(dataInicial),
+                dataFinal: UtilitiesService.formatarData(dataFinal),
                 empId: selectedEmpresa?.COD_EMP,
                 page: pagina
             };
@@ -144,74 +134,31 @@ export default function Vendas() {
         <ItemVenda key={item.COD_VEN} item={item} onPress={() => router.push(`/venda-details?id=${item.COD_VEN}`)} />
     ), [router]);
 
-    
-
-    if (loading && paginaAtual === 1) {
-        return <LoadingIndicator />;
-    }
-
-    if (error) {
-        return <ErrorMessage error={error} />;
-    }
-
     return (
         <View style={styles.container}>
-            <View style={{ paddingHorizontal: 20 }}>
+            <View style={{paddingHorizontal: 20}}>
                 <PageTitle title="Vendas" size="large" />
-            </View>
 
-            <View style={styles.datePickerContainer}>
-                <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.gray[500]} />
+                {error && (
+                    <ErrorMessage error={error} />
+                )}
 
-                <TouchableOpacity
-                    onPress={showDatePickerInicial}
-                    style={styles.datePickerElement}
-                >
-                    <Text style={styles.datePickerLabel}>{dataInicial.toLocaleDateString()}</Text>
-                </TouchableOpacity>
-
-                <DateTimePickerModal
-                    isVisible={isDatePickerInicialVisible}
-                    mode="date"
-                    display="inline"
-                    date={dataInicial}
-                    locale="pt-BR"
-                    onConfirm={(date) => {
-                        setDataInicial(date);
-                        hideDatePickerInicial();
+                <DatePickerContainer
+                    dataInicial={dataInicial}
+                    dataFinal={dataFinal}
+                    onDateChange={(inicio, fim) => {
+                        setDataInicial(inicio);
+                        setDataFinal(fim);
                     }}
-                    onCancel={hideDatePickerInicial}
                 />
 
-                <Feather name="minus" color={colors.gray[500]} />
-
-                <TouchableOpacity
-                    onPress={showDatePickerFinal}
-                    style={styles.datePickerElement}
-                >
-                    <Text style={styles.datePickerLabel}>{dataFinal.toLocaleDateString()}</Text>
-                </TouchableOpacity>
-
-                <DateTimePickerModal
-                    isVisible={isDatePickerFinalVisible}
-                    mode="date"
-                    display="inline"
-                    locale="pt-BR"
-                    date={dataFinal}
-                    onConfirm={(date) => {
-                        setDataFinal(date);
-                        hideDatePickerFinal();
-                    }}
-                    onCancel={hideDatePickerFinal}
-                />
+                {totalVendas > 0 && (
+                    <View style={styles.totalResults}>
+                        <Feather name="filter" size={22} color={colors.gray[500]} />
+                        <Text style={{color: colors.gray[500]}}>{totalVendas} vendas</Text>
+                    </View>
+                )}
             </View>
-
-            { totalVendas > 0 && (
-                <View style={styles.totalResults}>
-                    <Feather name="filter" size={20} color={colors.gray[500]} />
-                    <Text style={{color: colors.gray[500], fontWeight: 300}}>{totalVendas} vendas</Text>
-                </View>
-            ) }
 
             <FlatList
                 data={vendasPaginadas}
@@ -268,31 +215,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'flex-start',
-        marginHorizontal: 20,
         borderRadius: 20,
         gap: 10,
-        marginBottom: 12,
-    },
-    datePickerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        marginHorizontal: 20,
-        borderRadius: 20,
-        marginBottom: 2
-    },
-    datePickerElement: {
-        padding: 6
-    },
-    datePickerLabel: {
-        fontSize: 15,
-        borderWidth: 0.5,
-        borderColor: colors.gray[400],
-        padding: 5,
-        borderRadius: 5,
-        backgroundColor: colors.gray[100],
-        color: colors.gray[500],
-        fontWeight: 500
+        marginBottom: 20,
     },
     emptyContainer: {
         alignItems: 'center',

@@ -8,6 +8,8 @@ import { Feather } from '@expo/vector-icons';
 import { VendaDetailsItem } from '@/components/VendaDetailsItem';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { PageTitle } from '@/components/PageTitle';
+import { LoadingIndicator } from '@/components/LoadingIndicator';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export default function VendaDetails() {
     const { id } = useLocalSearchParams();
@@ -25,6 +27,8 @@ export default function VendaDetails() {
     }, [vendaId]);
 
     const fetchVenda = async () => {
+        setLoading(true);
+
         try {
             if (!vendaId) {
                 throw new Error("ID da venda não encontrado.");
@@ -47,16 +51,13 @@ export default function VendaDetails() {
     }
 
 
+ 
     if (loading) {
-        return <ActivityIndicator style={styles.loading} size="large" />;
+        return <LoadingIndicator />;
     }
-
+ 
     if (error) {
-        return (
-            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={styles.error}>{error}</Text>
-            </View>
-        );
+        return <ErrorMessage error={error} />;
     }
 
     if (venda) {
@@ -85,28 +86,30 @@ export default function VendaDetails() {
                 </View>
 
                 <View style={styles.vendaDetails}>
-                    <View style={{marginBottom: 10}}>
-                        <PageTitle title="Itens" size="small" />
-                    </View>
+                    <PageTitle title="Itens" size="small" />
 
                     { venda.ITENS.length > 0 
                         ? (
-                            <View style={{ gap: 30, backgroundColor: colors.gray[100], padding: 20, borderRadius: 10}}>
+                            <View style={{ gap: 40, backgroundColor: colors.gray[100], borderWidth: 0.5, borderColor: colors.gray[300], padding: 20, borderRadius: 10}}>
+
                                 {venda.ITENS.map((item, index) => (
-                                    <View key={`${index}`} style={{flex: 1, flexDirection: 'row', gap: 10}}>
-                                        <Feather style={{marginTop: 3}} size={16} name="shopping-bag" color={colors.gray[700]} />
-                                        <View style={styles.itemDetails}>
+                                    <View key={`${index}`} style={styles.itemDetails}>
+                                        <View style={{flexDirection: "row", alignItems: "center", gap: 5}}>
+                                            <Feather size={15} name="shopping-bag" color={colors.gray[800]} />
                                             <Text style={styles.itemNome}>{item.NOME_PRO}</Text>
-                                            <Text style={styles.itemInfo}>
-                                                {item.QUANT} {item.UNIDADE_MEDIDA} - {UtilitiesService.formatarValor(item.VALOR)}
-                                            </Text>
-                                            <Text style={styles.itemDesconto}>
-                                                Desconto: {UtilitiesService.formatarValor(item.DESCONTO)}
-                                            </Text>
-                                            <Text style={styles.itemTotal}>
-                                                Total: {UtilitiesService.formatarValor(item.VALOR_TOTAL)}
-                                            </Text>
                                         </View>
+
+                                        <Text style={styles.itemInfo}>
+                                            {item.QUANT} {item.UNIDADE_MEDIDA} - {UtilitiesService.formatarValor(item.VALOR)}
+                                        </Text>
+
+                                        <Text style={styles.itemDesconto}>
+                                            Desconto: {UtilitiesService.formatarValor(item.DESCONTO)}
+                                        </Text>
+                                        
+                                        <Text style={styles.itemTotal}>
+                                            Total: {UtilitiesService.formatarValor(item.VALOR_TOTAL)}
+                                        </Text>
                                     </View>
                                 ))}
                             </View>
@@ -117,13 +120,11 @@ export default function VendaDetails() {
                 </View>
 
                 <View style={styles.vendaDetails}>
-                    <View style={{marginBottom: 10}}>
-                        <PageTitle title="Formas de Pagamento" size="small" />
-                    </View>
+                    <PageTitle title="Formas de Pagamento" size="small" />
 
                     { venda.FORMAS_PAGAMENTO.length > 0 
                         ? (
-                            <View style={{gap: 10, backgroundColor: colors.gray[100], padding: 20, borderRadius: 10}}>
+                            <View style={{gap: 10, backgroundColor: colors.gray[100], borderWidth: 0.5, borderColor: colors.gray[300], padding: 20, borderRadius: 10}}>
                                 { venda.FORMAS_PAGAMENTO.map((item, index) => (
                                     <View key={`${index}`} style={styles.paymentRow}>
                                         <Feather name="credit-card" size={16} color={colors.gray[600]} />
@@ -194,41 +195,41 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         paddingTop: 10,
         borderTopWidth: 0.5,
-        borderTopColor: colors.gray[300]
+        borderTopColor: colors.gray[400]
     },
     paymentTextTotal: {
         flex: 1,
         fontWeight: 600,
-        color: colors.gray[700]
+        color: colors.gray[800]
     },
     paymentValueTotal: {
-        color: colors.gray[700],
+        color: colors.gray[800],
         fontWeight: 600
     },
     paymentText: {
         flex: 1,
-        marginLeft: 10,
-        color: colors.gray[600]
+        marginLeft: 5,
+        color: colors.gray[800]
     },
     paymentValue: {
-        color: colors.gray[600],
+        color: colors.gray[700],
     },
     itemDetails: {
         flex: 1,
         gap: 5
     },
     itemNome: {
-        color: colors.gray[700],
+        color: colors.gray[800],
         fontWeight: 600
     },
     itemInfo: {
-        color: colors.gray[500]
+        color: colors.gray[600]
     },
     itemDesconto: {
-        color: colors.gray[500]
+        color: colors.gray[600]
     },
     itemTotal: {
-        color: colors.gray[500]
+        color: colors.gray[600]
     },
     totalContainer: {
         flexDirection: 'row',

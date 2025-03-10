@@ -17,4 +17,8 @@ export class UtilitiesService {
         "Jul", "Ago", "Set", "Out", "Nov", "Dez"
     ];
 
+    static formatarData = (data: Date): string => {
+        return data.toLocaleDateString();
+    };
+
 }

@@ -48,12 +48,14 @@ export default function Index() {
 
 
    const fetchReports = async () => {
-        if (selectedRange < 0 || !selectedEmpresa) {
-            return
-        }
-
         setLoading(true);
         setError(null)
+
+        if (!selectedEmpresa) {
+            setLoading(false);
+            setError("Nenhuma empresa selecionada.");
+            return;
+        }
 
         try {
             const empresaService = new EmpresaService();
@@ -145,21 +147,22 @@ export default function Index() {
         if (selectedRange === null) return "Selecionar período";
         if (selectedRange === 0) return "Mês atual";
         if (selectedRange === 1) return "Mês passado";
-        return `Últimos ${selectedRange} meses`;
+        return `${selectedRange} meses`;
     };
 
-
-    if (error) {
-        return <ErrorMessage error={error} />;
-    }
 
     if (loading) {
         return <LoadingIndicator />
     }
 
+
     return (
         <ScrollView style={styles.container}  contentContainerStyle={{paddingBottom: 100}}>
             <PageTitle title="Dashboard" size="large" />
+
+            {error && (
+                <ErrorMessage error={error} />
+            )}
 
             <TouchableOpacity style={styles.datePickerElement} onPress={() => setModalVisible(true)}>
                 <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.gray[500]} />
@@ -168,21 +171,21 @@ export default function Index() {
                 </Text>
             </TouchableOpacity>
 
-            <View style={{flex: 1, gap: 40, marginBottom: 40}}>
+            <View style={{flex: 1, gap: 20, marginBottom: 50}}>
+                <View style={styles.chartHeader}>
+                    <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.indigo[700]}]} name="shopping-bag" size={20} />
+                    <View>
+                        <Text style={styles.subTitle}>
+                            Quantidade de vendas
+                        </Text>
+                        <Text style={styles.descricao}>
+                            {formatRange(selectedRange)}
+                        </Text>
+                    </View>
+                </View>
+                
                 { DATA1 && DATA1.length > 0  ? (
                     <View style={{height: 300}}>
-                        <View style={styles.chartHeader}>
-                            <Feather style={[styles.chartHeaderIcon, {backgroundColor: "#000"}]} name="shopping-bag" size={20} />
-                            <View>
-                                <Text style={styles.subTitle}>
-                                    Quantidade de vendas
-                                </Text>
-                                <Text style={styles.descricao}>
-                                    {formatRange(selectedRange)}
-                                </Text>
-                            </View>
-                        </View>
-
                         <CartesianChart
                             data={DATA1}
                             chartPressState={state1}
@@ -208,14 +211,14 @@ export default function Index() {
                                         chartBounds={chartBounds}
                                         points={points.count}
                                         roundedCorners={{
-                                            topLeft: 5,
-                                            topRight: 5,
+                                            topLeft: 3,
+                                            topRight: 3,
                                     }}
                                     >
                                         <LinearGradient
                                             start={vec(0, 0)}
-                                            end={vec(0, 1000)}
-                                            colors={["#000", "#FFFFFF00"]}
+                                            end={vec(0, 500)}
+                                            colors={["#4338ca", "#4338ca00"]}
                                         />
                                     </Bar>
                                     { isActive1 ? 
@@ -225,7 +228,7 @@ export default function Index() {
                                                 x={textXPosition1}
                                                 y={textYPosition1}
                                                 text={value1}
-                                                color={"#000"}
+                                                color={"#4338ca"}
                                             />
                                         </>    
                                     : null}
@@ -234,25 +237,27 @@ export default function Index() {
                         </CartesianChart>
                     </View>
                 ) : (
-                    <View style={{flex: 1, backgroundColor: colors.gray[100], height: 200}}></View>
+                    <View style={styles.chartEmpty}>
+                        <Text style={{color: colors.gray[500]}}>Não há registros</Text>
+                    </View>
                 ) }
             </View>
 
-            <View style={{flex: 1, gap: 40}}>
+            <View style={{flex: 1, gap: 20}}>
+                <View style={styles.chartHeader}>
+                    <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.green[500]}]} name="dollar-sign" size={20} />
+                    <View>
+                        <Text style={styles.subTitle}>
+                            Receita de vendas
+                        </Text>
+                        <Text style={styles.descricao}>
+                            {formatRange(selectedRange)}
+                        </Text>
+                    </View>
+                </View>
+
                 { DATA2 && DATA2.length > 0  ? (
                     <View style={{height: 300}}>
-                        <View style={styles.chartHeader}>
-                            <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.green[500]}]} name="dollar-sign" size={20} />
-                            <View>
-                                <Text style={styles.subTitle}>
-                                    Receita de vendas
-                                </Text>
-                                <Text style={styles.descricao}>
-                                    {formatRange(selectedRange)}
-                                </Text>
-                            </View>
-                        </View>
-
                         <CartesianChart
                             data={DATA2}
                             chartPressState={state2}
@@ -285,13 +290,13 @@ export default function Index() {
                                         chartBounds={chartBounds}
                                         points={points.total}
                                         roundedCorners={{
-                                            topLeft: 5,
-                                            topRight: 5,
+                                            topLeft: 3,
+                                            topRight: 3,
                                     }}
                                     >
                                         <LinearGradient
                                             start={vec(0, 0)}
-                                            end={vec(0, 600)}
+                                            end={vec(0, 500)}
                                             colors={["#22c55e", "#22c55e00"]}
                                         />
                                     </Bar>
@@ -311,7 +316,9 @@ export default function Index() {
                         </CartesianChart>
                     </View>
                 ) : (
-                    <View style={{flex: 1, backgroundColor: colors.gray[100], height: 200}}></View>
+                    <View style={styles.chartEmpty}>
+                        <Text style={{color: colors.gray[500]}}>Não há registros</Text>
+                    </View>
                 ) }
             </View>
 
@@ -363,8 +370,7 @@ const styles = StyleSheet.create({
     chartHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10, 
-        marginBottom: 15
+        gap: 10
     },
     chartHeaderIcon: {
         padding: 7,
@@ -380,7 +386,6 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         borderRadius: 5,
         gap: 3,
-        backgroundColor: colors.gray[100],
         marginBottom: 40,
         marginTop: 5
     },
@@ -421,7 +426,7 @@ const styles = StyleSheet.create({
     optionLabel: {
         fontSize: 15,
         color: colors.gray[600],
-        fontWeight: 600,
+        fontWeight: 500,
         marginBottom: 3
     },
     optionSubLabel: {
@@ -442,4 +447,12 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: colors.gray[700],
     },
+    chartEmpty: {
+        flex: 1, 
+        justifyContent: "center", 
+        alignItems: "center", 
+        height: 300,
+        borderWidth: 0.5,
+        borderColor: colors.gray[300]
+    }
 });
