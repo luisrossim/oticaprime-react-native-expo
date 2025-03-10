@@ -1,27 +1,33 @@
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
-import { useEmpresa } from '@/context/EmpresaContext';
+import { PageTitle } from '@/components/PageTitle';
+import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { EmpresaReports } from '@/models/company';
+import { dashboardFilterData } from '@/models/data/dashboardFilter';
 import { EmpresaService } from '@/services/empresa-service';
 import { colors } from '@/utils/constants/colors';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient, vec, Text as SKText, useFont } from '@shopify/react-native-skia';
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 import { Bar, CartesianChart, useChartPressState } from 'victory-native';
 
 const inter = require('@/assets/fonts/inter.ttf')
 
 export default function Index() {
-    const [DATA1, setDATA1] = useState<{label: string, count:number}[]>([]) 
-    const [DATA2, setDATA2] = useState<{label: string, total:number}[]>([])
-
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedRange, setSelectedRange] = useState<number>(6);
+    const { selectedEmpresa } = useEmpresaCaixa();
 
     const font = useFont(inter, 12)
 
-    const { selectedCompany } = useEmpresa();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const [DATA1, setDATA1] = useState<{label: string, count:number}[]>([]) 
+    const [DATA2, setDATA2] = useState<{label: string, total:number}[]>([])
 
     const { state: state1, isActive: isActive1 } = useChartPressState({
         x: "Jan",
@@ -32,25 +38,32 @@ export default function Index() {
         x: "Jan",
         y: { total: 0 }
     });
-    
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         setDATA1([]);
         setDATA2([]);
         fetchReports();
-    }, [selectedCompany])
+    }, [selectedRange, selectedEmpresa])
+
 
    const fetchReports = async () => {
+        if (selectedRange < 0 || !selectedEmpresa) {
+            return
+        }
+
         setLoading(true);
         setError(null)
 
         try {
             const empresaService = new EmpresaService();
-            const empId = selectedCompany?.COD_EMP || 0
-            const data = await empresaService.getReports(empId);
+
+            const params = {
+                id: selectedEmpresa.COD_EMP,
+                range: selectedRange
+            };
+
+            const data = await empresaService.getReports(params);
 
             if (data) {
                 buildCharts(data);
@@ -64,31 +77,39 @@ export default function Index() {
     };
 
     const buildCharts = (data: EmpresaReports) => {
-        if (!data || !data.totalVendasMensal) return;
-       
+        if (!data || !Array.isArray(data.totalVendasMensal)) return;
+        
         const formattedData1 = data.totalVendasMensal.map(report => ({
-            label: UtilitiesService.monthNames[report.MES - 1],
-            count: report.QUANTIDADE_VENDAS || 0
+            label: report.MES && report.MES >= 1 && report.MES <= 12 
+                ? UtilitiesService.monthNames[report.MES - 1] 
+                : "Desconhecido",
+            count: report.QUANTIDADE_VENDAS ?? 0
         }));
     
         const formattedData2 = data.totalVendasMensal.map(report => ({
-            label: UtilitiesService.monthNames[report.MES - 1],
-            total: report.TOTAL_VENDAS || 0
+            label: report.MES && report.MES >= 1 && report.MES <= 12 
+                ? UtilitiesService.monthNames[report.MES - 1] 
+                : "Desconhecido",
+            total: report.TOTAL_VENDAS ?? 0
         }));
-        
+    
         setDATA1(formattedData1);
         setDATA2(formattedData2);
     };
     
 
+    const handleSelectRange = (range: number) => {
+        setSelectedRange(range);
+        setModalVisible(false);
+    };
 
 
     const value1 = useDerivedValue(() => {
-        return `${state1.y.count.value.value}`;
+        return state1.y.count.value?.value ? `${state1.y.count.value.value}` : "0";
     }, [state1]);
-
+    
     const value2 = useDerivedValue(() => {
-        return `R$ ${state2.y.total.value.value}`;
+        return state2.y.total.value?.value ? `R$ ${state2.y.total.value.value}` : "R$ 0";
     }, [state2]);
 
     const textYPosition1 = useDerivedValue(() => {
@@ -120,34 +141,45 @@ export default function Index() {
     }, [state2, font]);
 
 
+    const formatRange = (selectedRange: number | null) => {
+        if (selectedRange === null) return "Selecionar período";
+        if (selectedRange === 0) return "Mês atual";
+        if (selectedRange === 1) return "Mês passado";
+        return `Últimos ${selectedRange} meses`;
+    };
 
-    if (loading) {
-        return <LoadingIndicator />;
-    }
 
     if (error) {
         return <ErrorMessage error={error} />;
     }
 
+    if (loading) {
+        return <LoadingIndicator />
+    }
+
     return (
         <ScrollView style={styles.container}  contentContainerStyle={{paddingBottom: 100}}>
-            <Text style={styles.title}>Dashboard</Text>
+            <PageTitle title="Dashboard" size="large" />
 
-            <TouchableOpacity style={styles.datePickerElement}>
-                <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.slate[500]} />
-                <Text style={styles.datePickerLabel}>Últimos 6 meses</Text>
+            <TouchableOpacity style={styles.datePickerElement} onPress={() => setModalVisible(true)}>
+                <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.gray[500]} />
+                <Text style={styles.datePickerLabel}>
+                    {formatRange(selectedRange)}
+                </Text>
             </TouchableOpacity>
 
-            <View style={{flex: 1, gap: 40, marginBottom: 30}}>
+            <View style={{flex: 1, gap: 40, marginBottom: 40}}>
                 { DATA1 && DATA1.length > 0  ? (
-                    <View style={{height: 280}}>
+                    <View style={{height: 300}}>
                         <View style={styles.chartHeader}>
-                            <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.sky[400]}]} name="shopping-bag" size={20} />
+                            <Feather style={[styles.chartHeaderIcon, {backgroundColor: "#000"}]} name="shopping-bag" size={20} />
                             <View>
                                 <Text style={styles.subTitle}>
                                     Quantidade de vendas
                                 </Text>
-                                <Text style={styles.descricao}>Últimos 6 meses</Text>
+                                <Text style={styles.descricao}>
+                                    {formatRange(selectedRange)}
+                                </Text>
                             </View>
                         </View>
 
@@ -156,17 +188,17 @@ export default function Index() {
                             chartPressState={state1}
                             xKey="label"
                             yKeys={["count"]}
-                            domainPadding={{ left: 30, right: 30, top: 50 }}
+                            domainPadding={{ left: 30, right: 30, top: 70, bottom: 50 }}
                             axisOptions={{
-                                lineColor: colors.slate[200],
-                                labelColor: colors.slate[500],
+                                lineColor: colors.gray[200],
+                                labelColor: colors.gray[500],
                                 tickCount: {
-                                    x: 7,
+                                    x: selectedRange || 1,
                                     y: 5
                                 },
                                 font: font ? font : undefined,
                                 formatXLabel(value) {
-                                    return value
+                                    return value || ""
                                 },
                             }}
                             >
@@ -182,8 +214,8 @@ export default function Index() {
                                     >
                                         <LinearGradient
                                             start={vec(0, 0)}
-                                            end={vec(0, 400)}
-                                            colors={["#0ea5e9", "#0ea5e900"]}
+                                            end={vec(0, 1000)}
+                                            colors={["#000", "#FFFFFF00"]}
                                         />
                                     </Bar>
                                     { isActive1 ? 
@@ -193,7 +225,7 @@ export default function Index() {
                                                 x={textXPosition1}
                                                 y={textYPosition1}
                                                 text={value1}
-                                                color={colors.sky[500]}
+                                                color={"#000"}
                                             />
                                         </>    
                                     : null}
@@ -202,20 +234,22 @@ export default function Index() {
                         </CartesianChart>
                     </View>
                 ) : (
-                    <LoadingIndicator />
+                    <View style={{flex: 1, backgroundColor: colors.gray[100], height: 200}}></View>
                 ) }
             </View>
 
             <View style={{flex: 1, gap: 40}}>
                 { DATA2 && DATA2.length > 0  ? (
-                    <View style={{height: 280}}>
+                    <View style={{height: 300}}>
                         <View style={styles.chartHeader}>
-                            <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.emerald[400]}]} name="dollar-sign" size={20} />
+                            <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.green[500]}]} name="dollar-sign" size={20} />
                             <View>
                                 <Text style={styles.subTitle}>
                                     Receita de vendas
                                 </Text>
-                                <Text style={styles.descricao}>Últimos 6 meses</Text>
+                                <Text style={styles.descricao}>
+                                    {formatRange(selectedRange)}
+                                </Text>
                             </View>
                         </View>
 
@@ -224,17 +258,17 @@ export default function Index() {
                             chartPressState={state2}
                             xKey="label"
                             yKeys={["total"]}
-                            domainPadding={{ left: 30, right: 30, top: 50 }}
+                            domainPadding={{ left: 30, right: 30, top: 70, bottom: 50 }}
                             axisOptions={{
-                                lineColor: colors.slate[200],
-                                labelColor: colors.slate[500],
+                                lineColor: colors.gray[200],
+                                labelColor: colors.gray[500],
                                 tickCount: {
-                                    x: 7,
+                                    x: selectedRange || 1,
                                     y: 5
                                 },
                                 font: font ? font : undefined,
                                 formatXLabel(value) {
-                                    return value
+                                   return value || ""
                                 },
                                 formatYLabel(value){
                                     if (value >= 1000) {
@@ -257,8 +291,8 @@ export default function Index() {
                                     >
                                         <LinearGradient
                                             start={vec(0, 0)}
-                                            end={vec(0, 400)}
-                                            colors={["#10b981", "#10b98100"]}
+                                            end={vec(0, 600)}
+                                            colors={["#22c55e", "#22c55e00"]}
                                         />
                                     </Bar>
                                     { isActive2 ? 
@@ -268,7 +302,7 @@ export default function Index() {
                                                 x={textXPosition2}
                                                 y={textYPosition2}
                                                 text={value2}
-                                                color={colors.emerald[500]}
+                                                color={"#22c55e"}
                                             />
                                         </>    
                                     : null}
@@ -277,9 +311,35 @@ export default function Index() {
                         </CartesianChart>
                     </View>
                 ) : (
-                    <LoadingIndicator />
+                    <View style={{flex: 1, backgroundColor: colors.gray[100], height: 200}}></View>
                 ) }
             </View>
+
+            <Modal animationType="fade" transparent={true} visible={modalVisible}>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Selecionar Período</Text>
+
+                        {dashboardFilterData.map((filter, index) => (
+                            <TouchableOpacity 
+                                key={index}
+                                style={[styles.option, (selectedRange == filter.range) ? styles.optionSelected : "" ]} 
+                                onPress={() => handleSelectRange(filter.range)}
+                            >
+                                <Feather style={{marginRight: 4}} name="calendar" size={25} color={colors.gray[600]} />
+                                <View style={{flexDirection: "column", gap: 1}}>
+                                    <Text style={styles.optionLabel}>{filter.label}</Text>
+                                    <Text style={styles.optionSubLabel}>{filter.sublabel}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+
+                        <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                            <Text style={styles.cancelButtonText}>Cancelar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }
@@ -290,18 +350,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 50,
     },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        marginBottom: 10
-    },
     subTitle: {
-        color: colors.slate[900], 
+        color: colors.gray[700], 
         fontWeight: 500, 
         fontSize: 18
     },
     descricao: {
-        color: colors.slate[500],  
+        color: colors.gray[500],
+        fontWeight: 300,
         fontSize: 14
     },
     chartHeader: {
@@ -320,16 +376,70 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderWidth: 0.5,
         alignItems: 'center',
-        borderColor: colors.slate[400],
+        borderColor: colors.gray[400],
         alignSelf: 'flex-start',
         borderRadius: 5,
         gap: 3,
-        backgroundColor: colors.slate[100],
-        marginBottom: 30
+        backgroundColor: colors.gray[100],
+        marginBottom: 40,
+        marginTop: 5
     },
     datePickerLabel: {
         fontSize: 15,
         fontWeight: 500,
-        color: colors.slate[500],
+        color: colors.gray[500],
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalContent: {
+        backgroundColor: "#FFF",
+        padding: 26,
+        borderRadius: 10,
+        width: "90%"
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: colors.gray[800],
+        marginBottom: 20,
+    },
+    option: {
+        paddingVertical: 15,
+        paddingHorizontal: 7,
+        width: "100%",
+        borderBottomWidth: 0.5,
+        borderBottomColor: colors.gray[300],
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5
+
+    },
+    optionLabel: {
+        fontSize: 15,
+        color: colors.gray[600],
+        fontWeight: 600,
+        marginBottom: 3
+    },
+    optionSubLabel: {
+        fontSize: 12,
+        fontWeight: 400,
+        color: colors.gray[400],
+    },
+    optionSelected: {
+        backgroundColor: colors.gray[100]
+    },
+    cancelButton: {
+        marginTop: 30,
+        padding: 10,
+        width: "100%",
+        alignItems: "center",
+    },
+    cancelButtonText: {
+        fontSize: 15,
+        color: colors.gray[700],
     },
 });

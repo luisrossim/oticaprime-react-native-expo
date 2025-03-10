@@ -6,8 +6,8 @@ export class EmpresaService extends AxiosService<Company> {
         super('/empresa');
     }
 
-    async getReports(id: number | string): Promise<EmpresaReports> {
-        const response = await this.api.get<EmpresaReports>(`${this.path}/relatorio/${id}`);
+    async getReports(params: Record<string, any>): Promise<EmpresaReports> {
+        const response = await this.api.get<EmpresaReports>(`${this.path}/relatorio`, { params });
         return response.data;
     }
 }

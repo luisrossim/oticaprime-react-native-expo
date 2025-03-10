@@ -8,15 +8,16 @@ import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
-import { useEmpresa } from '@/context/EmpresaContext';
+import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { UtilitiesService } from '@/utils/utilities-service';
+import { PageTitle } from '@/components/PageTitle';
 
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [totalVendas, setTotalVendas] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const { selectedCompany } = useEmpresa();
+    const { selectedEmpresa } = useEmpresaCaixa();
 
     const [isDatePickerInicialVisible, setDatePickerInicialVisibility] = useState(false);
     const [isDatePickerFinalVisible, setDatePickerFinalVisibility] = useState(false);
@@ -49,7 +50,7 @@ export default function Vendas() {
         setVendasPaginadas([]);
         setIsCompleted(false);
         fetchVendas(1);
-    }, [selectedCompany, dataInicial, dataFinal])
+    }, [selectedEmpresa, dataInicial, dataFinal])
 
     const fetchVendas = async (pagina: number) => {
         if (loading || isFetchingMore) return
@@ -65,7 +66,7 @@ export default function Vendas() {
             const params = {
                 dataInicial: formatarData(dataInicial),
                 dataFinal: formatarData(dataFinal),
-                empId: selectedCompany?.COD_EMP,
+                empId: selectedEmpresa?.COD_EMP,
                 page: pagina
             };
 
@@ -156,11 +157,11 @@ export default function Vendas() {
     return (
         <View style={styles.container}>
             <View style={{ paddingHorizontal: 20 }}>
-                <Text style={styles.title}>Vendas</Text>
+                <PageTitle title="Vendas" size="large" />
             </View>
 
             <View style={styles.datePickerContainer}>
-                <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.slate[500]} />
+                <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.gray[500]} />
 
                 <TouchableOpacity
                     onPress={showDatePickerInicial}
@@ -182,7 +183,7 @@ export default function Vendas() {
                     onCancel={hideDatePickerInicial}
                 />
 
-                <Feather name="minus" color={colors.slate[500]} />
+                <Feather name="minus" color={colors.gray[500]} />
 
                 <TouchableOpacity
                     onPress={showDatePickerFinal}
@@ -207,8 +208,8 @@ export default function Vendas() {
 
             { totalVendas > 0 && (
                 <View style={styles.totalResults}>
-                    <Feather name="filter" size={20} color={colors.slate[500]} />
-                    <Text style={{color: colors.slate[500]}}>{totalVendas} vendas</Text>
+                    <Feather name="filter" size={20} color={colors.gray[500]} />
+                    <Text style={{color: colors.gray[500], fontWeight: 300}}>{totalVendas} vendas</Text>
                 </View>
             ) }
 
@@ -227,7 +228,7 @@ export default function Vendas() {
                             style={styles.pageButton}
                             onPress={carregarMaisVendas} 
                         >
-                            <Feather size={18} color="green" name="plus" />
+                            <Feather size={25} color={colors.green[600]} name="plus" />
                         </TouchableOpacity>
                     ) : null
                 }
@@ -286,11 +287,11 @@ const styles = StyleSheet.create({
     datePickerLabel: {
         fontSize: 15,
         borderWidth: 0.5,
-        borderColor: colors.slate[400],
+        borderColor: colors.gray[400],
         padding: 5,
         borderRadius: 5,
-        backgroundColor: colors.slate[100],
-        color: colors.slate[500],
+        backgroundColor: colors.gray[100],
+        color: colors.gray[500],
         fontWeight: 500
     },
     emptyContainer: {
@@ -301,13 +302,13 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: colors.slate[500],
+        color: colors.gray[500],
     },
     vendaCard: {
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.slate[200],
+        borderBottomColor: colors.gray[200]
     },
     cardContent: {
         flexDirection: 'row',
@@ -327,40 +328,43 @@ const styles = StyleSheet.create({
     },
     dateColumn: {
         width: '25%',
-        justifyContent: 'flex-start',
+        justifyContent: 'flex-end',
+        alignItems: "flex-end",
         alignSelf: 'flex-start'
     },
     iconElement: {
-        backgroundColor: colors.emerald[300],
+        backgroundColor: colors.green[500],
         borderRadius: 999,
-        color: colors.slate[900],
+        color: colors.green[50],
         padding: 10
     },
     vendedor: {
         fontWeight: 'bold',
         fontSize: 15,
-        color: colors.slate[800]
+        color: colors.gray[800]
     },
     cliente: {
         fontSize: 15,
-        color: colors.slate[500]
+        color: colors.gray[500]
     },
     formaPagamento: {
         fontSize: 12,
-        color: colors.slate[500],
+        color: colors.gray[500],
         marginTop: 5
     },
     valor: {
         fontSize: 15,
-        color: colors.slate[500]
+        color: colors.gray[500]
     },
     dataVenda: {
         fontSize: 13,
-        color: colors.slate[500]
+        color: colors.gray[500],
+        fontWeight: 300
     },
     pageButton:{
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 30
+        padding: 30,
+        backgroundColor: colors.green[100]
     }
 });

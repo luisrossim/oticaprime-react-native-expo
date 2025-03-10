@@ -1,36 +1,51 @@
 import React from "react";
 import { colors } from "@/utils/constants/colors";
 import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Image } from "react-native";
-import { useEmpresa } from "@/context/EmpresaContext";
+import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import { router } from "expo-router";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
 export function CustomHeader() {
-    const { selectedCompany } = useEmpresa();
+    const { selectedEmpresa, selectedCaixa } = useEmpresaCaixa();
 
-    const getNomeAposOtico = (razaoSocial: string | undefined): string => {
+    const handleEmpresaNome = (razaoSocial: string | undefined): string => {
         if (!razaoSocial) return "";
         
         const match = razaoSocial.match(/(?:OTICO)\s+(.+)/i);
         return match ? match[1] : "";
     };
 
+    const handleCaixaName = (nome: string | undefined): string => {
+        const res = (nome?.includes("COFRE") ? "CAIXA COFRE" : "CAIXA NORMAL")
+        return res;
+    }
+
     return (
         <SafeAreaView>
             <View style={styles.container}>
-                <Image
-                    source={{ uri: 'https://github.com/letter.png' }}
-                    style={styles.image}
-                />
                 <TouchableOpacity 
                     onPress={() => router.push("/settings")} 
                     style={styles.subcontainer}
                 >
-                    <Text style={styles.profileText}>
-                        {getNomeAposOtico(selectedCompany?.RAZAO_EMP)}
-                    </Text>
-                    <FontAwesome6 name="store" size={16} color={colors.gray[500]} />
+                    <View style={{position: "relative"}}>
+                        <Image
+                            source={{ uri: 'https://github.com/luisrossim.png' }}
+                            style={styles.image}
+                        />
+
+                        <Feather name="settings" size={10} style={styles.settingsIcon} />
+                    </View>
+
+                    <View style={{flexDirection: "column", alignItems: "flex-start", gap: 1}}>
+                        <Text style={styles.profileText}>
+                            {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : "Nenhuma empresa selecionada"}
+                        </Text>
+                        <Text style={{fontSize: 10, color: colors.gray[500], fontWeight: 300}}>
+                            {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : "Nenhum caixa selecionado"}
+                        </Text>
+                    </View>
                 </TouchableOpacity>
+                <Feather name="bell" size={20} color={colors.gray[900]} />
             </View>
         </SafeAreaView>
     );
@@ -44,16 +59,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: 0.5,
         backgroundColor: '#FFF',
-        borderBottomColor: colors.slate[300],
+        borderBottomColor: colors.gray[300],
         paddingHorizontal: 20,
-        paddingVertical: 8
+        paddingTop: 18,
+        paddingBottom: 10,
     },
     subcontainer: {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-        padding: 10
+        gap: 10
     },
     profileContainer: {
         display: 'flex',
@@ -62,11 +77,21 @@ const styles = StyleSheet.create({
         gap: 10
     },
     profileText: {
-        color: colors.slate[600]
+        fontSize: 13,
+        color: colors.gray[900]
     },
     image: { 
-        width: 35, 
-        height: 35, 
+        width: 30, 
+        height: 30, 
+        borderRadius: 50
+    },
+    settingsIcon: {
+        position: "absolute", 
+        bottom: 0, 
+        right: 0,
+        padding: 1,
+        color: colors.gray[600],
         borderRadius: 50,
+        backgroundColor: "#FFF"
     }
 });

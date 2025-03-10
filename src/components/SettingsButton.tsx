@@ -25,7 +25,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
           </Text>
         </View>
 
-        <Feather name="chevron-right" size={20} color={colors.slate[400]} />
+        <Feather name="chevron-right" size={20} color={colors.gray[400]} />
       </TouchableOpacity>
     );
 };
@@ -34,18 +34,14 @@ const styles = StyleSheet.create({
     button: {
       flexDirection: 'row',
       paddingVertical: 15,
-      paddingHorizontal: 20,
       justifyContent: 'space-between',
       alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.slate[200],
-      backgroundColor: colors.slate[50],
-      marginBottom: 5,
-      borderRadius: 5
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.gray[300]
     },
     buttonText: {
       color: colors.gray[700],
-      fontSize: 15,
+      fontSize: 14,
       fontWeight: 500,
     }
 });

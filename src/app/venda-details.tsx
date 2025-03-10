@@ -7,6 +7,7 @@ import { Venda } from '@/models/venda';
 import { Feather } from '@expo/vector-icons';
 import { VendaDetailsItem } from '@/components/VendaDetailsItem';
 import { UtilitiesService } from '@/utils/utilities-service';
+import { PageTitle } from '@/components/PageTitle';
 
 export default function VendaDetails() {
     const { id } = useLocalSearchParams();
@@ -62,17 +63,19 @@ export default function VendaDetails() {
         return (
             <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Venda #{id}</Text>
                     <Feather 
                         name={
                             venda.NOME_TPV.includes("A PRAZO") || ["CARTAO", "A VISTA"].includes(venda.NOME_TPV)
                                 ? "dollar-sign" 
                                 : "star"
                         } 
-                    size={15} style={styles.iconElement} />
+                        size={20} 
+                        style={styles.iconElement} 
+                    />
+                    <PageTitle title={`Venda #${id}`} size="small" />
                 </View>
 
-                <View style={[styles.vendaDetails, {padding: 15}]}>
+                <View style={styles.vendaDetails}>
                     <VendaDetailsItem icon="user-tie" detail={venda.NOME_VEND} />
                     <VendaDetailsItem icon="user" detail={venda.NOME_CLI} />
                     <VendaDetailsItem icon="user-nurse" detail={venda.NOME_MEDICO} />
@@ -82,16 +85,16 @@ export default function VendaDetails() {
                 </View>
 
                 <View style={styles.vendaDetails}>
-                    <Text style={styles.detailTitle}>
-                        Itens
-                    </Text>
+                    <View style={{marginBottom: 10}}>
+                        <PageTitle title="Itens" size="small" />
+                    </View>
 
                     { venda.ITENS.length > 0 
                         ? (
-                            <View style={{ gap: 20, padding: 15 }}>
+                            <View style={{ gap: 30, backgroundColor: colors.gray[100], padding: 20, borderRadius: 10}}>
                                 {venda.ITENS.map((item, index) => (
                                     <View key={`${index}`} style={{flex: 1, flexDirection: 'row', gap: 10}}>
-                                        <Feather style={{marginTop: 3}} size={16} name="shopping-bag" color={colors.slate[700]} />
+                                        <Feather style={{marginTop: 3}} size={16} name="shopping-bag" color={colors.gray[700]} />
                                         <View style={styles.itemDetails}>
                                             <Text style={styles.itemNome}>{item.NOME_PRO}</Text>
                                             <Text style={styles.itemInfo}>
@@ -114,16 +117,16 @@ export default function VendaDetails() {
                 </View>
 
                 <View style={styles.vendaDetails}>
-                    <Text style={styles.detailTitle}>
-                        Formas de Pagamento
-                    </Text>
+                    <View style={{marginBottom: 10}}>
+                        <PageTitle title="Formas de Pagamento" size="small" />
+                    </View>
 
                     { venda.FORMAS_PAGAMENTO.length > 0 
                         ? (
-                            <View style={{gap: 10, padding: 15}}>
+                            <View style={{gap: 10, backgroundColor: colors.gray[100], padding: 20, borderRadius: 10}}>
                                 { venda.FORMAS_PAGAMENTO.map((item, index) => (
                                     <View key={`${index}`} style={styles.paymentRow}>
-                                        <Feather name="credit-card" size={16} color={colors.slate[600]} />
+                                        <Feather name="credit-card" size={16} color={colors.gray[600]} />
                                         <Text style={styles.paymentText}>{item.DESCRICAO}</Text>
                                         <Text style={styles.paymentValue}>
                                             {UtilitiesService.formatarValor(item.VALOR)}
@@ -161,43 +164,24 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20, 
         backgroundColor: "#FFF", 
         borderTopWidth: 0.5, 
-        borderTopColor: colors.slate[300] 
+        borderTopColor: colors.gray[300] 
     },
     header: { 
-        flexDirection: "row",
-        justifyContent: "space-between", 
+        flexDirection: "column", 
         alignItems: 'center',
-        marginBottom: 20 
-    },
-    headerTitle: {
-        fontSize: 26,
-        fontWeight: 700
+        marginBottom: 30,
+        gap: 10
     },
     iconElement: {
-        backgroundColor: colors.emerald[300],
+        backgroundColor: colors.green[500],
         borderRadius: 999,
-        color: colors.slate[900],
-        padding: 10
+        color: colors.gray[50],
+        padding: 10,
+        marginBottom: 2
     },
     vendaDetails: {
         flexDirection: 'column',
-        borderRadius: 10,
-        borderWidth: 1,
-        gap: 5,
-        backgroundColor: colors.slate[50],
-        borderColor: colors.slate[200],
-        marginBottom: 30
-    },
-    detailTitle: { 
-        fontSize: 18, 
-        fontWeight: 600, 
-        padding: 10,
-        borderTopRightRadius: 10,
-        borderTopLeftRadius: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.slate[200],
-        color: colors.slate[900],
-        backgroundColor: colors.slate[200]
+        marginBottom: 50
     },
     paymentRow: {
         flexDirection: "row",
@@ -208,41 +192,43 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingTop: 10
+        paddingTop: 10,
+        borderTopWidth: 0.5,
+        borderTopColor: colors.gray[300]
     },
     paymentTextTotal: {
         flex: 1,
         fontWeight: 600,
-        color: colors.slate[700]
+        color: colors.gray[700]
     },
     paymentValueTotal: {
-        color: colors.slate[700],
+        color: colors.gray[700],
         fontWeight: 600
     },
     paymentText: {
         flex: 1,
         marginLeft: 10,
-        color: colors.slate[600]
+        color: colors.gray[600]
     },
     paymentValue: {
-        color: colors.slate[600],
+        color: colors.gray[600],
     },
     itemDetails: {
         flex: 1,
         gap: 5
     },
     itemNome: {
-        color: colors.slate[700],
+        color: colors.gray[700],
         fontWeight: 600
     },
     itemInfo: {
-        color: colors.slate[500]
+        color: colors.gray[500]
     },
     itemDesconto: {
-        color: colors.slate[500]
+        color: colors.gray[500]
     },
     itemTotal: {
-        color: colors.slate[500]
+        color: colors.gray[500]
     },
     totalContainer: {
         flexDirection: 'row',
@@ -262,7 +248,7 @@ const styles = StyleSheet.create({
         color: '#28a745',
     },
     emptyText: {
-        color: colors.slate[400],
+        color: colors.gray[400],
         fontSize: 16,
         padding: 15
     },

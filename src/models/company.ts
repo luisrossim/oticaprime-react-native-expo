@@ -1,3 +1,5 @@
+import { Caixa } from "./caixa"
+
 export interface Company {
     COD_EMP: number,
     RAZAO_EMP: string  
@@ -25,4 +27,9 @@ interface FormaPagamentoMensal {
 interface FormaPagamentoQuantidade {
     nome: string
     quantidade: number
+}
+
+export interface selectedEmpresaCaixa {
+    empresa: Company,
+    caixa: Caixa
 }

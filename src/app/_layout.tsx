@@ -1,11 +1,11 @@
 import React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
-import { EmpresaProvider } from "@/context/EmpresaContext";
+import { EmpresaCaixaProvider } from "@/context/EmpresaCaixaContext";
 
 export default function Layout() {
     return (
-        <EmpresaProvider>
+        <EmpresaCaixaProvider>
             <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
             
             <Stack>
@@ -34,6 +34,6 @@ export default function Layout() {
                     }} 
                 />
             </Stack>
-        </EmpresaProvider>
+        </EmpresaCaixaProvider>
     );
 }

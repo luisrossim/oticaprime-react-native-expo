@@ -11,8 +11,11 @@ export default function Layout(){
                 sceneStyle: { backgroundColor: "#FFF" },
                 headerShown: true,
                 tabBarShowLabel: true,
-                tabBarActiveTintColor: colors.gray[900],
-                tabBarInactiveTintColor: colors.gray[400],
+                tabBarActiveTintColor: "#FFF",
+                tabBarInactiveTintColor: colors.gray[500],
+                tabBarStyle: {
+                    backgroundColor: "#000"
+                },
                 header: () => (
                     <CustomHeader />
                 ),
@@ -29,8 +32,8 @@ export default function Layout(){
                 name="index"
                 options={{
                     tabBarLabel: "Dashboard",
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="pie-chart" size={size} color={color} />
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <Feather name="pie-chart" style={focused ? {color: colors.yellow[500]} : ""} size={size} color={color} />
                     )
                }} 
             />
@@ -39,8 +42,8 @@ export default function Layout(){
                 name="vendas"
                 options={{
                     tabBarLabel: "Vendas",
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="dollar-sign" size={size} color={color} />
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <Feather name="dollar-sign" style={focused ? {color: colors.green[500]} : ""} size={size} color={color} />
                     )
                }} 
             />
@@ -49,8 +52,8 @@ export default function Layout(){
                 name="caixa"
                 options={{
                     tabBarLabel: "Caixa",
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="box" size={size} color={color} />
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <Feather name="box" style={focused ? {color: colors.fuchsia[500]} : ""} size={size} color={color} />
                     )
                }} 
             />
@@ -59,8 +62,8 @@ export default function Layout(){
                 name="recebimentos"
                 options={{
                     tabBarLabel: "Recebimentos",
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="arrow-down-right" size={size} color={color} />
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <Feather name="arrow-down-right" style={focused ? {color: colors.cyan[500]} : ""} size={size} color={color} />
                     )
                }} 
             />

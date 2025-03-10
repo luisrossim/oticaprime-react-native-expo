@@ -19,6 +19,7 @@
     "@react-native-community/datetimepicker": "^8.2.0",
     "@shopify/react-native-skia": "1.5.0",
     "axios": "^1.7.9",
+    "date-fns": "^4.1.0",
     "expo": "~52.0.36",
     "expo-router": "~4.0.17",
     "jest-expo": "~52.0.5",
