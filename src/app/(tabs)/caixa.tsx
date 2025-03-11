@@ -12,6 +12,7 @@ import { DatePickerContainer } from '@/components/DatePicker';
 import { LineChart } from '@/components/LineChart';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { LineDetail, LineDetailButton } from '@/components/LineDetail';
+import SectionTitle from '@/components/SectionTitle';
 
 export default function Caixa(){
     const [caixaDetails, setCaixaDetails] = useState<CaixaDetails | null>(null);
@@ -93,12 +94,10 @@ export default function Caixa(){
             {caixaDetails && (
                 <View>
                     <View style={styles.caixaSection}>
-                        <View style={{paddingHorizontal: 20}}>
-                            <Text style={{fontSize: 18, fontWeight: 500, color: colors.gray[700], marginBottom: 6}}>
-                                Total recebido
-                            </Text>
+                        <SectionTitle title="TOTAL RECEBIDO" />
 
-                            <Text style={{fontSize: 34, fontWeight: 500, color: colors.gray[700], marginBottom: 10}}>
+                        <View style={{paddingHorizontal: 20}}>
+                            <Text style={styles.totalValue}>
                                 {UtilitiesService.formatarValor(caixaDetails.TOTAL_RECEBIDO)}
                             </Text>
                         </View>
@@ -106,15 +105,14 @@ export default function Caixa(){
                         <LineChart total={caixaDetails.TOTAL_RECEBIDO} values={caixaDetails.FORMAS_PAGAMENTO} />
                         <LineDetail label='ACRÉSCIMO RECEBIDO' value={caixaDetails.TOTAL_ACRESCIMO_RECEBIDO} isBRL={true} />
                         <LineDetail label='DESCONTO CONCEDIDO' value={caixaDetails.TOTAL_DESCONTO_CONCEDIDO} isBRL={true} />
+                        <LineDetail label='BAIXAS' value={caixaDetails.TOTAL_BAIXAS} isBRL={false} />
                     </View>
 
                     <View style={styles.caixaSection}>
-                        <View style={{paddingHorizontal: 20}}>
-                            <Text style={{fontSize: 18, fontWeight: 500, color: colors.gray[700], marginBottom: 6}}>
-                                Total analítico de vendas
-                            </Text>
+                        <SectionTitle title="TOTAL ANALÍTICO DE VENDAS" />
 
-                            <Text style={{fontSize: 28, fontWeight: 500, color: colors.gray[700], marginBottom: 10}}>
+                        <View style={{paddingHorizontal: 20}}>
+                            <Text style={styles.totalValue}>
                                 {UtilitiesService.formatarValor(caixaDetails.TOTAL_VALOR_VENDAS || 0)}
                             </Text>
                         </View>
@@ -126,17 +124,15 @@ export default function Caixa(){
                     </View>
 
                     <View style={styles.caixaSection}>
-                        <View style={{paddingHorizontal: 20}}>
-                            <Text style={{fontSize: 18, fontWeight: 500, color: colors.gray[700], marginBottom: 6}}>
-                                Total de contas a receber
-                            </Text>
+                        <SectionTitle title="TOTAL CONTAS A RECEBER" />
 
-                            <Text style={{fontSize: 28, fontWeight: 500, color: colors.gray[700], marginBottom: 10}}>
+                        <View style={{paddingHorizontal: 20}}>
+                            <Text style={styles.totalValue}>
                                 {UtilitiesService.formatarValor(caixaDetails.TOTAL_CONTAS_RECEBER || 0)}
                             </Text>
                         </View>
 
-                        <LineDetailButton label='VISUALIZAR CONTAS' />
+                        <LineDetailButton label='CONTAS PENDENTES' />
                     </View>
                 </View>
             )}
@@ -155,7 +151,7 @@ const styles = StyleSheet.create({
         marginBottom: 3
     },
     caixaSection: {
-        marginTop: 60
+        marginTop: 40
     },
     lineContainer: {
         flexDirection: "column",
@@ -172,5 +168,11 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 13,
         color: colors.gray[500]
+    },
+    totalValue: {
+        fontSize: 32, 
+        fontWeight: 500, 
+        color: colors.gray[700],
+        marginVertical: 15
     }
 })

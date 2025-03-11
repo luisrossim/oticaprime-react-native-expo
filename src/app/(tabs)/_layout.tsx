@@ -1,72 +1,82 @@
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { colors } from "@/utils/constants/colors";
-import { CustomHeader } from "@/components/CustomHeader";
-import { Pressable } from "react-native";
+import { Platform, Pressable, View } from "react-native";
+import { GlobalHeader } from "@/components/GlobalHeader";
+import { useEffect } from "react";
+import * as NavigationBar from "expo-navigation-bar";
 
-export default function Layout(){
+export default function Layout(){  
+    useEffect(() => {
+        if (Platform.OS === "android") {
+            NavigationBar.setBackgroundColorAsync("#000");
+        }
+    }, []);
+
     return (
-        <Tabs
-            screenOptions={{
-                sceneStyle: { backgroundColor: "#FFF" },
-                headerShown: true,
-                tabBarShowLabel: true,
-                tabBarActiveTintColor: "#FFF",
-                tabBarInactiveTintColor: colors.gray[500],
-                tabBarStyle: {
-                    backgroundColor: "#000"
-                },
-                header: () => (
-                    <CustomHeader />
-                ),
-                tabBarButton: (props) => (
-                    <Pressable {...props}
-                      android_ripple={{ borderless: false, color: "transparent" }}
-                    >
-                      {props.children}
-                    </Pressable>
-                )
-            }}
-        >
-            <Tabs.Screen
-                name="index"
-                options={{
-                    tabBarLabel: "Dashboard",
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="pie-chart" size={size} color={color} />
-                    )
-               }} 
-            />
+        <View style={{ flex: 1, backgroundColor: "#FFF" }}>
+            <GlobalHeader />
 
-            <Tabs.Screen
-                name="vendas"
-                options={{
-                    tabBarLabel: "Vendas",
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="dollar-sign" size={size} color={color} />
+            <Tabs
+                screenOptions={{
+                    sceneStyle: { backgroundColor: "#FFF" },
+                    headerShown: false,
+                    tabBarShowLabel: true,
+                    animation: "shift",
+                    tabBarActiveTintColor: "#FFF",
+                    tabBarInactiveTintColor: colors.gray[500],
+                    tabBarStyle: {
+                        backgroundColor: "#000",
+                        paddingTop: 6,
+                        height: 90
+                    },
+                    tabBarButton: (props) => (
+                        <Pressable {...props} android_ripple={{ borderless: false, color: "transparent" }}>
+                            {props.children}
+                        </Pressable>
                     )
-               }} 
-            />
+                }}
+            >
+                <Tabs.Screen
+                    name="index"
+                    options={{
+                        tabBarLabel: "Dashboard",
+                        tabBarIcon: ({ color, size }) => (
+                            <Feather name="pie-chart" size={size} color={color} />
+                        )
+                    }}
+                />
 
-            <Tabs.Screen
-                name="caixa"
-                options={{
-                    tabBarLabel: "Caixa",
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="box" size={size} color={color} />
-                    )
-               }} 
-            />
-            
-            <Tabs.Screen
-                name="recebimentos"
-                options={{
-                    tabBarLabel: "Recebimentos",
-                    tabBarIcon: ({ color, size }) => (
-                        <Feather name="arrow-down-right" size={size} color={color} />
-                    )
-               }} 
-            />
-        </Tabs>
-    )
+                <Tabs.Screen
+                    name="vendas"
+                    options={{
+                        tabBarLabel: "Vendas",
+                        tabBarIcon: ({ color, size }) => (
+                            <Feather name="dollar-sign" size={size} color={color} />
+                        )
+                    }}
+                />
+
+                <Tabs.Screen
+                    name="caixa"
+                    options={{
+                        tabBarLabel: "Caixa",
+                        tabBarIcon: ({ color, size }) => (
+                            <Feather name="box" size={size} color={color} />
+                        )
+                    }}
+                />
+
+                <Tabs.Screen
+                    name="recebimentos"
+                    options={{
+                        tabBarLabel: "Recebimentos",
+                        tabBarIcon: ({ color, size }) => (
+                            <Feather name="arrow-down-right" size={size} color={color} />
+                        )
+                    }}
+                />
+            </Tabs>
+        </View>
+    );
 }

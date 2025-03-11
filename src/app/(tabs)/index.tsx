@@ -1,6 +1,7 @@
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { PageTitle } from '@/components/PageTitle';
+import { useAuth } from '@/context/AuthContext';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { EmpresaReports } from '@/models/company';
 import { dashboardFilterData } from '@/models/data/dashboardFilter';
@@ -18,7 +19,7 @@ const inter = require('@/assets/fonts/inter.ttf')
 
 export default function Index() {
     const [modalVisible, setModalVisible] = useState(false);
-    const [selectedRange, setSelectedRange] = useState<number>(6);
+    const [selectedRange, setSelectedRange] = useState<number>(12);
     const { selectedEmpresa } = useEmpresaCaixa();
 
     const font = useFont(inter, 12)
@@ -173,7 +174,7 @@ export default function Index() {
 
             <View style={{flex: 1, gap: 20, marginBottom: 50}}>
                 <View style={styles.chartHeader}>
-                    <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.indigo[700]}]} name="shopping-bag" size={22} />
+                    <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.blue[700]}]} name="shopping-bag" size={22} />
                     <View>
                         <Text style={styles.subTitle}>
                             Quantidade de vendas
@@ -217,8 +218,8 @@ export default function Index() {
                                     >
                                         <LinearGradient
                                             start={vec(0, 0)}
-                                            end={vec(0, 500)}
-                                            colors={["#4338ca", "#4338ca00"]}
+                                            end={vec(0, 600)}
+                                            colors={["#1d4ed8", "#1d4ed800"]}
                                         />
                                     </Bar>
                                     { isActive1 ? 
@@ -228,7 +229,7 @@ export default function Index() {
                                                 x={textXPosition1}
                                                 y={textYPosition1}
                                                 text={value1}
-                                                color={"#4338ca"}
+                                                color={"#1d4ed8"}
                                             />
                                         </>    
                                     : null}
@@ -296,7 +297,7 @@ export default function Index() {
                                     >
                                         <LinearGradient
                                             start={vec(0, 0)}
-                                            end={vec(0, 500)}
+                                            end={vec(0, 600)}
                                             colors={["#22c55e", "#22c55e00"]}
                                         />
                                     </Bar>

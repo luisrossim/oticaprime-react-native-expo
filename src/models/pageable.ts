@@ -1,6 +1,7 @@
 export interface Pageable {
-    totalPages: number
     page: number
+    pageResults: number
     pageSize: number
     totalResults: number
+    totalPages: number
 }

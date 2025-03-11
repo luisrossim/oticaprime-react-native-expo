@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, SafeAreaView } from "react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
@@ -10,6 +10,8 @@ import { SettingsButton } from "@/components/SettingsButton";
 import { EmpresaService } from "@/services/empresa-service";
 import { Caixa } from "@/models/caixa";
 import { CaixaService } from "@/services/caixa-service";
+import { useAuth } from "@/context/AuthContext";
+import { CustomHeader } from "@/components/CustomHeader";
 
 export default function Settings() {
   const bottomSheetRefEmpresa = useRef<BottomSheet>(null);
@@ -19,10 +21,11 @@ export default function Settings() {
   const [caixas, setCaixas] = useState<Caixa[]>([]);
 
   const { selectedEmpresa, selectedCaixa, updateEmpresa, updateCaixa } = useEmpresaCaixa();
+  const { logout, authData } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const snapPoints = useMemo(() => ['88%'], []);
+  const snapPoints = useMemo(() => ['70%'], []);
 
 
   const fetchEmpresasAtivas = async () => {
@@ -65,6 +68,10 @@ export default function Settings() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+  }
+
   const handleChangeEmpresa = () => {
     bottomSheetRefEmpresa.current?.expand();
     fetchEmpresasAtivas();
@@ -98,154 +105,160 @@ export default function Settings() {
   
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#FFF"}}>
-      <View style={styles.container}>
-        <View style={styles.profile}>
-          <Image
-              source={{ uri: 'https://github.com/luisrossim.png' }}
-              style={styles.image}
-          />
+      <SafeAreaView style={{flex: 1}}>
+        <CustomHeader title="Configurações" />
 
-          <View style={{ gap: 5 }}>
-            <Text style={styles.selectedEmpresaTitle}>
-              {selectedEmpresa?.RAZAO_EMP || "Nenhuma empresa selecionada"}
-            </Text>
+        <View style={styles.container}>
+          <View style={styles.profile}>
+            <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
+                style={styles.image}
+            />
 
-            <Text
-              style={{ fontSize: 12, fontWeight: "400", color: colors.gray[500], textAlign: 'center', marginBottom: 25 }}
-            >
-              {selectedCaixa?.DESC_CAI || "Nenhum caixa selecionado"}
-            </Text>
-
-            <View style={styles.account}>
-              <Feather name="user" color={colors.gray[500]} />
-              <Text
-                style={{ fontSize: 12, fontWeight: "300", color: colors.gray[500], textAlign: 'center' }}
-              >
-                luisrossim12@gmail.com
+            <View style={{ gap: 5 }}>
+              <Text style={styles.selectedEmpresaTitle}>
+                {selectedEmpresa?.RAZAO_EMP || "Nenhuma empresa selecionada"}
               </Text>
+
+              <Text
+                style={{color: colors.gray[500], textAlign: 'center', marginBottom: 25 }}
+              >
+                {selectedCaixa?.DESC_CAI || "Nenhum caixa selecionado"}
+              </Text>
+
+              <View style={styles.account}>
+                <Feather name="user" color={colors.gray[500]} />
+                <Text style={{ fontSize: 12, fontWeight: "300", color: colors.gray[500], textAlign: 'center' }}>
+                  {authData?.login || "Desconhecido"}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.options}>
+            <View>
+              <SettingsButton
+                icon="home"
+                title="Selecionar empresa"
+                iconColor={colors.sky[700]}
+                onPress={handleChangeEmpresa}
+              />
+
+              <SettingsButton
+                icon="box"
+                title="Selecionar caixa"
+                iconColor={colors.pink[700]}
+                onPress={handleChangeCaixa}
+              />
+            </View>
+
+            <View>
+              <SettingsButton 
+                icon="log-out" 
+                title="Sair" 
+                iconColor={colors.gray[700]} 
+                onPress={handleLogout}
+              />
             </View>
           </View>
         </View>
 
-        <View style={styles.options}>
-          <SettingsButton
-            icon="home"
-            title="Selecionar empresa"
-            iconColor={colors.blue[700]}
-            onPress={handleChangeEmpresa}
-          />
+        <BottomSheet
+          ref={bottomSheetRefEmpresa}
+          index={-1}
+          snapPoints={snapPoints}
+          enablePanDownToClose={true}
+          backdropComponent={renderBackdrop}
+        >
+          <BottomSheetView style={styles.contentContainer}>
+            <Text style={{ fontSize: 24, fontWeight: "600", marginBottom: 5 }}>
+              Selecionar empresa</Text>
+            <Text
+              style={{ fontSize: 14, fontWeight: "300", color: colors.gray[500], marginBottom: 26 }}
+            >
+              Os dados serão sincronizados e exibidos de acordo com a empresa selecionada.
+            </Text>
 
-          <SettingsButton
-            icon="box"
-            title="Selecionar caixa"
-            iconColor={colors.fuchsia[700]}
-            onPress={handleChangeCaixa}
-          />
-
-          <SettingsButton 
-            icon="log-out" 
-            title="Sair" 
-            iconColor={colors.red[700]} 
-            onPress={() => {}} 
-          />
-        </View>
-      </View>
-
-      <BottomSheet
-        ref={bottomSheetRefEmpresa}
-        index={-1}
-        snapPoints={snapPoints}
-        enablePanDownToClose={true}
-        backdropComponent={renderBackdrop}
-      >
-        <BottomSheetView style={styles.contentContainer}>
-          <Text style={{ fontSize: 24, fontWeight: "600", marginBottom: 5 }}>
-            Selecionar empresa</Text>
-          <Text
-            style={{ fontSize: 14, fontWeight: "300", color: colors.gray[500], marginBottom: 26 }}
-          >
-            Os dados serão sincronizados e exibidos de acordo com a empresa selecionada.
-          </Text>
-
-          {loading ? (
-            <ActivityIndicator size="large" color={colors.sky[700]} />
-          ) : (
-            empresas.map((empresa) => (
-              <TouchableOpacity
-                key={empresa.COD_EMP}
-                onPress={() => handleSelectEmpresa(empresa)}
-                style={[
-                  styles.radioButtonContainer,
-                  selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedRadioButtonEmpresa,
-                ]}
-              >
-                <View
+            {loading ? (
+              <ActivityIndicator size="large" color={colors.sky[700]} />
+            ) : (
+              empresas.map((empresa) => (
+                <TouchableOpacity
+                  key={empresa.COD_EMP}
+                  onPress={() => handleSelectEmpresa(empresa)}
                   style={[
-                    styles.radioButtonEmpresa,
-                    selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedInnerRadioButtonEmpresa,
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.radioButtonText,
-                    selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedText,
+                    styles.radioButtonContainer,
+                    selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedRadioButtonEmpresa,
                   ]}
                 >
-                  {empresa.RAZAO_EMP}
-                </Text>
-              </TouchableOpacity>
-            ))
-          )}
-        </BottomSheetView>
-      </BottomSheet>
+                  <View
+                    style={[
+                      styles.radioButtonEmpresa,
+                      selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedInnerRadioButtonEmpresa,
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.radioButtonText,
+                      selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedText,
+                    ]}
+                  >
+                    {empresa.RAZAO_EMP}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            )}
+          </BottomSheetView>
+        </BottomSheet>
 
-      <BottomSheet
-        ref={bottomSheetRefCaixa}
-        index={-1}
-        snapPoints={snapPoints}
-        enablePanDownToClose={true}
-        backdropComponent={renderBackdrop}
-      >
-        <BottomSheetView style={styles.contentContainer}>
-          <Text style={{ fontSize: 24, fontWeight: "600", marginBottom: 5 }}>
-            Selecionar caixa</Text>
-          <Text
-            style={{ fontSize: 14, fontWeight: "300", color: colors.gray[500], marginBottom: 26 }}
-          >
-            Os dados serão sincronizados e exibidos de acordo com o caixa selecionado.
-          </Text>
+        <BottomSheet
+          ref={bottomSheetRefCaixa}
+          index={-1}
+          snapPoints={snapPoints}
+          enablePanDownToClose={true}
+          backdropComponent={renderBackdrop}
+        >
+          <BottomSheetView style={styles.contentContainer}>
+            <Text style={{ fontSize: 24, fontWeight: "600", marginBottom: 5 }}>
+              Selecionar caixa</Text>
+            <Text
+              style={{ fontSize: 14, fontWeight: "300", color: colors.gray[500], marginBottom: 26 }}
+            >
+              Os dados serão sincronizados e exibidos de acordo com o caixa selecionado.
+            </Text>
 
-          {loading ? (
-            <ActivityIndicator size="large" color={colors.sky[700]} />
-          ) : (
-            caixas.map((caixa, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => handleSelectCaixa(caixa)}
-                style={[
-                  styles.radioButtonContainer,
-                  selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedRadioButtonCaixa,
-                ]}
-              >
-                <View
+            {loading ? (
+              <ActivityIndicator size="large" color={colors.sky[700]} />
+            ) : (
+              caixas.map((caixa, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handleSelectCaixa(caixa)}
                   style={[
-                    styles.radioButtonCaixa,
-                    selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedInnerRadioButtonCaixa,
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.radioButtonText,
-                    selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedText,
+                    styles.radioButtonContainer,
+                    selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedRadioButtonCaixa,
                   ]}
                 >
-                  {caixa.DESC_CAI}
-                </Text>
-              </TouchableOpacity>
-            ))
-          )}
-        </BottomSheetView>
-      </BottomSheet>
+                  <View
+                    style={[
+                      styles.radioButtonCaixa,
+                      selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedInnerRadioButtonCaixa,
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.radioButtonText,
+                      selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedText,
+                    ]}
+                  >
+                    {caixa.DESC_CAI}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            )}
+          </BottomSheetView>
+        </BottomSheet>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
@@ -256,9 +269,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 50,
-    gap: 10,
-    borderTopWidth: 0.5, 
-    borderTopColor: colors.gray[300] 
+    gap: 10
   },
   profile: {
     flexDirection: 'column',
@@ -305,11 +316,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   selectedRadioButtonEmpresa: {
-    backgroundColor: colors.blue[700]
+    backgroundColor: colors.sky[700]
   },
   selectedInnerRadioButtonEmpresa: {
-    borderColor: colors.blue[500],
-    backgroundColor: colors.blue[500]
+    borderColor: colors.sky[500],
+    backgroundColor: colors.sky[500]
   },
   radioButtonCaixa: {
     width: 20,
@@ -321,11 +332,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   selectedRadioButtonCaixa: {
-    backgroundColor: colors.fuchsia[700]
+    backgroundColor: colors.pink[700]
   },
   selectedInnerRadioButtonCaixa: {
-    borderColor: colors.fuchsia[500],
-    backgroundColor: colors.fuchsia[500]
+    borderColor: colors.pink[500],
+    backgroundColor: colors.pink[500]
   },
   selectedText: {
     color: "#FFF",
@@ -343,10 +354,11 @@ const styles = StyleSheet.create({
     padding: 10
   },
   options: {
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
+    gap: 30
   },
   selectedEmpresaTitle: {
-    fontSize: 16, 
+    fontSize: 18, 
     fontWeight: "600", 
     textAlign: 'center',
     color: colors.gray[700]
@@ -364,8 +376,8 @@ const styles = StyleSheet.create({
     borderColor: colors.gray[400]
   },
   image: { 
-    width: 70, 
-    height: 70, 
+    width: 85, 
+    height: 85, 
     borderRadius: 50
 }
 });

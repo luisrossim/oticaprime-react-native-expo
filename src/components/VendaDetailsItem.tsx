@@ -10,7 +10,7 @@ interface VendaDetailsItemProps {
 export const VendaDetailsItem = (props: VendaDetailsItemProps) => {
     return (
         <View style={styles.vendaDetailsItem}>
-            <FontAwesome6 name={props.icon} size={20} color={colors.emerald[600]} />
+            <FontAwesome6 name={props.icon} size={20} color={colors.emerald[600]} style={styles.icon} />
             <Text style={styles.vendaDetailsText}>
                 {props.detail}
             </Text>
@@ -20,15 +20,24 @@ export const VendaDetailsItem = (props: VendaDetailsItemProps) => {
 
 const styles = StyleSheet.create({
     vendaDetailsItem: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 20, 
-        borderBottomWidth: 0.5,
-        borderBottomColor: colors.gray[300]
+        gap: 15,
+        paddingVertical: 5,
+        paddingHorizontal: 20
     },
     vendaDetailsText: {
-        color: colors.gray[600]
+        flex: 1,
+        fontWeight: 500,
+        color: colors.gray[700]
     },
+    icon: {
+        textAlign: "center",
+        padding: 10,
+        width: 40,
+        height: 40,
+        backgroundColor: colors.green[200],
+        borderRadius: 50
+    }
 })

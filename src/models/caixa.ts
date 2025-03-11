@@ -7,6 +7,7 @@ export interface Caixa {
 export interface CaixaDetails {
     CAIXA: Caixa
     FORMAS_PAGAMENTO: CaixaFormasPagamento[]
+    TOTAL_BAIXAS: number
     TOTAL_RECEBIDO: number
     TOTAL_ACRESCIMO_RECEBIDO: number
     TOTAL_DESCONTO_CONCEDIDO: number
