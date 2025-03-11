@@ -7,10 +7,11 @@ import { CaixaService } from '@/services/caixa-service';
 import { colors } from '@/utils/constants/colors';
 import { Feather } from '@expo/vector-icons';
 import { useEffect, useState } from 'react'
-import { View, StyleSheet, Text, ScrollView } from 'react-native'
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity } from 'react-native'
 import { DatePickerContainer } from '@/components/DatePicker';
 import { LineChart } from '@/components/LineChart';
 import { UtilitiesService } from '@/utils/utilities-service';
+import { LineDetail, LineDetailButton } from '@/components/LineDetail';
 
 export default function Caixa(){
     const [caixaDetails, setCaixaDetails] = useState<CaixaDetails | null>(null);
@@ -89,45 +90,53 @@ export default function Caixa(){
                 />
             </View>
 
-            {caixaDetails?.FORMAS_PAGAMENTO && (
-                <View style={styles.caixaFormaPagamento}>
-                    <View style={{paddingHorizontal: 20}}>
-                        <Text style={{fontSize: 18, fontWeight: 500, color: colors.gray[500], marginBottom: 6}}>
-                            Valor total recebido
-                        </Text>
+            {caixaDetails && (
+                <View>
+                    <View style={styles.caixaSection}>
+                        <View style={{paddingHorizontal: 20}}>
+                            <Text style={{fontSize: 18, fontWeight: 500, color: colors.gray[700], marginBottom: 6}}>
+                                Total recebido
+                            </Text>
 
-                        <Text style={{fontSize: 32, fontWeight: 500, marginBottom: 10}}>
-                            {UtilitiesService.formatarValor(caixaDetails.TOTAL_RECEBIDO)}
-                        </Text>
-                    </View>
-
-                    <LineChart total={caixaDetails.TOTAL_RECEBIDO} values={caixaDetails.FORMAS_PAGAMENTO} />
-
-                    <View style={styles.lineContainer}>
-                        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
-                            <Text style={styles.label}>ACRÉSCIMO RECEBIDO</Text>
-                            <Text style={styles.value}>
-                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_ACRESCIMO_RECEBIDO)}
+                            <Text style={{fontSize: 34, fontWeight: 500, color: colors.gray[700], marginBottom: 10}}>
+                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_RECEBIDO)}
                             </Text>
                         </View>
+
+                        <LineChart total={caixaDetails.TOTAL_RECEBIDO} values={caixaDetails.FORMAS_PAGAMENTO} />
+                        <LineDetail label='ACRÉSCIMO RECEBIDO' value={caixaDetails.TOTAL_ACRESCIMO_RECEBIDO} isBRL={true} />
+                        <LineDetail label='DESCONTO CONCEDIDO' value={caixaDetails.TOTAL_DESCONTO_CONCEDIDO} isBRL={true} />
                     </View>
 
-                    <View style={styles.lineContainer}>
-                        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
-                            <Text style={styles.label}>DESCONTO CONCEDIDO</Text>
-                            <Text style={styles.value}>
-                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_DESCONTO_CONCEDIDO)}
+                    <View style={styles.caixaSection}>
+                        <View style={{paddingHorizontal: 20}}>
+                            <Text style={{fontSize: 18, fontWeight: 500, color: colors.gray[700], marginBottom: 6}}>
+                                Total analítico de vendas
+                            </Text>
+
+                            <Text style={{fontSize: 28, fontWeight: 500, color: colors.gray[700], marginBottom: 10}}>
+                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_VALOR_VENDAS || 0)}
                             </Text>
                         </View>
+
+                        <LineChart total={caixaDetails.TOTAL_VALOR_VENDAS} values={caixaDetails.FORMAS_PAGAMENTO_VENDAS} />
+                        <LineDetail label='DESCONTO EM VENDAS' value={caixaDetails.TOTAL_DESCONTO_VENDAS || 0} isBRL={true} />
+                        <LineDetail label='VENDAS CONCLUÍDAS' value={caixaDetails.TOTAL_VENDAS || 0} isBRL={false} />
+                        <LineDetail label='VENDAS CANCELADAS' value={caixaDetails.TOTAL_VENDAS_CANCELADAS || 0} isBRL={false} />
                     </View>
 
-                    <View style={styles.lineContainer}>
-                        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
-                            <Text style={styles.label}>CONTAS A RECEBER</Text>
-                            <Text style={styles.value}>
-                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_CONTAS_RECEBER)}
+                    <View style={styles.caixaSection}>
+                        <View style={{paddingHorizontal: 20}}>
+                            <Text style={{fontSize: 18, fontWeight: 500, color: colors.gray[700], marginBottom: 6}}>
+                                Total de contas a receber
+                            </Text>
+
+                            <Text style={{fontSize: 28, fontWeight: 500, color: colors.gray[700], marginBottom: 10}}>
+                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_CONTAS_RECEBER || 0)}
                             </Text>
                         </View>
+
+                        <LineDetailButton label='VISUALIZAR CONTAS' />
                     </View>
                 </View>
             )}
@@ -138,18 +147,20 @@ export default function Caixa(){
 const styles = StyleSheet.create({
    container: {
         flex: 1,
-        paddingVertical: 50
+        paddingVertical: 50,
+        backgroundColor: "#FFF"
     },
     caixaDetailsHeader: {
         marginTop: 10,
         marginBottom: 3
     },
-    caixaFormaPagamento: {
-        marginTop: 40
+    caixaSection: {
+        marginTop: 60
     },
     lineContainer: {
         flexDirection: "column",
-        padding: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
         width: "100%",
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300]
@@ -159,6 +170,7 @@ const styles = StyleSheet.create({
         fontWeight: 400,
     },
     label: {
-        fontSize: 13
+        fontSize: 13,
+        color: colors.gray[500]
     }
 })

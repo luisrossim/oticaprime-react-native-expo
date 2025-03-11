@@ -173,7 +173,7 @@ export default function Index() {
 
             <View style={{flex: 1, gap: 20, marginBottom: 50}}>
                 <View style={styles.chartHeader}>
-                    <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.indigo[700]}]} name="shopping-bag" size={20} />
+                    <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.indigo[700]}]} name="shopping-bag" size={22} />
                     <View>
                         <Text style={styles.subTitle}>
                             Quantidade de vendas
@@ -245,7 +245,7 @@ export default function Index() {
 
             <View style={{flex: 1, gap: 20}}>
                 <View style={styles.chartHeader}>
-                    <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.green[500]}]} name="dollar-sign" size={20} />
+                    <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.green[500]}]} name="dollar-sign" size={22} />
                     <View>
                         <Text style={styles.subTitle}>
                             Receita de vendas
@@ -356,6 +356,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 20,
         paddingVertical: 50,
+        backgroundColor: "#FFF"
     },
     subTitle: {
         color: colors.gray[700], 
@@ -373,8 +374,8 @@ const styles = StyleSheet.create({
         gap: 10
     },
     chartHeaderIcon: {
-        padding: 7,
-        borderRadius: 10,
+        padding: 5,
+        borderRadius: 7,
         color: "#FFF"
     },
     datePickerElement: {

@@ -1,8 +1,9 @@
 import { CaixaFormasPagamento } from "@/models/caixa";
 import { colors } from "@/utils/constants/colors";
 import { UtilitiesService } from "@/utils/utilities-service";
+import { Feather } from "@expo/vector-icons";
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 interface LineChartProps {
   total: number;
@@ -17,20 +18,24 @@ export const LineChart: React.FC<LineChartProps> = ({ total, values }) => {
                 const percentagem = (item.VALOR_TOTAL / total) * 100;
 
                 return (
-                    <View key={index} style={styles.lineContainer}>
-                        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 7}}>
-                            <Text style={styles.label}>{item.DESCRICAO}</Text>
-                            <Text style={styles.percentagem}>
-                                {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)} (${percentagem.toFixed(0)}%)`}
-                            </Text>
+                    <TouchableOpacity key={index} style={styles.lineContainer}>
+                        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
+                            <View style={{flexDirection: "column", marginBottom: 7}}>
+                                <Text style={styles.label}>{item.DESCRICAO}</Text>
+                                <Text style={styles.percentagem}>
+                                    {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)} (${percentagem.toFixed(0)}%)`}
+                                </Text>
+                            </View>
+                            <Feather name="chevron-right" size={20} color={colors.gray[500]} />
                         </View>
+
                         <View
                             style={[
                                 styles.line,
                                 { width: `${percentagem}%`, backgroundColor: getColor(index) },
                             ]}
                         />
-                    </View>
+                    </TouchableOpacity>
                 );
             })}
         </View>
@@ -53,18 +58,22 @@ const styles = StyleSheet.create({
     },
     lineContainer: {
         flexDirection: "column",
-        padding: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
         width: "100%",
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300]
     },
     label: {
-        fontSize: 13
+        fontWeight: 500,
+        marginBottom: 2,
+        color: colors.gray[600]
     },
     line: {
         height: 4
     },
     percentagem: {
+        fontSize: 13,
         color: colors.gray[500],
         fontWeight: 400,
     },

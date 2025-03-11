@@ -143,13 +143,6 @@ export default function Settings() {
           />
 
           <SettingsButton 
-            icon="help-circle" 
-            title="Ajuda" 
-            iconColor={colors.gray[700]} 
-            onPress={() => {}} 
-          />
-
-          <SettingsButton 
             icon="log-out" 
             title="Sair" 
             iconColor={colors.red[700]} 

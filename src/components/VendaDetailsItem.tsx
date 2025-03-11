@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 12,
         paddingVertical: 12,
+        paddingHorizontal: 20, 
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300]
     },

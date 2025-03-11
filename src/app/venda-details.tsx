@@ -85,12 +85,12 @@ export default function VendaDetails() {
                     <VendaDetailsItem icon="building-columns" detail={venda.RAZAO_EMP} />
                 </View>
 
-                <View style={styles.vendaDetails}>
+                <View style={[styles.vendaDetails, {paddingHorizontal: 20}]}>
                     <PageTitle title="Itens" size="small" />
 
                     { venda.ITENS.length > 0 
                         ? (
-                            <View style={{ gap: 40, backgroundColor: colors.gray[100], borderWidth: 0.5, borderColor: colors.gray[300], padding: 20, borderRadius: 10}}>
+                            <View style={{ gap: 40, backgroundColor: colors.gray[100], borderWidth: 0.5, borderColor: colors.gray[300], padding: 20, borderRadius: 10, marginTop: 10}}>
 
                                 {venda.ITENS.map((item, index) => (
                                     <View key={`${index}`} style={styles.itemDetails}>
@@ -119,12 +119,12 @@ export default function VendaDetails() {
                     }
                 </View>
 
-                <View style={styles.vendaDetails}>
+                <View style={[styles.vendaDetails, {paddingHorizontal: 20}]}>
                     <PageTitle title="Formas de Pagamento" size="small" />
 
                     { venda.FORMAS_PAGAMENTO.length > 0 
                         ? (
-                            <View style={{gap: 10, backgroundColor: colors.gray[100], borderWidth: 0.5, borderColor: colors.gray[300], padding: 20, borderRadius: 10}}>
+                            <View style={{gap: 10, backgroundColor: colors.gray[100], borderWidth: 0.5, borderColor: colors.gray[300], padding: 20, borderRadius: 10, marginTop: 10}}>
                                 { venda.FORMAS_PAGAMENTO.map((item, index) => (
                                     <View key={`${index}`} style={styles.paymentRow}>
                                         <Feather name="credit-card" size={16} color={colors.gray[600]} />
@@ -162,7 +162,6 @@ const styles = StyleSheet.create({
     container: { 
         flex: 1, 
         paddingVertical: 50,
-        paddingHorizontal: 20, 
         backgroundColor: "#FFF", 
         borderTopWidth: 0.5, 
         borderTopColor: colors.gray[300] 
@@ -171,6 +170,7 @@ const styles = StyleSheet.create({
         flexDirection: "column", 
         alignItems: 'center',
         marginBottom: 30,
+        paddingHorizontal: 20,
         gap: 10
     },
     iconElement: {

@@ -25,7 +25,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
           </Text>
         </View>
 
-        <Feather name="chevron-right" size={20} color={colors.gray[400]} />
+        <Feather name="chevron-right" size={20} color={colors.gray[500]} />
       </TouchableOpacity>
     );
 };

@@ -33,14 +33,14 @@ export function CustomHeader() {
                             style={styles.image}
                         />
 
-                        <Feather name="settings" size={12} style={styles.settingsIcon} />
+                        <Feather name="settings" size={14} style={styles.settingsIcon} />
                     </View>
 
                     <View style={{flexDirection: "column", alignItems: "flex-start", gap: 1}}>
                         <Text style={styles.profileText}>
                             {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : "Nenhuma empresa selecionada"}
                         </Text>
-                        <Text style={{fontSize: 10, color: colors.gray[500], fontWeight: 300}}>
+                        <Text style={{fontSize: 11, color: colors.gray[500]}}>
                             {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : "Nenhum caixa selecionado"}
                         </Text>
                     </View>
@@ -58,11 +58,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         borderBottomWidth: 0.5,
-        backgroundColor: '#FFF',
         borderBottomColor: colors.gray[300],
         paddingHorizontal: 20,
-        paddingTop: 18,
-        paddingBottom: 10,
+        paddingTop: 30,
+        paddingBottom: 12,
     },
     subcontainer: {
         display: 'flex',
@@ -77,12 +76,12 @@ const styles = StyleSheet.create({
         gap: 10
     },
     profileText: {
-        fontSize: 13,
-        color: colors.gray[900]
+        color: colors.gray[900],
+        fontWeight: 500
     },
     image: { 
-        width: 30, 
-        height: 30, 
+        width: 35, 
+        height: 35, 
         borderRadius: 50
     },
     settingsIcon: {

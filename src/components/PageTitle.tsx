@@ -8,14 +8,13 @@ interface PageTitleProps {
 
 export function PageTitle({ title, size }: PageTitleProps){
     return (
-        <Text style={[styles.title, (size == "large") ? {fontSize: 32} : {fontSize: 24} ]}>{title}</Text>
+        <Text style={[styles.title, (size == "large") ? {fontSize: 34} : {fontSize: 24} ]}>{title}</Text>
     )
 }
 
 const styles = StyleSheet.create({
     title: {
-        fontWeight: 700,
-        color: colors.gray[900],
-        marginBottom: 10
+        fontWeight: 600,
+        color: colors.gray[900]
     }
 })
