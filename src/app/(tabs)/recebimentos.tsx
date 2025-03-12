@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Switch, ActivityIndicator } from 'react-native';
 import { colors } from '@/utils/constants/colors';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -8,12 +8,13 @@ import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { PageTitle } from '@/components/PageTitle';
-import { DatePickerContainer } from '@/components/DatePicker';
 import { RecebimentoSummary } from '@/models/recebimento';
 import { RecebimentosService } from '@/services/recebimentos-service';
+import { useDateFilter } from '@/context/DateFilterContext';
 
 export default function Recebimentos() {
     const {selectedEmpresa, selectedCaixa} = useEmpresaCaixa();
+    const {dateFilter} = useDateFilter();
     const [recebimentosResumo, setRecebimentosResumo] = useState<RecebimentoSummary[]>([]);
 
     const [paginaAtual, setPaginaAtual] = useState(1);
@@ -22,23 +23,18 @@ export default function Recebimentos() {
 
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
+    const [isToggled, setIsToggled] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const hoje = new Date();
-    const dataInicialPadrao = new Date();
-    dataInicialPadrao.setDate(hoje.getDate() - 31);
-
-    const [dataInicial, setDataInicial] = useState(dataInicialPadrao);
-    const [dataFinal, setDataFinal] = useState(hoje);
-
+    const toggleSwitch = () => setIsToggled(previousState => !previousState);
 
     useEffect(() => {
         setPaginaAtual(1);
         setRecebimentosResumo([]);
         setIsCompleted(false);
         fetchRecebimentosCred(1);
-    }, [selectedEmpresa, selectedCaixa, dataInicial, dataFinal])
+    }, [selectedEmpresa, selectedCaixa, dateFilter])
 
     const fetchRecebimentosCred = async (pagina: number) => {
         if (loading || isFetchingMore) return;
@@ -58,8 +54,8 @@ export default function Recebimentos() {
             const params = {
                 caixaId: selectedCaixa?.COD_CAI,
                 empId: selectedEmpresa?.COD_EMP,
-                ano: 2025,
-                mes: 1,
+                dataInicial: dateFilter?.dataInicial,
+                dataFinal: dateFilter?.dataFinal,
                 page: pagina
             };
 
@@ -150,22 +146,35 @@ export default function Recebimentos() {
                 {error && (
                     <ErrorMessage error={error} />
                 )}
-
-                <DatePickerContainer
-                    dataInicial={dataInicial}
-                    dataFinal={dataFinal}
-                    onDateChange={(inicio, fim) => {
-                        setDataInicial(inicio);
-                        setDataFinal(fim);
-                    }}
-                />
-
-                {totalRecebimentos > 0 && (
-                    <View style={styles.totalResults}>
-                        <Feather name="arrow-down-right" size={22} color={colors.gray[500]} />
-                        <Text style={{color: colors.gray[500]}}>{totalRecebimentos} recebimentos</Text>
+                
+                {dateFilter && (
+                    <View style={{flexDirection: "row", gap: 6, marginBottom: 5}}>
+                        <Feather name="calendar" size={16}  color={colors.gray[500]} />
+                        <Text style={{color: colors.gray[500]}}>
+                            {String(dateFilter.dataFinal)}
+                        </Text>
+                        <Text>-</Text>
+                        <Text style={{color: colors.gray[500]}}>
+                            {String(dateFilter.dataInicial)}
+                        </Text>
                     </View>
                 )}
+
+                <View style={styles.totalResults}>
+                    <Feather name="arrow-down-right" size={16} color={colors.gray[500]} />
+                    <Text style={{color: colors.gray[500]}}>{totalRecebimentos || 0} recebimentos</Text>
+                </View>
+
+                {/* <View style={styles.toggleContainer}>
+                    <Switch
+                        value={isToggled}
+                        onValueChange={toggleSwitch}
+                        trackColor={{ false: colors.gray[50], true: colors.amber[500] }}
+                        thumbColor={isToggled ? colors.amber[50] : colors.gray[50]}
+                        style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }, {translateX: -5}] }}
+                    />
+                    <Text style={styles.label}>Pendentes</Text>
+                </View> */}
             </View>
 
             <FlatList
@@ -176,7 +185,7 @@ export default function Recebimentos() {
                 ListFooterComponent={
                     isFetchingMore ? (
                         <View style={{ padding: 10 }}>
-                            <LoadingIndicator />
+                             <ActivityIndicator size="large" color={colors.cyan[500]} />
                         </View>
                     ) : !isCompleted && recebimentosResumo.length > 0 ? (
                         <TouchableOpacity 
@@ -224,9 +233,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'flex-start',
-        borderRadius: 20,
-        gap: 10,
-        marginBottom: 20,
+        gap: 5
     },
     emptyContainer: {
         alignItems: 'center',
@@ -300,5 +307,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 30,
         backgroundColor: colors.cyan[100]
+    },
+    toggleContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginVertical: 10
+    },
+    label: {
+        color: colors.gray[500]
     }
 });

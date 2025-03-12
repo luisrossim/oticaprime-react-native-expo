@@ -29,7 +29,6 @@ const styles = StyleSheet.create({
     },
     vendaDetailsText: {
         flex: 1,
-        fontWeight: 500,
         color: colors.gray[700]
     },
     icon: {

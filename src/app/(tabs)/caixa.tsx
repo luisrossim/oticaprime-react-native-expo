@@ -5,34 +5,29 @@ import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { CaixaDetails } from '@/models/caixa';
 import { CaixaService } from '@/services/caixa-service';
 import { colors } from '@/utils/constants/colors';
-import { Feather } from '@expo/vector-icons';
 import { useEffect, useState } from 'react'
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity } from 'react-native'
-import { DatePickerContainer } from '@/components/DatePicker';
+import { View, StyleSheet, Text, ScrollView } from 'react-native'
 import { LineChart } from '@/components/LineChart';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { LineDetail, LineDetailButton } from '@/components/LineDetail';
 import SectionTitle from '@/components/SectionTitle';
+import { router } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
+import { useDateFilter } from '@/context/DateFilterContext';
 
 export default function Caixa(){
     const [caixaDetails, setCaixaDetails] = useState<CaixaDetails | null>(null);
     const {selectedCaixa, selectedEmpresa} = useEmpresaCaixa();
+    const {dateFilter} = useDateFilter();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    const hoje = new Date();
-    const dataInicialPadrao = new Date();
-    dataInicialPadrao.setDate(hoje.getDate() - 31);
-
-    const [dataInicial, setDataInicial] = useState(dataInicialPadrao);
-    const [dataFinal, setDataFinal] = useState(hoje);
 
 
     useEffect(() => {
         setCaixaDetails(null)
         fetchCaixaDetails();
-    }, [selectedCaixa])
+    }, [selectedEmpresa, selectedCaixa, dateFilter])
 
 
     const fetchCaixaDetails = async () => {
@@ -49,8 +44,8 @@ export default function Caixa(){
             const params = {
                 caixaId: selectedCaixa.COD_CAI,
                 empId: selectedEmpresa.COD_EMP,
-                ano: 2025,
-                mes: 1
+                dataInicial: dateFilter?.dataInicial,
+                dataFinal: dateFilter?.dataFinal
             }
 
             const caixaService = new CaixaService();
@@ -67,6 +62,10 @@ export default function Caixa(){
         }
     }
 
+    function handleContasReceber(){
+        router.navigate("/recebimentos");
+    }
+
     if (loading) {
         return <LoadingIndicator />;
     }
@@ -74,21 +73,32 @@ export default function Caixa(){
 
     return (
          <ScrollView style={styles.container}  contentContainerStyle={{paddingBottom: 100}}>
-            <View style={{paddingHorizontal: 20}}>
+            <View style={{paddingHorizontal: 20, marginBottom: 20}}>
                 <PageTitle title="Caixa" size="large" />
 
                 {error && (
                     <ErrorMessage error={error} />
                 )}
 
-                <DatePickerContainer
-                    dataInicial={dataInicial}
-                    dataFinal={dataFinal}
-                    onDateChange={(inicio, fim) => {
-                        setDataInicial(inicio);
-                        setDataFinal(fim);
-                    }}
-                />
+                {dateFilter && (
+                    <View style={{flexDirection: "row", gap: 6, marginBottom: 5}}>
+                        <Feather name="calendar" size={16}  color={colors.gray[500]} />
+                        <Text style={{color: colors.gray[500]}}>
+                            {String(dateFilter.dataFinal)}
+                        </Text>
+                        <Text>-</Text>
+                        <Text style={{color: colors.gray[500]}}>
+                            {String(dateFilter.dataInicial)}
+                        </Text>
+                    </View>
+                )}
+
+                <View style={styles.totalResults}>
+                    <Feather name="box" size={16} color={colors.gray[500]} />
+                    <Text style={{color: colors.gray[500]}}>
+                        {selectedCaixa ? selectedCaixa.DESC_CAI : "Nenhum caixa selecionado"}
+                    </Text>
+                </View>
             </View>
 
             {caixaDetails && (
@@ -132,7 +142,7 @@ export default function Caixa(){
                             </Text>
                         </View>
 
-                        <LineDetailButton label='CONTAS PENDENTES' />
+                        <LineDetailButton label='CONTAS PENDENTES' onPress={handleContasReceber} />
                     </View>
                 </View>
             )}
@@ -151,7 +161,8 @@ const styles = StyleSheet.create({
         marginBottom: 3
     },
     caixaSection: {
-        marginTop: 40
+        marginTop: 10,
+        marginBottom: 50
     },
     lineContainer: {
         flexDirection: "column",
@@ -171,8 +182,15 @@ const styles = StyleSheet.create({
     },
     totalValue: {
         fontSize: 32, 
-        fontWeight: 500, 
-        color: colors.gray[700],
-        marginVertical: 15
-    }
+        color: colors.gray[900],
+        marginTop: 15
+    },
+    totalResults: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        borderRadius: 20,
+        gap: 6,
+        marginBottom: 20,
+    },
 })

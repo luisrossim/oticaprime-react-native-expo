@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { VendaService } from '@/services/venda-service';
 import { colors } from '@/utils/constants/colors';
 import { VendaSummary } from '@/models/venda';
@@ -10,26 +10,21 @@ import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { PageTitle } from '@/components/PageTitle';
-import { DatePickerContainer } from '@/components/DatePicker';
+import { useDateFilter } from '@/context/DateFilterContext';
 
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [totalVendas, setTotalVendas] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const { selectedEmpresa } = useEmpresaCaixa();
 
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const hoje = new Date();
-    const dataInicialPadrao = new Date();
-    dataInicialPadrao.setDate(hoje.getDate() - 31);
-
-    const [dataInicial, setDataInicial] = useState(dataInicialPadrao);
-    const [dataFinal, setDataFinal] = useState(hoje);
+    const {selectedEmpresa} = useEmpresaCaixa();
+    const {dateFilter} = useDateFilter();
 
 
     useEffect(() => {
@@ -37,7 +32,7 @@ export default function Vendas() {
         setVendasPaginadas([]);
         setIsCompleted(false);
         fetchVendas(1);
-    }, [selectedEmpresa, dataInicial, dataFinal])
+    }, [selectedEmpresa, dateFilter])
 
     const fetchVendas = async (pagina: number) => {
         if (loading || isFetchingMore) return;
@@ -54,8 +49,8 @@ export default function Vendas() {
         try {
             const vendaService = new VendaService();
             const params = {
-                dataInicial: UtilitiesService.formatarData(dataInicial),
-                dataFinal: UtilitiesService.formatarData(dataFinal),
+                dataInicial: dateFilter?.dataInicial,
+                dataFinal: dateFilter?.dataFinal,
                 empId: selectedEmpresa?.COD_EMP,
                 page: pagina
             };
@@ -71,7 +66,7 @@ export default function Vendas() {
                 setVendasPaginadas((prev) => [...prev, ...data.vendas]);
             }
 
-            if (totalPages == pagina) {
+            if (data.pageable.totalPages <= pagina) {
                 setIsCompleted(true);
             } else {
                 setPaginaAtual(pagina);
@@ -143,21 +138,25 @@ export default function Vendas() {
                     <ErrorMessage error={error} />
                 )}
 
-                <DatePickerContainer
-                    dataInicial={dataInicial}
-                    dataFinal={dataFinal}
-                    onDateChange={(inicio, fim) => {
-                        setDataInicial(inicio);
-                        setDataFinal(fim);
-                    }}
-                />
-
-                {totalVendas > 0 && (
-                    <View style={styles.totalResults}>
-                        <Feather name="filter" size={22} color={colors.gray[500]} />
-                        <Text style={{color: colors.gray[500]}}>{totalVendas} vendas</Text>
+                {dateFilter && (
+                    <View style={{flexDirection: "row", gap: 6, marginBottom: 5}}>
+                        <Feather name="calendar" size={16}  color={colors.gray[500]} />
+                        <Text style={{color: colors.gray[500]}}>
+                            {String(dateFilter.dataFinal)}
+                        </Text>
+                        <Text>-</Text>
+                        <Text style={{color: colors.gray[500]}}>
+                            {String(dateFilter.dataInicial)}
+                        </Text>
                     </View>
                 )}
+
+                <View style={styles.totalResults}>
+                    <Feather name="dollar-sign" size={16} color={colors.gray[500]} />
+                    <Text style={{color: colors.gray[500]}}>
+                        {totalVendas || 0} vendas
+                    </Text>
+                </View>
             </View>
 
             <FlatList
@@ -168,7 +167,7 @@ export default function Vendas() {
                 ListFooterComponent={
                     isFetchingMore ? (
                         <View style={{ padding: 10 }}>
-                            <LoadingIndicator />
+                            <ActivityIndicator size="large" color={colors.green[500]} />
                         </View>
                     ) : !isCompleted && vendasPaginadas.length > 0 ? (
                         <TouchableOpacity 
@@ -181,7 +180,7 @@ export default function Vendas() {
                 }
                 ListEmptyComponent={() => (
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Nenhuma venda encontrada.</Text>
+                        <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
                     </View>
                 )}
                 renderItem={renderItem}
@@ -217,7 +216,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'flex-start',
         borderRadius: 20,
-        gap: 10,
+        gap: 6,
         marginBottom: 20,
     },
     emptyContainer: {

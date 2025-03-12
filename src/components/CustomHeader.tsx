@@ -17,10 +17,10 @@ export function CustomHeader({ title }: CustomHeaderProps){
                         onPress={() => router.back()}
                         style={styles.backButton}
                     >
-                        <Feather name="chevron-left" size={20} color={colors.gray[700]} />
+                        <Feather name="chevron-left" size={24} color={colors.gray[700]} />
                     </TouchableOpacity>
 
-                    <Text style={{fontWeight: 500, fontSize: 15, paddingBottom: 1}}>
+                    <Text style={{fontWeight: 500, fontSize: 16}}>
                         {title}
                     </Text>
                 </View>
@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300],
         paddingHorizontal: 20,
-        paddingTop: 30,
-        paddingBottom: 14,
+        paddingTop: 40,
+        paddingBottom: 13,
         backgroundColor: "#FFF"
     },
     subContainer: {
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: "absolute",
-        padding: 6,
+        padding: 3,
         left: 0,
         bottom: 0
     }

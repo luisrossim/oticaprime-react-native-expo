@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { colors } from "@/utils/constants/colors";
 import { Platform, Pressable, View } from "react-native";
@@ -6,10 +6,10 @@ import { GlobalHeader } from "@/components/GlobalHeader";
 import { useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 
-export default function Layout(){  
+export default function Layout(){
     useEffect(() => {
         if (Platform.OS === "android") {
-            NavigationBar.setBackgroundColorAsync("#000");
+            NavigationBar.setBackgroundColorAsync(colors.gray[900]);
         }
     }, []);
 
@@ -26,7 +26,7 @@ export default function Layout(){
                     tabBarActiveTintColor: "#FFF",
                     tabBarInactiveTintColor: colors.gray[500],
                     tabBarStyle: {
-                        backgroundColor: "#000",
+                        backgroundColor: colors.gray[900],
                         paddingTop: 6,
                         height: 90
                     },

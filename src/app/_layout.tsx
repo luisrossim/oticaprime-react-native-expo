@@ -3,6 +3,8 @@ import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "react-native";
 import { EmpresaCaixaProvider } from "@/context/EmpresaCaixaContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
+import { DateFilterProvider } from "@/context/DateFilterContext";
 
 function MainLayout() {
     const { authData, isLoading } = useAuth();
@@ -18,47 +20,49 @@ function MainLayout() {
         }
     }, [authData, isLoading]);
 
-    if (isLoading) return null;
+    if (isLoading) return <LoadingIndicator />;
 
     return (
         <EmpresaCaixaProvider>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-            
-            <Stack>
-                <Stack.Screen 
-                    name="(tabs)" 
-                    options={{ 
-                        headerShown: false, 
-                        animation: "fade" 
-                    }} 
-                />
-                <Stack.Screen 
-                    name="settings" 
-                    options={{ 
-                        headerShown: false,
-                        animation: "ios_from_right",
-                        headerTitle: "Configurações",
-                        headerBackTitle: "Painel"
-                    }} 
-                />
-                <Stack.Screen 
-                    name="venda-details" 
-                    options={{ 
-                        headerShown: false,
-                        animation: "ios_from_right",
-                        headerTitle: "Detalhes",
-                        headerBackTitle: "Vendas"
-                    }} 
-                />
-                <Stack.Screen 
-                    name="login" 
-                    options={{ 
-                        headerShown: false,
-                        animation: "slide_from_bottom",
-                        gestureEnabled: false
-                    }} 
-                />
-            </Stack>
+            <DateFilterProvider>
+                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+                
+                <Stack>
+                    <Stack.Screen 
+                        name="login" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_left",
+                            gestureEnabled: false
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="(tabs)" 
+                        options={{ 
+                            headerShown: false, 
+                            animation: "slide_from_right" 
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="settings" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_right",
+                            headerTitle: "Configurações",
+                            headerBackTitle: "Painel"
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="venda-details" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_right",
+                            headerTitle: "Detalhes",
+                            headerBackTitle: "Vendas"
+                        }} 
+                    />
+                </Stack>
+            </DateFilterProvider>
         </EmpresaCaixaProvider>
     );
 }

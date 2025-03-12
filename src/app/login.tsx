@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ImageBackground, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { colors } from "@/utils/constants/colors";
 import { Feather } from "@expo/vector-icons";
@@ -132,7 +132,8 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 220,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        backgroundColor: colors.gray[100]
     },
     titleFooter: {
         fontSize: 10,

@@ -12,6 +12,7 @@ interface LineDetailProps {
 
 interface LineDetailButtonProps {
     label: string
+    onPress: () => void
 }
 
 export function LineDetail({label, value, isBRL}: LineDetailProps) {
@@ -29,9 +30,9 @@ export function LineDetail({label, value, isBRL}: LineDetailProps) {
     )
 }
 
-export function LineDetailButton({label}: LineDetailButtonProps) {
+export const LineDetailButton: React.FC<LineDetailButtonProps> = ({ label, onPress }) => {
     return (
-        <TouchableOpacity style={styles.lineContainer}>
+        <TouchableOpacity style={styles.lineContainer} onPress={onPress}>
             <View style={styles.lineContent}>
                 <Text style={styles.label}>
                     {label}

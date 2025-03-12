@@ -4,7 +4,6 @@ import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { colors } from "@/utils/constants/colors";
-import { Feather } from "@expo/vector-icons";
 import { Company } from "@/models/company";
 import { SettingsButton } from "@/components/SettingsButton";
 import { EmpresaService } from "@/services/empresa-service";
@@ -12,6 +11,7 @@ import { Caixa } from "@/models/caixa";
 import { CaixaService } from "@/services/caixa-service";
 import { useAuth } from "@/context/AuthContext";
 import { CustomHeader } from "@/components/CustomHeader";
+import SectionTitle from "@/components/SectionTitle";
 
 export default function Settings() {
   const bottomSheetRefEmpresa = useRef<BottomSheet>(null);
@@ -125,38 +125,33 @@ export default function Settings() {
               >
                 {selectedCaixa?.DESC_CAI || "Nenhum caixa selecionado"}
               </Text>
-
-              <View style={styles.account}>
-                <Feather name="user" color={colors.gray[500]} />
-                <Text style={{ fontSize: 12, fontWeight: "300", color: colors.gray[500], textAlign: 'center' }}>
-                  {authData?.login || "Desconhecido"}
-                </Text>
-              </View>
             </View>
           </View>
 
           <View style={styles.options}>
             <View>
+              <SectionTitle title="EDITAR INFORMAÇÕES" />
               <SettingsButton
                 icon="home"
                 title="Selecionar empresa"
-                iconColor={colors.sky[700]}
+                iconColor={colors.sky[600]}
                 onPress={handleChangeEmpresa}
               />
 
               <SettingsButton
                 icon="box"
                 title="Selecionar caixa"
-                iconColor={colors.pink[700]}
+                iconColor={colors.emerald[600]}
                 onPress={handleChangeCaixa}
               />
             </View>
 
             <View>
+              <SectionTitle title={`CONTA: ${authData?.login || "null"}`} />
               <SettingsButton 
                 icon="log-out" 
                 title="Sair" 
-                iconColor={colors.gray[700]} 
+                iconColor={colors.red[600]}
                 onPress={handleLogout}
               />
             </View>
@@ -268,7 +263,7 @@ export default function Settings() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
+    paddingTop: 40,
     gap: 10
   },
   profile: {
@@ -276,8 +271,7 @@ const styles = StyleSheet.create({
     gap: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 30
+    paddingHorizontal: 20
   },
   title: {
     fontSize: 22,
@@ -332,11 +326,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   selectedRadioButtonCaixa: {
-    backgroundColor: colors.pink[700]
+    backgroundColor: colors.emerald[700]
   },
   selectedInnerRadioButtonCaixa: {
-    borderColor: colors.pink[500],
-    backgroundColor: colors.pink[500]
+    borderColor: colors.emerald[500],
+    backgroundColor: colors.emerald[500]
   },
   selectedText: {
     color: "#FFF",
@@ -354,26 +348,13 @@ const styles = StyleSheet.create({
     padding: 10
   },
   options: {
-    paddingHorizontal: 20,
-    gap: 30
+    gap: 50
   },
   selectedEmpresaTitle: {
     fontSize: 18, 
     fontWeight: "600", 
     textAlign: 'center',
-    color: colors.gray[700]
-  },
-  account: {
-    alignItems: "center", 
-    flexDirection: "row", 
-    justifyContent: "center", 
-    gap: 5,
-    borderWidth: 0.5, 
-    borderRadius: 50,
-    alignSelf: "center",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderColor: colors.gray[400]
+    color: colors.gray[900]
   },
   image: { 
     width: 85, 

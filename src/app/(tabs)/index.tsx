@@ -20,7 +20,7 @@ const inter = require('@/assets/fonts/inter.ttf')
 export default function Index() {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedRange, setSelectedRange] = useState<number>(12);
-    const { selectedEmpresa } = useEmpresaCaixa();
+    const {selectedEmpresa} = useEmpresaCaixa();
 
     const font = useFont(inter, 12)
 
@@ -331,20 +331,31 @@ export default function Index() {
                         {dashboardFilterData.map((filter, index) => (
                             <TouchableOpacity 
                                 key={index}
-                                style={[styles.option, (selectedRange == filter.range) ? styles.optionSelected : "" ]} 
+                                style={[styles.option, (selectedRange == filter.range) && styles.optionSelected]} 
                                 onPress={() => handleSelectRange(filter.range)}
                             >
-                                <Feather style={{marginRight: 4}} name="calendar" size={25} color={colors.gray[600]} />
-                                <View style={{flexDirection: "column", gap: 1}}>
-                                    <Text style={styles.optionLabel}>{filter.label}</Text>
-                                    <Text style={styles.optionSubLabel}>{filter.sublabel}</Text>
-                                </View>
+                                <Feather 
+                                    name="calendar" 
+                                    size={20} 
+                                    style={
+                                        (selectedRange == filter.range) ? {color: colors.blue[100]} : {color: colors.gray[500]}
+                                    } 
+                                />
+                                <Text 
+                                    style={(selectedRange == filter.range) ? styles.optionLabelSelected : styles.optionLabel}
+                                >
+                                    {filter.label}
+                                </Text>
                             </TouchableOpacity>
                         ))}
 
-                        <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-                            <Text style={styles.cancelButtonText}>Cancelar</Text>
-                        </TouchableOpacity>
+                        <View style={{flexDirection: "row"}}>
+                            <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                                <Text style={styles.cancelButtonText}>
+                                    Cancelar
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -400,36 +411,37 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.5)",
+        backgroundColor: "rgba(0,0,0,0.7)",
     },
     modalContent: {
         backgroundColor: "#FFF",
-        padding: 26,
+        padding: 20,
         borderRadius: 10,
         width: "90%"
     },
     modalTitle: {
         fontSize: 20,
-        fontWeight: 700,
+        fontWeight: 600,
         color: colors.gray[800],
         marginBottom: 20,
     },
     option: {
-        paddingVertical: 15,
+        paddingVertical: 10,
         paddingHorizontal: 7,
         width: "100%",
-        borderBottomWidth: 0.5,
-        borderBottomColor: colors.gray[300],
         flexDirection: "row",
         alignItems: "center",
-        gap: 5
+        gap: 8,
+        marginVertical: 2
 
     },
     optionLabel: {
         fontSize: 15,
-        color: colors.gray[600],
-        fontWeight: 500,
-        marginBottom: 3
+        color: colors.gray[600]
+    },
+    optionLabelSelected: {
+        fontSize: 15,
+        color: colors.blue[100]
     },
     optionSubLabel: {
         fontSize: 12,
@@ -437,17 +449,21 @@ const styles = StyleSheet.create({
         color: colors.gray[400],
     },
     optionSelected: {
-        backgroundColor: colors.gray[100]
+        backgroundColor: colors.blue[600],
+        borderRadius: 6
     },
     cancelButton: {
-        marginTop: 30,
-        padding: 10,
-        width: "100%",
-        alignItems: "center",
+        flex: 1,
+        marginTop: 30
     },
     cancelButtonText: {
-        fontSize: 15,
-        color: colors.gray[700],
+        fontSize: 16,
+        textAlign: "center",
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        color: colors.gray[600],
+        backgroundColor: colors.gray[200],
+        borderRadius: 6
     },
     chartEmpty: {
         flex: 1, 

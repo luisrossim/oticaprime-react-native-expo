@@ -59,14 +59,14 @@ const styles = StyleSheet.create({
     lineContainer: {
         flexDirection: "column",
         paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingVertical: 14,
         width: "100%",
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300]
     },
     label: {
         fontWeight: 500,
-        marginBottom: 2,
+        marginBottom: 4,
         color: colors.gray[600]
     },
     line: {

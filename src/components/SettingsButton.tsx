@@ -33,12 +33,14 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
 const styles = StyleSheet.create({
     button: {
       flexDirection: 'row',
-      paddingVertical: 7,
+      paddingVertical: 15,
       justifyContent: 'space-between',
-      alignItems: 'center'
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.gray[300]
     },
     buttonText: {
-      color: colors.gray[600],
       fontWeight: 500
     }
 });

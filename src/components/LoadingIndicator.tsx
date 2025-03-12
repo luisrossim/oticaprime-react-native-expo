@@ -1,5 +1,5 @@
 import { colors } from "@/utils/constants/colors";
-import { View, StyleSheet, ActivityIndicator, Dimensions } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 
 export function LoadingIndicator() {
     return (

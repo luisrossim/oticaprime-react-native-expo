@@ -20,11 +20,12 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.gray[100],
         paddingHorizontal: 20,
-        paddingVertical: 10
+        paddingVertical: 10,
+    
     },
     text: {
-        color: colors.gray[500], 
+        color: "#878b94", 
         fontSize: 12,
-        fontWeight: 400
+        fontWeight: 500
     },
 });
