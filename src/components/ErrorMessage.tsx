@@ -20,11 +20,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: 'center',
         backgroundColor: colors.red[200],
-        padding: 10,
-        marginBottom: 10
+        padding: 20
     },
     error: {
-        fontSize: 13,
-        color: colors.red[600]
+        color: colors.red[500]
     }
 })

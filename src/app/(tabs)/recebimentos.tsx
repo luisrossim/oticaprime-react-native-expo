@@ -1,56 +1,48 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Switch, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Animated } from 'react-native';
 import { colors } from '@/utils/constants/colors';
 import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { ErrorMessage } from '@/components/ErrorMessage';
-import { LoadingIndicator } from '@/components/LoadingIndicator';
+import { PageTitle } from '@/components/PageTitle';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { UtilitiesService } from '@/utils/utilities-service';
-import { PageTitle } from '@/components/PageTitle';
-import { RecebimentoSummary } from '@/models/recebimento';
-import { RecebimentosService } from '@/services/recebimentos-service';
 import { useDateFilter } from '@/context/DateFilterContext';
+import { RecebimentosService } from '@/services/recebimentos-service';
+import { RecebimentoSummary } from '@/models/recebimento';
+import { useAuth } from '@/context/AuthContext';
+import { DateFilterInfo } from '@/components/DateFilterInfo';
+import { FilterInfo } from '@/components/FilterInfo';
 
 export default function Recebimentos() {
-    const {selectedEmpresa, selectedCaixa} = useEmpresaCaixa();
-    const {dateFilter} = useDateFilter();
-    const [recebimentosResumo, setRecebimentosResumo] = useState<RecebimentoSummary[]>([]);
-
+    const { selectedEmpresa, selectedCaixa } = useEmpresaCaixa();
+    const { dateFilter } = useDateFilter();
+    const [recebimentosResumo, setRecebimentosResumo] = useState([]);
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [totalRecebimentos, setTotalRecebimentos] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
-    const [isToggled, setIsToggled] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    const toggleSwitch = () => setIsToggled(previousState => !previousState);
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const flatListRef = useRef<FlatList>(null);
+    const {authData} = useAuth();
 
     useEffect(() => {
+        scrollY.setValue(0); 
         setPaginaAtual(1);
         setRecebimentosResumo([]);
         setIsCompleted(false);
-        fetchRecebimentosCred(1);
-    }, [selectedEmpresa, selectedCaixa, dateFilter])
+        fetchRecebimentos(1);
+    }, [selectedEmpresa, selectedCaixa, dateFilter]);
 
-    const fetchRecebimentosCred = async (pagina: number) => {
+    const fetchRecebimentos = async (pagina: number) => {
         if (loading || isFetchingMore) return;
-
         setLoading(true);
         setError(null);
 
-        if (pagina === 1) {
-            setLoading(true);
-        } else {
-            setIsFetchingMore(true);
-        }
-
         try {
-            const recebimentosService = new RecebimentosService();
-
+            const recebimentosService = new RecebimentosService(authData?.token);
             const params = {
                 caixaId: selectedCaixa?.COD_CAI,
                 empId: selectedEmpresa?.COD_EMP,
@@ -60,24 +52,14 @@ export default function Recebimentos() {
             };
 
             const data = await recebimentosService.getWithPageable(params);
-
+         
             setTotalRecebimentos(data.pageable.totalResults);
             setTotalPages(data.pageable.totalPages);
-
-            if (pagina === 1) {
-                setRecebimentosResumo(data.registros);
-            } else {
-                setRecebimentosResumo((prev) => [...prev, ...data.registros]);
-            }
-
-            if (totalPages == pagina) {
-                setIsCompleted(true);
-            } else {
-                setPaginaAtual(pagina);
-            }
-
-        } catch (err) {
-            setError(`Erro ao buscar recebimentos de crediário.`);
+            setRecebimentosResumo((prev): any => (pagina === 1 ? data.registros : [...prev, ...data.registros]));
+            if (pagina >= data.pageable.totalPages) setIsCompleted(true);
+            setPaginaAtual(pagina);
+        } catch (err: any) {
+            setError(`Error: ${err.response.data.message || err}`);
         } finally {
             setLoading(false);
             setIsFetchingMore(false);
@@ -86,14 +68,14 @@ export default function Recebimentos() {
 
     const carregarMaisVendas = () => {
         if (!isFetchingMore && !isCompleted && paginaAtual < totalPages) {
-            setIsFetchingMore(true); 
-            fetchRecebimentosCred(paginaAtual + 1);
+            setIsFetchingMore(true);
+            fetchRecebimentos(paginaAtual + 1);
         }
     };
 
     const ItemRecebimento = React.memo(({ item, onPress }: { item: RecebimentoSummary, onPress: () => void }) => (
-        <TouchableOpacity style={styles.vendaCard} onPress={onPress}>
-            <View style={styles.cardContent}>
+        <TouchableOpacity style={styles.itemListCard} onPress={onPress}>
+            <View style={styles.itemListCardContent}>
                 <View style={styles.iconColumn}>
                     <Feather 
                         name="arrow-down-right"
@@ -110,11 +92,7 @@ export default function Recebimentos() {
                     </Text>
     
                     <Text style={styles.valor}>
-                        {item.VLRPAGO_CTR ? (
-                            UtilitiesService.formatarValor(item.VLRPAGO_CTR)
-                        ) : (
-                            UtilitiesService.formatarValor(item.VALOR_CTR)
-                        )}
+                        {UtilitiesService.formatarValor(item.VLRPAGO_CTR)}
                     </Text>
     
                     <Text style={styles.formaPagamento}>
@@ -123,117 +101,157 @@ export default function Recebimentos() {
                 </View>
     
                 <View style={styles.dateColumn}>
-                    {item.DTPAGTO_CTR 
-                    ? (
-                        <Text style={styles.dataVenda}>{new Date(item.DTPAGTO_CTR).toLocaleDateString()}</Text>
-                    ) : (
-                        <Text style={styles.dataVenda}>{new Date(item.VENCTO_CTR).toLocaleDateString()}</Text>
-                    )}
+                    <Text style={styles.dataVenda}>{new Date(item.DTPAGTO_CTR).toLocaleDateString()}</Text>
                 </View>
             </View>
         </TouchableOpacity>
     ));
 
     const renderItem = useCallback(({ item }: { item: RecebimentoSummary }) => (
-        <ItemRecebimento key={item.COD_CTR} item={item} onPress={() => {}} />
-    ), [router]);
+        <ItemRecebimento 
+            key={item.COD_CTR}
+            item={item} 
+            onPress={() => {}}
+        />
+    ), []);
 
     return (
-        <View style={styles.container}>
-            <View style={{paddingHorizontal: 20}}>
-                <PageTitle title="Recebimentos de crediário" size="large" />
-
-                {error && (
+        <View style={{ flex: 1 }}>
+            {error 
+                ? (
                     <ErrorMessage error={error} />
-                )}
-                
-                {dateFilter && (
-                    <View style={{flexDirection: "row", gap: 6, marginBottom: 5}}>
-                        <Feather name="calendar" size={16}  color={colors.gray[500]} />
-                        <Text style={{color: colors.gray[500]}}>
-                            {String(dateFilter.dataFinal)}
-                        </Text>
-                        <Text>-</Text>
-                        <Text style={{color: colors.gray[500]}}>
-                            {String(dateFilter.dataInicial)}
-                        </Text>
-                    </View>
-                )}
+                ) : (
+                    <>
+                        <Animated.View 
+                            style={[styles.navBar, { 
+                                transform: [{
+                                    translateY: scrollY.interpolate({
+                                        inputRange: [50, 150],
+                                        outputRange: [-50, 0], 
+                                        extrapolate: 'clamp'
+                                    })
+                                }]
+                            }]}
+                        > 
+                            <Text style={styles.navBarTitle}>
+                                Recebimentos de crediário
+                            </Text>
+                            <TouchableOpacity 
+                                style={styles.scrollToTopButton} 
+                                onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
+                            >
+                                <Feather name="chevron-up" size={18} color={colors.cyan[200]} />
+                            </TouchableOpacity>
+                        </Animated.View>
 
-                <View style={styles.totalResults}>
-                    <Feather name="arrow-down-right" size={16} color={colors.gray[500]} />
-                    <Text style={{color: colors.gray[500]}}>{totalRecebimentos || 0} recebimentos</Text>
-                </View>
-
-                {/* <View style={styles.toggleContainer}>
-                    <Switch
-                        value={isToggled}
-                        onValueChange={toggleSwitch}
-                        trackColor={{ false: colors.gray[50], true: colors.amber[500] }}
-                        thumbColor={isToggled ? colors.amber[50] : colors.gray[50]}
-                        style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }, {translateX: -5}] }}
-                    />
-                    <Text style={styles.label}>Pendentes</Text>
-                </View> */}
-            </View>
-
-            <FlatList
-                data={recebimentosResumo}
-                keyExtractor={(item, index) => String(item.COD_CTR) + "_" + index}
-                initialNumToRender={20}
-                maxToRenderPerBatch={20}
-                ListFooterComponent={
-                    isFetchingMore ? (
-                        <View style={{ padding: 10 }}>
-                             <ActivityIndicator size="large" color={colors.cyan[500]} />
-                        </View>
-                    ) : !isCompleted && recebimentosResumo.length > 0 ? (
-                        <TouchableOpacity 
-                            style={styles.pageButton}
-                            onPress={carregarMaisVendas} 
-                        >
-                            <Feather size={25} color={colors.cyan[600]} name="plus" />
-                        </TouchableOpacity>
-                    ) : null
-                }
-                ListEmptyComponent={() => (
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
-                    </View>
-                )}
-                renderItem={renderItem}
-            />
+                        <Animated.FlatList
+                            ListHeaderComponent={
+                                <View style={styles.headerContainer}>
+                                    <PageTitle 
+                                        title="Recebimentos de crediário" 
+                                        size="large" 
+                                    />
+                                    <DateFilterInfo />
+                                    <FilterInfo 
+                                        totalInfo={`${totalRecebimentos || 0} recebimentos`} 
+                                        icon='arrow-down-right'
+                                    />
+                                </View>
+                            }
+                            ref={flatListRef}
+                            data={recebimentosResumo}
+                            keyExtractor={(item, index) => String(item.COD_CTR) + "_" + index}
+                            initialNumToRender={20}
+                            maxToRenderPerBatch={20}
+                            ListFooterComponent={
+                                isFetchingMore ? (
+                                    <ActivityIndicator size="large" color={colors.cyan[500]} style={{padding: 40}} />
+                                ) : (!isCompleted && recebimentosResumo.length > 0) ? (
+                                    <TouchableOpacity 
+                                        style={styles.loadMoreButton} 
+                                        onPress={carregarMaisVendas}
+                                    >
+                                        <Feather size={25} color={colors.cyan[600]} name="plus" />
+                                    </TouchableOpacity>
+                                ) : null
+                            }
+                            onScroll={Animated.event(
+                                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                                { useNativeDriver: true }
+                            )}
+                            scrollEventThrottle={16}
+                            ListEmptyComponent={() => (
+                                <View style={styles.emptyContainer}>
+                                    <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+                                </View>
+                            )}
+                            renderItem={renderItem} 
+                        />
+                    </>
+                )
+            }
         </View>
     );
 }
 
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: 50,
-        backgroundColor: "#FFF"
+    navBar: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 45,
+        backgroundColor: colors.cyan[600],
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        zIndex: 10
     },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        marginBottom: 12
+    navBarTitle: {
+        color: colors.cyan[200],
+        fontWeight: 600
     },
-    error: {
-        fontSize: 16,
-        color: 'red',
-        textAlign: 'center',
+    headerContainer: {
+        padding: 20,
+        paddingTop: 50
+    },
+    dateContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 5
+    },
+    dateText: {
+        color: colors.gray[500]
+    },
+    toggleContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginVertical: 10
+    },
+    label: {
+        color: colors.gray[500]
+    },
+    itemContainer: {
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.gray[200]
+    },
+    loadMoreButton: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 40,
+        backgroundColor: colors.gray[100]
+    },
+    scrollToTopButton: {
+        position: 'absolute',
+        right: 16,
+        bottom: 8,
+        padding: 5,
+        borderRadius: 20,
     },
     loading: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
-    },
-    totalResults: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        alignSelf: 'flex-start',
-        gap: 5
     },
     emptyContainer: {
         alignItems: 'center',
@@ -245,13 +263,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: colors.gray[500],
     },
-    vendaCard: {
+    itemListCard: {
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: colors.gray[200]
     },
-    cardContent: {
+    itemListCardContent: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -274,10 +292,10 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start'
     },
     iconElement: {
-        backgroundColor: colors.cyan[500],
-        borderRadius: 999,
-        color: colors.cyan[50],
-        padding: 10
+        borderRadius: 60,
+        padding: 10,
+        backgroundColor: colors.cyan[500], 
+        color: colors.cyan[200]
     },
     vendedor: {
         fontWeight: 'bold',
@@ -301,19 +319,5 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: colors.gray[500],
         fontWeight: 300
-    },
-    pageButton:{
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 30,
-        backgroundColor: colors.cyan[100]
-    },
-    toggleContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginVertical: 10
-    },
-    label: {
-        color: colors.gray[500]
     }
 });

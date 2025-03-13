@@ -13,16 +13,28 @@ LocaleConfig.locales['pt-br'] = UtilitiesService.ptBR
 LocaleConfig.defaultLocale = 'pt-br';
 
 export function GlobalHeader() {
-    const { selectedEmpresa, selectedCaixa } = useEmpresaCaixa();
+    const {selectedEmpresa, selectedCaixa} = useEmpresaCaixa();
     const [modalVisible, setModalVisible] = useState(false);
+
+    const {updateDateFilter} = useDateFilter();
     const [selectedStartDate, setSelectedStartDate] = useState<string | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<string | null>(null);
     const [markedDates, setMarkedDates] = useState<any>({});
-    const {updateDateFilter} = useDateFilter();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    
+    const openModal = () => {
+        setModalVisible(true);
+    };
+
+    const closeModal = () => {
+        setModalVisible(false);
+    };
+
+
+    const formatDate = (dateString: string) => dateString.split('-').reverse().join('/');
 
     const handleEmpresaNome = (razaoSocial: string | undefined): string => {
         if (!razaoSocial) return "";
@@ -35,6 +47,7 @@ export function GlobalHeader() {
         const res = (nome?.includes("COFRE") ? "CAIXA COFRE" : "CAIXA NORMAL")
         return res;
     }
+
 
     const handleDateSelect = (date: string) => {
         if (!selectedStartDate || selectedEndDate) {
@@ -81,18 +94,6 @@ export function GlobalHeader() {
             setMarkedDates(rangeMarkedDates);
         }
     };
-    
-    
-
-    const openModal = () => {
-        setModalVisible(true);
-    };
-
-    const closeModal = () => {
-        setModalVisible(false);
-    };
-
-    const formatDate = (dateString: string) => dateString.split('-').reverse().join('/');
 
     const handleUpdateDateFilter = () => {
         try {
@@ -105,41 +106,47 @@ export function GlobalHeader() {
                 updateDateFilter(dateFilter)
             }
         } catch (err: any) {
-            setError(`Erro ao salvar intervalo.`);
+            setError(`Erro ao salvar intervalo de data.`);
         } finally {
             closeModal();
         }
     }
 
+
     return (
         <SafeAreaView>
             <View style={styles.container}>
-                <TouchableOpacity 
-                    onPress={() => router.push("/settings")} 
-                    style={styles.subcontainer}
-                >
-                    <View style={{position: "relative"}}>
-                        <Image
-                            source={{ uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
-                            style={styles.image}
-                        />
+                <View style={styles.subcontainer}>
+                    <Image
+                        source={{ uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
+                        style={styles.image}
+                    />
 
-                        <Feather name="settings" size={14} style={styles.settingsIcon} />
-                    </View>
-
-                    <View style={{flexDirection: "column", alignItems: "flex-start", gap: 1}}>
+                    <View style={styles.profileContainer}>
                         <Text style={styles.profileText}>
                             {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : "Nenhuma empresa selecionada"}
                         </Text>
-                        <Text style={{fontSize: 11, color: colors.gray[500]}}>
+                        <Text style={styles.profileSubText}>
                             {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : "Nenhum caixa selecionado"}
                         </Text>
                     </View>
-                </TouchableOpacity>
+                </View>
 
-                <TouchableOpacity onPress={openModal} style={{paddingVertical: 5}}>
-                    <Feather name="calendar" size={22} color={colors.gray[500]} />
-                </TouchableOpacity>
+                <View style={styles.globalHeaderActions}>
+                    <TouchableOpacity 
+                        onPress={openModal} 
+                        style={{padding: 5}}
+                    >
+                        <Feather name="calendar" size={20} color={colors.gray[500]} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        onPress={() => router.push("/settings")} 
+                        style={{paddingVertical: 5, paddingLeft: 5}}
+                    >
+                        <Feather name="settings" size={20} color={colors.gray[500]} />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <Modal
@@ -166,12 +173,20 @@ export function GlobalHeader() {
                         />
 
                         <View style={styles.buttons}>
-                            <TouchableOpacity onPress={closeModal} style={{flex: 1}}>
+                            <TouchableOpacity 
+                                onPress={closeModal} 
+                                style={{flex: 1}}
+                            >
                                 <Text style={styles.footerCancelButton}>
                                     Cancelar
                                 </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={handleUpdateDateFilter} disabled={!selectedEndDate} style={{flex: 1}}>
+
+                            <TouchableOpacity 
+                                onPress={handleUpdateDateFilter} 
+                                disabled={!selectedEndDate} 
+                                style={{flex: 1}}
+                            >
                                 <Text style={[selectedEndDate ? styles.footerSubmitButton : styles.footerDisabledButton]}>
                                     Aplicar
                                 </Text>
@@ -201,37 +216,36 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10
+        gap: 7
     },
     profileContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10
+        flexDirection: "column", 
+        alignItems: "flex-start", 
+        gap: 1
     },
     profileText: {
         color: colors.gray[900],
         fontWeight: 500
     },
+    profileSubText: {
+        fontSize: 11, 
+        color: colors.gray[500]
+    },
     image: { 
-        width: 40, 
-        height: 40, 
+        width: 35, 
+        height: 35, 
         borderRadius: 50
     },
-    settingsIcon: {
-        position: "absolute", 
-        bottom: -2, 
-        right: -2,
-        padding: 2,
-        color: colors.gray[600],
-        borderRadius: 50,
-        backgroundColor: "#FFF"
+    globalHeaderActions: {
+        flexDirection: "row", 
+        alignItems: "center", 
+        gap: 10
     },
     modalBackground: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
     },
     modalContainer: {
         width: '92%',

@@ -82,13 +82,13 @@ export default function VendaDetails() {
                     </View>
 
                     <SectionTitle title="INFORMAÇÕES" />
-                    <View style={{paddingTop: 10, paddingBottom: 30}}>
+                    <View style={{paddingTop: 10, paddingBottom: 30, gap: 10}}>
                         <VendaDetailsItem icon="user-tie" detail={venda.NOME_VEND} />
                         <VendaDetailsItem icon="user" detail={venda.NOME_CLI} />
                         <VendaDetailsItem icon="user-nurse" detail={venda.NOME_MEDICO} />
                         <VendaDetailsItem icon="calendar-day" detail={new Date(venda!.DATA_VEN).toLocaleDateString()} />
                         <VendaDetailsItem icon="sack-dollar" detail={handlePaymentLabel(venda.TOTAL_VEN, venda.NOME_TPV)} />
-                        <VendaDetailsItem icon="building-columns" detail={venda.RAZAO_EMP} />
+                        <VendaDetailsItem icon="building" detail={venda.RAZAO_EMP} />
                     </View>
 
                     <View style={styles.vendaDetails}>
@@ -188,8 +188,8 @@ const styles = StyleSheet.create({
     },
     iconElement: {
         backgroundColor: colors.green[500],
-        borderRadius: 999,
-        color: colors.gray[50],
+        borderRadius: 60,
+        color: colors.green[200],
         padding: 10,
         marginBottom: 2
     },
@@ -239,6 +239,7 @@ const styles = StyleSheet.create({
     },
     itemInfo: {
         fontSize: 13,
+        fontWeight: 300,
         paddingVertical: 2,
         color: colors.gray[500]
     },
@@ -260,9 +261,10 @@ const styles = StyleSheet.create({
         color: '#28a745',
     },
     emptyText: {
-        color: colors.gray[400],
-        fontSize: 16,
-        padding: 15
+        color: colors.gray[500],
+        fontWeight: 300,
+        marginTop: 15,
+        paddingHorizontal: 20
     },
     error: {
         fontSize: 16,

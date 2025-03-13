@@ -5,30 +5,37 @@ import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { CaixaDetails } from '@/models/caixa';
 import { CaixaService } from '@/services/caixa-service';
 import { colors } from '@/utils/constants/colors';
-import { useEffect, useState } from 'react'
-import { View, StyleSheet, Text, ScrollView } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { View, StyleSheet, Text, ScrollView, Animated, TouchableOpacity } from 'react-native'
 import { LineChart } from '@/components/LineChart';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { LineDetail, LineDetailButton } from '@/components/LineDetail';
 import SectionTitle from '@/components/SectionTitle';
-import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useDateFilter } from '@/context/DateFilterContext';
+import { useAuth } from '@/context/AuthContext';
+import { DateFilterInfo } from '@/components/DateFilterInfo';
+import { FilterInfo } from '@/components/FilterInfo';
 
 export default function Caixa(){
     const [caixaDetails, setCaixaDetails] = useState<CaixaDetails | null>(null);
     const {selectedCaixa, selectedEmpresa} = useEmpresaCaixa();
+
     const {dateFilter} = useDateFilter();
+    const {authData} = useAuth();
+
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
 
     useEffect(() => {
+        scrollY.setValue(0); 
         setCaixaDetails(null)
         fetchCaixaDetails();
     }, [selectedEmpresa, selectedCaixa, dateFilter])
-
 
     const fetchCaixaDetails = async () => {
         setLoading(true);
@@ -48,7 +55,7 @@ export default function Caixa(){
                 dataFinal: dateFilter?.dataFinal
             }
 
-            const caixaService = new CaixaService();
+            const caixaService = new CaixaService(authData?.token);
             const result = await caixaService.getCaixaDetails(params);
             
             if(result) {
@@ -56,15 +63,12 @@ export default function Caixa(){
             }
 
         } catch (err) {
-            setError("Erro ao buscar detalhes do caixa.");
+            setError(`Erro ao buscar detalhes do caixa: ${err}`);
         } finally {
             setLoading(false);
         }
     }
-
-    function handleContasReceber(){
-        router.navigate("/recebimentos");
-    }
+    
 
     if (loading) {
         return <LoadingIndicator />;
@@ -72,81 +76,108 @@ export default function Caixa(){
 
 
     return (
-         <ScrollView style={styles.container}  contentContainerStyle={{paddingBottom: 100}}>
-            <View style={{paddingHorizontal: 20, marginBottom: 20}}>
-                <PageTitle title="Caixa" size="large" />
-
-                {error && (
-                    <ErrorMessage error={error} />
-                )}
-
-                {dateFilter && (
-                    <View style={{flexDirection: "row", gap: 6, marginBottom: 5}}>
-                        <Feather name="calendar" size={16}  color={colors.gray[500]} />
-                        <Text style={{color: colors.gray[500]}}>
-                            {String(dateFilter.dataFinal)}
-                        </Text>
-                        <Text>-</Text>
-                        <Text style={{color: colors.gray[500]}}>
-                            {String(dateFilter.dataInicial)}
-                        </Text>
-                    </View>
-                )}
-
-                <View style={styles.totalResults}>
-                    <Feather name="box" size={16} color={colors.gray[500]} />
-                    <Text style={{color: colors.gray[500]}}>
-                        {selectedCaixa ? selectedCaixa.DESC_CAI : "Nenhum caixa selecionado"}
-                    </Text>
-                </View>
-            </View>
-
-            {caixaDetails && (
-                <View>
-                    <View style={styles.caixaSection}>
-                        <SectionTitle title="TOTAL RECEBIDO" />
-
-                        <View style={{paddingHorizontal: 20}}>
-                            <Text style={styles.totalValue}>
-                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_RECEBIDO)}
+        <View style={{flex: 1}}>
+            {error
+                ? ( <ErrorMessage error={error} /> )
+                : (
+                    <>
+                        <Animated.View 
+                            style={[styles.navBar, { 
+                                transform: [{
+                                    translateY: scrollY.interpolate({
+                                        inputRange: [50, 150],
+                                        outputRange: [-50, 0], 
+                                        extrapolate: 'clamp'
+                                    })
+                                }]
+                            }]}
+                        > 
+                            <Text style={styles.navBarTitle}>
+                                Caixa
                             </Text>
-                        </View>
+                            <TouchableOpacity 
+                                style={styles.scrollToTopButton} 
+                                onPress={() => scrollViewRef.current?.scrollTo({y: 0, animated: true})}
+                            >
+                                <Feather name="chevron-up" size={18} color={colors.fuchsia[200]} />
+                            </TouchableOpacity>
+                        </Animated.View>
 
-                        <LineChart total={caixaDetails.TOTAL_RECEBIDO} values={caixaDetails.FORMAS_PAGAMENTO} />
-                        <LineDetail label='ACRÉSCIMO RECEBIDO' value={caixaDetails.TOTAL_ACRESCIMO_RECEBIDO} isBRL={true} />
-                        <LineDetail label='DESCONTO CONCEDIDO' value={caixaDetails.TOTAL_DESCONTO_CONCEDIDO} isBRL={true} />
-                        <LineDetail label='BAIXAS' value={caixaDetails.TOTAL_BAIXAS} isBRL={false} />
-                    </View>
+                        <Animated.ScrollView 
+                            ref={scrollViewRef}
+                            style={styles.container} 
+                            contentContainerStyle={{paddingBottom: 100}}
+                            onScroll={Animated.event(
+                                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                                { useNativeDriver: true }
+                            )}    
+                        >
+                            <View style={{paddingHorizontal: 20, marginBottom: 20}}>
+                                <PageTitle title="Caixa" size="large" />
 
-                    <View style={styles.caixaSection}>
-                        <SectionTitle title="TOTAL ANALÍTICO DE VENDAS" />
+                                {error ? (
+                                    <ErrorMessage error={error} />
+                                ) : (
+                                    <>
+                                        <DateFilterInfo />
+                                        <FilterInfo 
+                                            totalInfo={selectedCaixa ? selectedCaixa.DESC_CAI : "Nenhum caixa selecionado"}
+                                            icon='box'
+                                        />
+                                    </>
+                                )}
+                            </View>
 
-                        <View style={{paddingHorizontal: 20}}>
-                            <Text style={styles.totalValue}>
-                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_VALOR_VENDAS || 0)}
-                            </Text>
-                        </View>
+                            {caixaDetails && (
+                                <View>
+                                    <View style={styles.caixaSection}>
+                                        <SectionTitle title="TOTAL RECEBIDO" />
 
-                        <LineChart total={caixaDetails.TOTAL_VALOR_VENDAS} values={caixaDetails.FORMAS_PAGAMENTO_VENDAS} />
-                        <LineDetail label='DESCONTO EM VENDAS' value={caixaDetails.TOTAL_DESCONTO_VENDAS || 0} isBRL={true} />
-                        <LineDetail label='VENDAS CONCLUÍDAS' value={caixaDetails.TOTAL_VENDAS || 0} isBRL={false} />
-                        <LineDetail label='VENDAS CANCELADAS' value={caixaDetails.TOTAL_VENDAS_CANCELADAS || 0} isBRL={false} />
-                    </View>
+                                        <View style={{paddingHorizontal: 20}}>
+                                            <Text style={styles.totalValue}>
+                                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_RECEBIDO)}
+                                            </Text>
+                                        </View>
 
-                    <View style={styles.caixaSection}>
-                        <SectionTitle title="TOTAL CONTAS A RECEBER" />
+                                        <LineChart total={caixaDetails.TOTAL_RECEBIDO} values={caixaDetails.FORMAS_PAGAMENTO} />
+                                        <LineDetail label='ACRÉSCIMO RECEBIDO' value={caixaDetails.TOTAL_ACRESCIMO_RECEBIDO} isBRL={true} />
+                                        <LineDetail label='DESCONTO CONCEDIDO' value={caixaDetails.TOTAL_DESCONTO_CONCEDIDO} isBRL={true} />
+                                        <LineDetail label='BAIXAS' value={caixaDetails.TOTAL_BAIXAS} isBRL={false} />
+                                    </View>
 
-                        <View style={{paddingHorizontal: 20}}>
-                            <Text style={styles.totalValue}>
-                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_CONTAS_RECEBER || 0)}
-                            </Text>
-                        </View>
+                                    <View style={styles.caixaSection}>
+                                        <SectionTitle title="TOTAL ANALÍTICO DE VENDAS" />
 
-                        <LineDetailButton label='CONTAS PENDENTES' onPress={handleContasReceber} />
-                    </View>
-                </View>
-            )}
-        </ScrollView>
+                                        <View style={{paddingHorizontal: 20}}>
+                                            <Text style={styles.totalValue}>
+                                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_VALOR_VENDAS || 0)}
+                                            </Text>
+                                        </View>
+
+                                        <LineChart total={caixaDetails.TOTAL_VALOR_VENDAS} values={caixaDetails.FORMAS_PAGAMENTO_VENDAS} />
+                                        <LineDetail label='DESCONTO EM VENDAS' value={caixaDetails.TOTAL_DESCONTO_VENDAS || 0} isBRL={true} />
+                                        <LineDetail label='VENDAS CONCLUÍDAS' value={caixaDetails.TOTAL_VENDAS || 0} isBRL={false} />
+                                        <LineDetail label='VENDAS CANCELADAS' value={caixaDetails.TOTAL_VENDAS_CANCELADAS || 0} isBRL={false} />
+                                    </View>
+
+                                    <View style={styles.caixaSection}>
+                                        <SectionTitle title="TOTAL CONTAS A RECEBER" />
+
+                                        <View style={{paddingHorizontal: 20}}>
+                                            <Text style={styles.totalValue}>
+                                                {UtilitiesService.formatarValor(caixaDetails.TOTAL_CONTAS_RECEBER || 0)}
+                                            </Text>
+                                        </View>
+
+                                        <LineDetailButton label='CONTAS PENDENTES' onPress={() => {}} />
+                                    </View>
+                                </View>
+                            )}
+                        </Animated.ScrollView>
+                    </>
+                )
+            }
+        </View>
     )
 }
 
@@ -185,12 +216,26 @@ const styles = StyleSheet.create({
         color: colors.gray[900],
         marginTop: 15
     },
-    totalResults: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        alignSelf: 'flex-start',
+    scrollToTopButton: {
+        position: 'absolute',
+        right: 16,
+        bottom: 8,
+        padding: 5,
         borderRadius: 20,
-        gap: 6,
-        marginBottom: 20,
+    },
+    navBar: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 45,
+        backgroundColor: colors.purple[600],
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        zIndex: 10
+    },
+    navBarTitle: {
+        color: colors.fuchsia[200],
+        fontWeight: 600
     },
 })

@@ -5,7 +5,7 @@ export class AxiosService<T> {
   protected readonly api: AxiosInstance;
   protected readonly path: string;
 
-  constructor(path: string) {
+  constructor(path: string, token?: string) {
     this.path = path;
     
     this.api = axios.create({
@@ -14,7 +14,6 @@ export class AxiosService<T> {
 
     this.api.interceptors.request.use(
       (config) => {
-        const token = "";
 
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;

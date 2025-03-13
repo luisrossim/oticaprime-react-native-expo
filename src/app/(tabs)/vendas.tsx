@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Animated } from 'react-native';
 import { VendaService } from '@/services/venda-service';
 import { colors } from '@/utils/constants/colors';
 import { VendaSummary } from '@/models/venda';
@@ -11,6 +11,8 @@ import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { PageTitle } from '@/components/PageTitle';
 import { useDateFilter } from '@/context/DateFilterContext';
+import { DateFilterInfo } from '@/components/DateFilterInfo';
+import { FilterInfo } from '@/components/FilterInfo';
 
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
@@ -26,8 +28,12 @@ export default function Vendas() {
     const {selectedEmpresa} = useEmpresaCaixa();
     const {dateFilter} = useDateFilter();
 
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const flatListRef = useRef<FlatList>(null);
+
 
     useEffect(() => {
+        scrollY.setValue(0); 
         setPaginaAtual(1);
         setVendasPaginadas([]);
         setIsCompleted(false);
@@ -126,65 +132,89 @@ export default function Vendas() {
     ));
 
     const renderItem = useCallback(({ item }: { item: VendaSummary }) => (
-        <ItemVenda key={item.COD_VEN} item={item} onPress={() => router.push(`/venda-details?id=${item.COD_VEN}`)} />
-    ), [router]);
+        <ItemVenda 
+            key={item.COD_VEN} 
+            item={item} 
+            onPress={() => router.push(`/venda-details?id=${item.COD_VEN}`)} 
+        />
+    ), []);
 
+    
     return (
         <View style={styles.container}>
-            <View style={{paddingHorizontal: 20}}>
-                <PageTitle title="Vendas" size="large" />
-
-                {error && (
+            {error 
+                ? (
                     <ErrorMessage error={error} />
-                )}
+                ) : (
+                    <>
+                        <Animated.View 
+                            style={[styles.navBar, { 
+                                transform: [{
+                                    translateY: scrollY.interpolate({
+                                        inputRange: [50, 150],
+                                        outputRange: [-50, 0], 
+                                        extrapolate: 'clamp'
+                                    })
+                                }]
+                            }]}
+                        > 
+                            <Text style={styles.navBarTitle}>
+                                Vendas
+                            </Text>
+                            <TouchableOpacity 
+                                style={styles.scrollToTopButton} 
+                                onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
+                            >
+                                <Feather name="chevron-up" size={18} color={colors.cyan[200]} />
+                            </TouchableOpacity>
+                        </Animated.View>
 
-                {dateFilter && (
-                    <View style={{flexDirection: "row", gap: 6, marginBottom: 5}}>
-                        <Feather name="calendar" size={16}  color={colors.gray[500]} />
-                        <Text style={{color: colors.gray[500]}}>
-                            {String(dateFilter.dataFinal)}
-                        </Text>
-                        <Text>-</Text>
-                        <Text style={{color: colors.gray[500]}}>
-                            {String(dateFilter.dataInicial)}
-                        </Text>
-                    </View>
-                )}
-
-                <View style={styles.totalResults}>
-                    <Feather name="dollar-sign" size={16} color={colors.gray[500]} />
-                    <Text style={{color: colors.gray[500]}}>
-                        {totalVendas || 0} vendas
-                    </Text>
-                </View>
-            </View>
-
-            <FlatList
-                data={vendasPaginadas}
-                keyExtractor={(item, index) => String(item.COD_VEN) + "_" + index}
-                initialNumToRender={20}
-                maxToRenderPerBatch={20}
-                ListFooterComponent={
-                    isFetchingMore ? (
-                        <View style={{ padding: 10 }}>
-                            <ActivityIndicator size="large" color={colors.green[500]} />
-                        </View>
-                    ) : !isCompleted && vendasPaginadas.length > 0 ? (
-                        <TouchableOpacity 
-                            style={styles.pageButton}
-                            onPress={carregarMaisVendas} 
-                        >
-                            <Feather size={25} color={colors.green[600]} name="plus" />
-                        </TouchableOpacity>
-                    ) : null
-                }
-                ListEmptyComponent={() => (
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
-                    </View>
-                )}
-                renderItem={renderItem}
-            />
+                        <Animated.FlatList
+                            ListHeaderComponent={
+                                <View style={styles.headerContainer}>
+                                    <PageTitle 
+                                        title="Vendas" 
+                                        size="large" 
+                                    />
+                                    <DateFilterInfo />
+                                    <FilterInfo 
+                                        totalInfo={`${totalVendas || 0} vendas`} 
+                                        icon='arrow-down-right'
+                                    />
+                                </View>
+                            }
+                            ref={flatListRef}
+                            data={vendasPaginadas}
+                            keyExtractor={(item, index) => String(item.COD_VEN) + "_" + index}
+                            initialNumToRender={20}
+                            maxToRenderPerBatch={20}
+                            ListFooterComponent={
+                                isFetchingMore ? (
+                                    <ActivityIndicator size="large" color={colors.green[500]} style={{padding: 40}} />
+                                ) : !isCompleted && vendasPaginadas.length > 0 ? (
+                                    <TouchableOpacity 
+                                        style={styles.loadMoreButton}
+                                        onPress={carregarMaisVendas} 
+                                    >
+                                        <Feather size={25} color={colors.green[600]} name="plus" />
+                                    </TouchableOpacity>
+                                ) : null
+                            }
+                            ListEmptyComponent={() => (
+                                <View style={styles.emptyContainer}>
+                                    <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+                                </View>
+                            )}
+                            onScroll={Animated.event(
+                                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                                { useNativeDriver: true }
+                            )}
+                            scrollEventThrottle={16}
+                            renderItem={renderItem}
+                        />
+                    </>
+                )
+            }
         </View>
     );
 }
@@ -192,9 +222,7 @@ export default function Vendas() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        paddingTop: 50,
-        backgroundColor: "#FFF"
+        flex: 1
     },
     title: {
         fontSize: 32,
@@ -210,14 +238,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
-    },
-    totalResults: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        alignSelf: 'flex-start',
-        borderRadius: 20,
-        gap: 6,
-        marginBottom: 20,
     },
     emptyContainer: {
         alignItems: 'center',
@@ -259,8 +279,8 @@ const styles = StyleSheet.create({
     },
     iconElement: {
         backgroundColor: colors.green[500],
-        borderRadius: 999,
-        color: colors.green[50],
+        borderRadius: 60,
+        color: colors.green[200],
         padding: 10
     },
     vendedor: {
@@ -286,10 +306,36 @@ const styles = StyleSheet.create({
         color: colors.gray[500],
         fontWeight: 300
     },
-    pageButton:{
+    loadMoreButton:{
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 30,
-        backgroundColor: colors.green[100]
+        padding: 40,
+        backgroundColor: colors.gray[100]
+    },
+    navBar: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 45,
+        backgroundColor: colors.green[600],
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        zIndex: 10
+    },
+    navBarTitle: {
+        color: colors.green[200],
+        fontWeight: 600
+    },
+    scrollToTopButton: {
+        position: 'absolute',
+        right: 16,
+        bottom: 8,
+        padding: 5,
+        borderRadius: 20,
+    },
+    headerContainer: {
+        padding: 20,
+        paddingTop: 50
     }
 });

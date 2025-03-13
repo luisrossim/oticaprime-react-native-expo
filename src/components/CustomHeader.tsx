@@ -4,6 +4,7 @@ import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity } from "react-na
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 
+
 interface CustomHeaderProps {
     title: string
 }
@@ -17,7 +18,7 @@ export function CustomHeader({ title }: CustomHeaderProps){
                         onPress={() => router.back()}
                         style={styles.backButton}
                     >
-                        <Feather name="chevron-left" size={24} color={colors.gray[700]} />
+                        <Feather name="chevron-left" size={24} color={colors.gray[500]} />
                     </TouchableOpacity>
 
                     <Text style={{fontWeight: 500, fontSize: 16}}>
@@ -38,8 +39,8 @@ const styles = StyleSheet.create({
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300],
         paddingHorizontal: 20,
-        paddingTop: 40,
-        paddingBottom: 13,
+        paddingTop: 35,
+        paddingBottom: 12,
         backgroundColor: "#FFF"
     },
     subContainer: {

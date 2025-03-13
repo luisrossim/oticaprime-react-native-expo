@@ -2,8 +2,9 @@ import { RecebimentoPageable, RecebimentoSummary } from "@/models/recebimento";
 import { AxiosService } from "./axios-service";
 
 export class RecebimentosService extends AxiosService<RecebimentoSummary> {
-    constructor() {
-        super('/recebimentos');
+
+    constructor(token?: string) {
+        super('/recebimentos', token);
     }
 
     async getWithPageable(params: Record<string, any>): Promise<RecebimentoPageable> {

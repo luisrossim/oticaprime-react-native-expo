@@ -51,11 +51,11 @@ export default function Login() {
                     resizeMode="cover"
                 >
                     <View style={styles.overlay}>
-                        <Feather name="layers" size={32} color={"rgba(255,255,255, 0.7)"} />
+                        <Feather name="layers" size={32} color={"rgba(255,255,255, 0.9)"} />
                     </View>
                 </ImageBackground>
 
-                <View style={{flex: 1, justifyContent: "space-between", flexDirection: "column", paddingHorizontal: 20, paddingVertical: 40}}>
+                <View style={styles.loginContainer}>
                     <View>
                         <Text style={styles.title}>Acessar</Text>
                         <Text style={styles.subtitle}>Informe suas credenciais de acesso.</Text>
@@ -89,7 +89,7 @@ export default function Login() {
 
                     <View style={{alignItems: "center"}}>
                         <Text style={styles.titleFooter}>
-                            ÓTICA PRIME FINANCE
+                            ÓTICA PRIME
                         </Text>
                         <Text style={styles.titleFooter}>
                             {'\u00A9'} ATIP 2025 v.1.0
@@ -109,6 +109,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff"
+    },
+    loginContainer: {
+        flex: 1, 
+        justifyContent: "space-between", 
+        flexDirection: "column", 
+        paddingHorizontal: 20, 
+        paddingVertical: 40, 
+        gap: 20
     },
     title: {
         fontSize: 32,

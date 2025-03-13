@@ -42,17 +42,7 @@ export default function Layout(){
                     options={{
                         tabBarLabel: "Dashboard",
                         tabBarIcon: ({ color, size }) => (
-                            <Feather name="pie-chart" size={size} color={color} />
-                        )
-                    }}
-                />
-
-                <Tabs.Screen
-                    name="vendas"
-                    options={{
-                        tabBarLabel: "Vendas",
-                        tabBarIcon: ({ color, size }) => (
-                            <Feather name="dollar-sign" size={size} color={color} />
+                            <Feather name="bar-chart-2" size={size} color={color} />
                         )
                     }}
                 />
@@ -63,6 +53,16 @@ export default function Layout(){
                         tabBarLabel: "Caixa",
                         tabBarIcon: ({ color, size }) => (
                             <Feather name="box" size={size} color={color} />
+                        )
+                    }}
+                />
+
+                <Tabs.Screen
+                    name="vendas"
+                    options={{
+                        tabBarLabel: "Vendas",
+                        tabBarIcon: ({ color, size }) => (
+                            <Feather name="dollar-sign" size={size} color={color} />
                         )
                     }}
                 />
