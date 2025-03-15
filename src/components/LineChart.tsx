@@ -1,17 +1,19 @@
-import { CaixaFormasPagamento } from "@/models/caixa";
+import { FormasPagamentoTotal } from "@/models/caixa";
 import { colors } from "@/utils/constants/colors";
 import { UtilitiesService } from "@/utils/utilities-service";
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 
 interface LineChartProps {
   total: number;
-  values: CaixaFormasPagamento[];
+  values: FormasPagamentoTotal[];
+  type: 'recebimentos' | 'vendas';
 }
 
-export const LineChart: React.FC<LineChartProps> = ({ total, values }) => {
+export const LineChart: React.FC<LineChartProps> = ({ total, values, type }) => {
     return (
         <View style={styles.container}>
 
@@ -19,16 +21,25 @@ export const LineChart: React.FC<LineChartProps> = ({ total, values }) => {
                 const percentagem = (item.VALOR_TOTAL / total) * 100;
 
                 return (
-                    <TouchableOpacity key={index} style={styles.lineContainer}>
-                        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
-                            <View style={{flexDirection: "column", marginBottom: 7}}>
-                                <Text style={styles.label}>{item.DESCRICAO}</Text>
-                                <Text style={styles.percentagem}>
-                                    {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)} (${percentagem.toFixed(0)}%)`}
-                                </Text>
-                            </View>
+                    <TouchableOpacity 
+                        key={index} 
+                        style={styles.lineContainer}
+                        onPress={() => {router.push(`${type == 'recebimentos' ? '/recebimentos' : '/vendas'}`)}}
+                    >
+                        <View style={{width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
+                            <Text style={styles.label}>
+                                {`${item.DESCRICAO} (${item.QUANTIDADE})`}
+                            </Text>
                             <Feather name="chevron-right" size={20} color={colors.gray[500]} />
                         </View>
+
+                        <Text style={styles.subItemText}>
+                            {`${UtilitiesService.formatarValor(item.DESCONTO_TOTAL || 0)} DE DESCONTO`}
+                        </Text>
+                        
+                        <Text style={styles.subItemText}>
+                            {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)} (${percentagem.toFixed(1)}%)`}
+                        </Text>
 
                         <View
                             style={[
@@ -59,23 +70,22 @@ const styles = StyleSheet.create({
     },
     lineContainer: {
         flexDirection: "column",
-        paddingHorizontal: 20,
-        paddingVertical: 14,
+        padding: 20,
+        gap: 5,
         width: "100%",
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300]
     },
     label: {
         fontWeight: 500,
-        marginBottom: 4,
-        color: colors.gray[600]
+        color: colors.gray[900]
     },
     line: {
-        height: 4
+        height: 4,
+        marginTop: 5
     },
-    percentagem: {
+    subItemText: {
         fontSize: 13,
-        color: colors.gray[500],
-        fontWeight: 400,
+        color: colors.gray[500]
     },
 });

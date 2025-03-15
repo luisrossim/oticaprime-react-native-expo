@@ -18,10 +18,10 @@ export function CustomHeader({ title }: CustomHeaderProps){
                         onPress={() => router.back()}
                         style={styles.backButton}
                     >
-                        <Feather name="chevron-left" size={24} color={colors.gray[500]} />
+                        <Feather name="chevron-left" size={24} color={colors.gray[900]} />
                     </TouchableOpacity>
 
-                    <Text style={{fontWeight: 500, fontSize: 16}}>
+                    <Text style={{fontWeight: 500, fontSize: 16, marginBottom: 1}}>
                         {title}
                     </Text>
                 </View>

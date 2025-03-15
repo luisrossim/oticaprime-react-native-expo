@@ -12,12 +12,14 @@ import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { CustomHeader } from '@/components/CustomHeader';
 import SectionTitle from '@/components/SectionTitle';
+import { useAuth } from '@/context/AuthContext';
 
 export default function VendaDetails() {
     const { id } = useLocalSearchParams();
     const vendaId = Array.isArray(id) ? id[0] : id;
-
     const [venda, setVenda] = useState<Venda>();
+
+    const {authData} = useAuth();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export default function VendaDetails() {
                 throw new Error("ID da venda não encontrado.");
             }
 
-            const vendaService = new VendaService();
+            const vendaService = new VendaService(authData?.token);
             const data = await vendaService.getById(vendaId);
             setVenda(data);
 
@@ -58,20 +60,18 @@ export default function VendaDetails() {
         return <LoadingIndicator />;
     }
  
-    if (error) {
-        return <ErrorMessage error={error} />;
-    }
+    return (
+        <SafeAreaView style={{flex: 1, backgroundColor: "#FFF"}}>
+            <CustomHeader title={"Detalhes da venda"} />
 
-    if (venda) {
-        return (
-            <SafeAreaView style={{flex: 1, backgroundColor: "#FFF"}}>
-                <CustomHeader title={"Detalhes da venda"} />
-
+            {error ? (
+                  <ErrorMessage error={error} />
+            ) : (
                 <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
                     <View style={styles.header}>
                         <Feather 
                             name={
-                                venda.NOME_TPV.includes("A PRAZO") || ["CARTAO", "A VISTA"].includes(venda.NOME_TPV)
+                                venda!.NOME_TPV.includes("A PRAZO") || ["CARTAO", "A VISTA"].includes(venda!.NOME_TPV)
                                     ? "dollar-sign" 
                                     : "star"
                             } 
@@ -83,21 +83,21 @@ export default function VendaDetails() {
 
                     <SectionTitle title="INFORMAÇÕES" />
                     <View style={{paddingTop: 10, paddingBottom: 30, gap: 10}}>
-                        <VendaDetailsItem icon="user-tie" detail={venda.NOME_VEND} />
-                        <VendaDetailsItem icon="user" detail={venda.NOME_CLI} />
-                        <VendaDetailsItem icon="user-nurse" detail={venda.NOME_MEDICO} />
+                        <VendaDetailsItem icon="user-tie" detail={venda!.NOME_VEND} />
+                        <VendaDetailsItem icon="user" detail={venda!.NOME_CLI} />
+                        <VendaDetailsItem icon="user-nurse" detail={venda!.NOME_MEDICO} />
                         <VendaDetailsItem icon="calendar-day" detail={new Date(venda!.DATA_VEN).toLocaleDateString()} />
-                        <VendaDetailsItem icon="sack-dollar" detail={handlePaymentLabel(venda.TOTAL_VEN, venda.NOME_TPV)} />
-                        <VendaDetailsItem icon="building" detail={venda.RAZAO_EMP} />
+                        <VendaDetailsItem icon="sack-dollar" detail={handlePaymentLabel(venda!.TOTAL_VEN, venda!.NOME_TPV)} />
+                        <VendaDetailsItem icon="building" detail={venda!.RAZAO_EMP} />
                     </View>
 
                     <View style={styles.vendaDetails}>
                         <SectionTitle title="ITENS" />
 
-                        { venda.ITENS.length > 0 
+                        { venda!.ITENS.length > 0 
                             ? (
                                 <View style={{ gap: 20, padding: 20}}>
-                                    {venda.ITENS.map((item, index) => (
+                                    {venda!.ITENS.map((item, index) => (
                                         <View key={`${index}`} style={styles.itemDetails}>
                                             <Feather 
                                                 style={[styles.itemIcon, {alignSelf: "center"}]} 
@@ -132,10 +132,10 @@ export default function VendaDetails() {
                     <View style={styles.vendaDetails}>
                         <SectionTitle title="FORMAS DE PAGAMENTO" />
 
-                        { venda.FORMAS_PAGAMENTO.length > 0 
+                        { venda!.FORMAS_PAGAMENTO.length > 0 
                             ? (
                                 <View style={{ gap: 10, padding: 20}}>
-                                    { venda.FORMAS_PAGAMENTO.map((item, index) => (
+                                    { venda!.FORMAS_PAGAMENTO.map((item, index) => (
                                         <View key={`${index}`} style={styles.paymentRow}>
                                             <Text style={styles.paymentText}>
                                                 {item.DESCRICAO}
@@ -151,7 +151,7 @@ export default function VendaDetails() {
                                             TOTAL
                                         </Text>
                                         <Text style={styles.paymentValueTotal}>
-                                            {UtilitiesService.formatarValor(venda.TOTAL_VEN)}
+                                            {UtilitiesService.formatarValor(venda!.TOTAL_VEN)}
                                         </Text>
                                     </View>
                                 </View>
@@ -160,16 +160,10 @@ export default function VendaDetails() {
                             )
                         }
                     </View>
-                </ScrollView >
-            </SafeAreaView>
-        )
-    } else {
-        return (
-            <View>
-                <Text>Venda não encontrada.</Text>
-            </View>
-        )
-    }
+                </ScrollView>
+            )}
+        </SafeAreaView>
+    )
 }
 
 
@@ -235,7 +229,8 @@ const styles = StyleSheet.create({
     },
     itemNome: {
         color: colors.gray[700],
-        fontWeight: 500
+        fontWeight: 500,
+        marginBottom: 3
     },
     itemInfo: {
         fontSize: 13,

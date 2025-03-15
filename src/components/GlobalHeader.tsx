@@ -124,7 +124,7 @@ export function GlobalHeader() {
 
                     <View style={styles.profileContainer}>
                         <Text style={styles.profileText}>
-                            {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : "Nenhuma empresa selecionada"}
+                            {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : "Nenhuma empresa"}
                         </Text>
                         <Text style={styles.profileSubText}>
                             {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : "Nenhum caixa selecionado"}

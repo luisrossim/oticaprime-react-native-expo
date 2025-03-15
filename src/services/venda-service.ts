@@ -2,8 +2,8 @@ import { Venda, VendasPaginadas } from "@/models/venda";
 import { AxiosService } from "./axios-service";
 
 export class VendaService extends AxiosService<Venda> {
-    constructor() {
-        super('/venda');
+    constructor(token?: string) {
+        super('/venda', token);
     }
 
     async getWithPageable(params: Record<string, any>): Promise<VendasPaginadas> {

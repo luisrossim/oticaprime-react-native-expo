@@ -31,5 +31,10 @@ export const dashboardFilterData = [
         label: "12 meses",
         range: 12,
         sublabel: UtilitiesService.generateSublabel(12)
+    },
+    {
+        label: "24 meses",
+        range: 24,
+        sublabel: UtilitiesService.generateSublabel(24)
     }
 ];

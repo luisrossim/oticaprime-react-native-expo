@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Animated, Modal } from 'react-native';
 import { colors } from '@/utils/constants/colors';
 import { Feather } from '@expo/vector-icons';
 import { ErrorMessage } from '@/components/ErrorMessage';
@@ -12,6 +12,9 @@ import { RecebimentoSummary } from '@/models/recebimento';
 import { useAuth } from '@/context/AuthContext';
 import { DateFilterInfo } from '@/components/DateFilterInfo';
 import { FilterInfo } from '@/components/FilterInfo';
+import { FormaPagamento } from '@/models/formaPagamento';
+import { FormasPagamentoService } from '@/services/formas-pagamento-service';
+import { router } from 'expo-router';
 
 export default function Recebimentos() {
     const { selectedEmpresa, selectedCaixa } = useEmpresaCaixa();
@@ -22,6 +25,11 @@ export default function Recebimentos() {
     const [totalPages, setTotalPages] = useState(0);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
+
+    const [formasPagamento, setFormasPagamento] = useState<FormaPagamento[]>([]);
+    const [selectedFormaPagamento, setSelectedFormaPagamento] = useState<FormaPagamento | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const scrollY = useRef(new Animated.Value(0)).current;
@@ -29,12 +37,16 @@ export default function Recebimentos() {
     const {authData} = useAuth();
 
     useEffect(() => {
+        fetchFormasPagamento();
+    },[]);
+
+    useEffect(() => {
         scrollY.setValue(0); 
         setPaginaAtual(1);
         setRecebimentosResumo([]);
         setIsCompleted(false);
         fetchRecebimentos(1);
-    }, [selectedEmpresa, selectedCaixa, dateFilter]);
+    }, [selectedEmpresa, selectedCaixa, dateFilter, selectedFormaPagamento]);
 
     const fetchRecebimentos = async (pagina: number) => {
         if (loading || isFetchingMore) return;
@@ -43,13 +55,17 @@ export default function Recebimentos() {
 
         try {
             const recebimentosService = new RecebimentosService(authData?.token);
-            const params = {
+            const params: any = {
                 caixaId: selectedCaixa?.COD_CAI,
                 empId: selectedEmpresa?.COD_EMP,
                 dataInicial: dateFilter?.dataInicial,
                 dataFinal: dateFilter?.dataFinal,
                 page: pagina
             };
+
+            if (selectedFormaPagamento) {
+                params.fpId = selectedFormaPagamento.CODIGO;
+            }
 
             const data = await recebimentosService.getWithPageable(params);
          
@@ -65,6 +81,36 @@ export default function Recebimentos() {
             setIsFetchingMore(false);
         }
     };
+
+    const fetchFormasPagamento = async () => {
+        try {
+            const formaPagamentoService = new FormasPagamentoService(authData?.token);
+            const data = await formaPagamentoService.getAll();
+            setFormasPagamento(data);
+
+        } catch (err) {
+            setError(`Erro ao buscar formas de pagamento.`);
+        }
+    };
+
+    const handleFormaPagamentoSelect = (formaPagamento: FormaPagamento) => {
+        setSelectedFormaPagamento(formaPagamento);
+        setIsModalVisible(false);
+    };
+
+    const handleClearSelection = () => {
+        setSelectedFormaPagamento(null);
+        setIsModalVisible(false);
+    };
+
+    const renderFormaPagamentoItem = ({ item }: { item: FormaPagamento }) => (
+        <TouchableOpacity
+            style={styles.formaPagamentoItem}
+            onPress={() => handleFormaPagamentoSelect(item)}
+        >
+            <Text style={styles.formaPagamentoText}>{item.DESCRICAO}</Text>
+        </TouchableOpacity>
+    );
 
     const carregarMaisVendas = () => {
         if (!isFetchingMore && !isCompleted && paginaAtual < totalPages) {
@@ -88,15 +134,15 @@ export default function Recebimentos() {
                     <Text style={styles.vendedor}>{item.NUMDOCUMENTO_CTR}</Text>
     
                     <Text style={styles.cliente}>
-                        {item.COD_CTR}
+                        {item.NOME_CLI.length > 16 ? item.NOME_CLI.slice(0, 16) + "..." : item.NOME_CLI}
                     </Text>
     
                     <Text style={styles.valor}>
                         {UtilitiesService.formatarValor(item.VLRPAGO_CTR)}
                     </Text>
     
-                    <Text style={styles.formaPagamento}>
-                        {item.COD_VENDA}
+                    <Text style={styles.baixa}>
+                        {item.COD_BAIXA}
                     </Text>
                 </View>
     
@@ -111,7 +157,7 @@ export default function Recebimentos() {
         <ItemRecebimento 
             key={item.COD_CTR}
             item={item} 
-            onPress={() => {}}
+            onPress={() => {router.push(`/recebimento-details?id=${item.COD_CTR}`)}}
         />
     ), []);
 
@@ -126,8 +172,8 @@ export default function Recebimentos() {
                             style={[styles.navBar, { 
                                 transform: [{
                                     translateY: scrollY.interpolate({
-                                        inputRange: [50, 150],
-                                        outputRange: [-50, 0], 
+                                        inputRange: [100, 200],
+                                        outputRange: [-100, 0], 
                                         extrapolate: 'clamp'
                                     })
                                 }]
@@ -156,6 +202,15 @@ export default function Recebimentos() {
                                         totalInfo={`${totalRecebimentos || 0} recebimentos`} 
                                         icon='arrow-down-right'
                                     />
+                                     <TouchableOpacity
+                                        style={styles.selectButton}
+                                        onPress={() => setIsModalVisible(true)}
+                                    >
+                                        <Text style={styles.selectButtonText}>
+                                            {selectedFormaPagamento ? selectedFormaPagamento.DESCRICAO : 'TODAS AS FORMAS DE PAGAMENTO'}
+                                        </Text>
+                                        <Feather name="chevron-down" size={18} color={colors.cyan[500]} />
+                                    </TouchableOpacity>
                                 </View>
                             }
                             ref={flatListRef}
@@ -187,6 +242,36 @@ export default function Recebimentos() {
                             )}
                             renderItem={renderItem} 
                         />
+
+                        <Modal
+                            visible={isModalVisible}
+                            transparent={true}
+                            animationType="fade"
+                            onRequestClose={() => setIsModalVisible(false)}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContent}>
+                                    <Text style={styles.modalTitle}>Selecione a forma de pagamento</Text>
+                                    <FlatList
+                                        data={formasPagamento}
+                                        keyExtractor={(item) => String(item.CODIGO)}
+                                        renderItem={renderFormaPagamentoItem}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.clearSelectionButton}
+                                        onPress={handleClearSelection}
+                                    >
+                                        <Text style={styles.clearSelectionText}>Limpar Seleção</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.closeButton}
+                                        onPress={() => setIsModalVisible(false)}
+                                    >
+                                        <Text style={styles.closeButtonText}>Fechar</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
                     </>
                 )
             }
@@ -306,7 +391,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: colors.gray[500]
     },
-    formaPagamento: {
+    baixa: {
         fontSize: 12,
         color: colors.gray[500],
         marginTop: 5
@@ -319,5 +404,65 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: colors.gray[500],
         fontWeight: 300
+    },
+    selectButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: "space-between",
+        backgroundColor: colors.cyan[100],
+        padding: 10,
+        marginTop: 10,
+        borderRadius: 5,
+    },
+    selectButtonText: {
+        marginRight: 10,
+        color: colors.cyan[700],
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 500,
+        marginBottom: 10
+    },
+    formaPagamentoItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.gray[200],
+    },
+    formaPagamentoText: {
+        color: colors.gray[500],
+    },
+    closeButton: {
+        marginTop: 10,
+        backgroundColor: colors.red[500],
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    clearSelectionButton: {
+        marginTop: 30,
+        backgroundColor: colors.gray[500],
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    clearSelectionText: {
+        color: 'white',
+        fontSize: 16,
     }
 });

@@ -4,7 +4,7 @@ import { DateFilter } from "@/models/dates";
 
 type DateFilterContextType = {
     dateFilter: DateFilter | null;
-    updateDateFilter: (dateFilter: DateFilter) => Promise<void>;
+    updateDateFilter: (dateFilter: DateFilter | null) => Promise<void>;
 };
 
 const DateFilterContext = createContext<DateFilterContextType | undefined>(undefined);
@@ -27,10 +27,14 @@ export const DateFilterProvider = ({ children }: { children: React.ReactNode }) 
         loadDateFilter();
     }, []);
 
-    const updateDateFilter = async (dateFilter: DateFilter) => {
+    const updateDateFilter = async (dateFilter: DateFilter | null) => {
         try {
-            await AsyncStorage.setItem("@dateFilter", JSON.stringify(dateFilter));
+            if(dateFilter) {
+                await AsyncStorage.setItem("@dateFilter", JSON.stringify(dateFilter));
+            }
+
             setDateFilter(dateFilter);
+
         } catch (error) {
             console.error("Erro ao filtro de data:", error);
         }

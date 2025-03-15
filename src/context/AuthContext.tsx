@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthResponse } from "@/models/auth";
+import { useEmpresaCaixa } from "./EmpresaCaixaContext";
 
 type AuthContextType = {
     authData: AuthResponse | null;
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [authData, setAuthData] = useState<AuthResponse | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { updateEmpresa, updateCaixa } = useEmpresaCaixa(); 
 
     useEffect(() => {
         const loadAuthData = async () => {
@@ -43,8 +45,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = async () => {
         try {
-            await AsyncStorage.removeItem("@authData");
+            await AsyncStorage.clear();
             setAuthData(null);
+            updateEmpresa(null);
+            updateCaixa(null);
         } catch (error) {
             console.error("Erro ao remover usuário:", error);
         }

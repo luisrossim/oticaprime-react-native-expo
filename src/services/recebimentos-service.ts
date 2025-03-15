@@ -1,7 +1,7 @@
-import { RecebimentoPageable, RecebimentoSummary } from "@/models/recebimento";
+import { Recebimento, RecebimentoPageable } from "@/models/recebimento";
 import { AxiosService } from "./axios-service";
 
-export class RecebimentosService extends AxiosService<RecebimentoSummary> {
+export class RecebimentosService extends AxiosService<Recebimento> {
 
     constructor(token?: string) {
         super('/recebimentos', token);

@@ -2,8 +2,8 @@ import { AxiosService } from "./axios-service";
 import { Company, EmpresaReports } from "@/models/company";
 
 export class EmpresaService extends AxiosService<Company> {
-    constructor() {
-        super('/empresa');
+    constructor(token?: string) {
+        super('/empresa', token);
     }
 
     async getReports(params: Record<string, any>): Promise<EmpresaReports> {

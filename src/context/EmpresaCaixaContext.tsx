@@ -6,8 +6,8 @@ import { Caixa } from "@/models/caixa";
 type EmpresaCaixaContextType = {
     selectedEmpresa: Company | null;
     selectedCaixa: Caixa | null;
-    updateEmpresa: (empresa: Company) => Promise<void>;
-    updateCaixa: (caixa: Caixa) => Promise<void>;
+    updateEmpresa: (empresa: Company | null) => Promise<void>;
+    updateCaixa: (caixa: Caixa | null) => Promise<void>;
 };
 
 const EmpresaCaixaContext = createContext<EmpresaCaixaContextType | undefined>(undefined);
@@ -32,10 +32,12 @@ export const EmpresaCaixaProvider = ({ children }: { children: React.ReactNode }
         loadData();
     }, []);
 
-    const updateEmpresa = async (empresa: Company) => {
+    const updateEmpresa = async (empresa: Company | null) => {
         try {
-            await AsyncStorage.setItem("@empresa", JSON.stringify(empresa));
-            await AsyncStorage.removeItem("@caixa");
+            if(empresa){
+                await AsyncStorage.setItem("@empresa", JSON.stringify(empresa));
+                await AsyncStorage.removeItem("@caixa");
+            }
             setSelectedEmpresa(empresa);
             setSelectedCaixa(null);
         } catch (error) {
@@ -43,7 +45,7 @@ export const EmpresaCaixaProvider = ({ children }: { children: React.ReactNode }
         }
     };
 
-    const updateCaixa = async (caixa: Caixa) => {
+    const updateCaixa = async (caixa: Caixa | null) => {
         try {
             await AsyncStorage.setItem("@caixa", JSON.stringify(caixa));
             setSelectedCaixa(caixa);

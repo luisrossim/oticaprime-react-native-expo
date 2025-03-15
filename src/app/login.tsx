@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard, ActivityIndicator, Alert } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { colors } from "@/utils/constants/colors";
 import { Feather } from "@expo/vector-icons";
 import CustomButton from "@/components/CustomButton";
-import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { AuthRequest, AuthResponse } from "@/models/auth";
 import { UserService } from "@/services/user-service";
 
@@ -16,10 +15,16 @@ export default function Login() {
 
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+
 
     const handleLogin = async () => {
         setLoading(true);
+
+        if (!email || !password) {
+            setLoading(false);
+            Alert.alert("Preencha os campos obrigatórios.");
+            return;
+        }
 
         try {
             const credenciais: AuthRequest = {
@@ -34,8 +39,8 @@ export default function Login() {
                 updateAuth(res);
             }
 
-        } catch (err) {
-            setError(`Erro ao buscar vendas.`);
+        } catch (err: any) {
+            Alert.alert(err.response.data.message || err);
             setLoading(false);
         } finally {
             setLoading(false);
@@ -56,35 +61,43 @@ export default function Login() {
                 </ImageBackground>
 
                 <View style={styles.loginContainer}>
-                    <View>
-                        <Text style={styles.title}>Acessar</Text>
-                        <Text style={styles.subtitle}>Informe suas credenciais de acesso.</Text>
+                    <View style={{gap: 20}}>
+                        <View>
+                            <Text style={styles.title}>Acessar</Text>
+                            <Text style={styles.subtitle}>Informe suas credenciais de acesso.</Text>
+                        </View>
 
-                        <TextInput
-                            style={styles.input}
-                            placeholder="E-mail"
-                            keyboardType="email-address"
-                            value={email}
-                            placeholderTextColor="#999"
-                            autoCorrect={false}
-                            spellCheck={false}
-                            autoCapitalize="none"
-                            onChangeText={setEmail}
-                        />
+                        <View style={{gap: 10}}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="E-mail"
+                                keyboardType="email-address"
+                                value={email}
+                                placeholderTextColor="#999"
+                                autoCorrect={false}
+                                spellCheck={false}
+                                autoCapitalize="none"
+                                onChangeText={setEmail}
+                            />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Senha"
+                                placeholderTextColor="#999"
+                                secureTextEntry={!passwordVisible}
+                                value={password}
+                                autoCorrect={false}
+                                spellCheck={false}
+                                autoCapitalize="none"
+                                onChangeText={setPassword}
+                            />
+                        </View>
 
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Senha"
-                            placeholderTextColor="#999"
-                            secureTextEntry={!passwordVisible}
-                            value={password}
-                            autoCorrect={false}
-                            spellCheck={false}
-                            autoCapitalize="none"
-                            onChangeText={setPassword}
-                        />
-
-                        <CustomButton label="Acessar" onPress={handleLogin} />
+                        {loading ? (
+                                <ActivityIndicator size="small" color={colors.blue[500]} style={{padding: 15}} />
+                            ) : (
+                                <CustomButton label="Acessar" onPress={handleLogin} />
+                            )
+                        }
                     </View>
 
                     <View style={{alignItems: "center"}}>
@@ -92,14 +105,10 @@ export default function Login() {
                             ÓTICA PRIME
                         </Text>
                         <Text style={styles.titleFooter}>
-                            {'\u00A9'} ATIP 2025 v.1.0
+                            {'\u00A9'} ATIP 2025 v.1.01
                         </Text>
                     </View>
                 </View>
-
-                {loading && (
-                    <LoadingIndicator />
-                )}
             </View>
         </TouchableWithoutFeedback>
     );
@@ -125,14 +134,12 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontWeight: "300",
-        color: colors.gray[500],
-        marginBottom: 20,
+        color: colors.gray[500]
     },
     input: {
         borderWidth: 1,
         borderColor: colors.gray[300],
         padding: 14,
-        marginBottom: 10,
         borderRadius: 5,
         fontSize: 15
     },

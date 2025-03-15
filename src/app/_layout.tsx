@@ -23,54 +23,63 @@ function MainLayout() {
     if (isLoading) return <LoadingIndicator />;
 
     return (
-        <EmpresaCaixaProvider>
-            <DateFilterProvider>
-                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-                
-                <Stack>
-                    <Stack.Screen 
-                        name="login" 
-                        options={{ 
-                            headerShown: false,
-                            animation: "ios_from_left",
-                            gestureEnabled: false
-                        }} 
-                    />
-                    <Stack.Screen 
-                        name="(tabs)" 
-                        options={{ 
-                            headerShown: false, 
-                            animation: "slide_from_right" 
-                        }} 
-                    />
-                    <Stack.Screen 
-                        name="settings" 
-                        options={{ 
-                            headerShown: false,
-                            animation: "ios_from_right",
-                            headerTitle: "Configurações",
-                            headerBackTitle: "Painel"
-                        }} 
-                    />
-                    <Stack.Screen 
-                        name="venda-details" 
-                        options={{ 
-                            headerShown: false,
-                            animation: "ios_from_right",
-                            headerTitle: "Detalhes",
-                            headerBackTitle: "Vendas"
-                        }} 
-                    />
-                </Stack>
-            </DateFilterProvider>
-        </EmpresaCaixaProvider>
+        <DateFilterProvider>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            
+            <Stack>
+                <Stack.Screen 
+                    name="login" 
+                    options={{ 
+                        headerShown: false,
+                        animation: "ios_from_left",
+                        gestureEnabled: false
+                    }} 
+                />
+                <Stack.Screen 
+                    name="(tabs)" 
+                    options={{ 
+                        headerShown: false, 
+                        animation: "slide_from_right" 
+                    }} 
+                />
+                <Stack.Screen 
+                    name="settings" 
+                    options={{ 
+                        headerShown: false,
+                        animation: "ios_from_right",
+                        headerTitle: "Configurações",
+                        headerBackTitle: "Painel"
+                    }} 
+                />
+                <Stack.Screen 
+                    name="venda-details" 
+                    options={{ 
+                        headerShown: false,
+                        animation: "ios_from_right",
+                        headerTitle: "Detalhes",
+                        headerBackTitle: "Vendas"
+                    }} 
+                />
+                 <Stack.Screen 
+                    name="recebimento-details" 
+                    options={{ 
+                        headerShown: false,
+                        animation: "ios_from_right",
+                        headerTitle: "Detalhes",
+                        headerBackTitle: "Recebimentos"
+                    }} 
+                />
+            </Stack>
+        </DateFilterProvider>
     );
 }
 
 export default function Layout() {
     return (
-        <AuthProvider>
-            <MainLayout />
-        </AuthProvider>
+        <EmpresaCaixaProvider>
+            <AuthProvider>
+                <MainLayout />
+            </AuthProvider>
+        </EmpresaCaixaProvider>
     );
 }

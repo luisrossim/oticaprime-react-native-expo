@@ -1,17 +1,17 @@
+import { DashboardFilterModal } from '@/components/DashboardFilterModal';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { PageTitle } from '@/components/PageTitle';
 import { useAuth } from '@/context/AuthContext';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { EmpresaReports } from '@/models/company';
-import { dashboardFilterData } from '@/models/data/dashboardFilter';
 import { EmpresaService } from '@/services/empresa-service';
 import { colors } from '@/utils/constants/colors';
 import { UtilitiesService } from '@/utils/utilities-service';
-import { Feather } from '@expo/vector-icons';
+import { Feather, FontAwesome6 } from '@expo/vector-icons';
 import { LinearGradient, vec, Text as SKText, useFont } from '@shopify/react-native-skia';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal, Animated } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Animated } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 import { Bar, CartesianChart, useChartPressState } from 'victory-native';
 
@@ -19,10 +19,11 @@ const inter = require('@/assets/fonts/inter.ttf')
 
 export default function Index() {
     const [modalVisible, setModalVisible] = useState(false);
-    const [selectedRange, setSelectedRange] = useState<number>(12);
-    const {selectedEmpresa} = useEmpresaCaixa();
+    const [selectedRange, setSelectedRange] = useState<number>(24);
 
-    const font = useFont(inter, 12)
+    const {selectedEmpresa} = useEmpresaCaixa();
+    const {authData} = useAuth();
+    const font = useFont(inter, 12);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -62,7 +63,7 @@ export default function Index() {
         }
 
         try {
-            const empresaService = new EmpresaService();
+            const empresaService = new EmpresaService(authData?.token);
 
             const params = {
                 id: selectedEmpresa.COD_EMP,
@@ -102,7 +103,9 @@ export default function Index() {
         setDATA1(formattedData1);
         setDATA2(formattedData2);
     };
-    
+
+    const maxValue1 = Math.max(...DATA1.map(d => d.count), 1);
+    const maxValue2 = Math.max(...DATA2.map(d => d.total), 1);
 
     const handleSelectRange = (range: number) => {
         setSelectedRange(range);
@@ -166,8 +169,8 @@ export default function Index() {
                 style={[styles.navBar, { 
                     transform: [{
                         translateY: scrollY.interpolate({
-                            inputRange: [50, 150],
-                            outputRange: [-50, 0], 
+                            inputRange: [100, 200],
+                            outputRange: [-100, 0], 
                             extrapolate: 'clamp'
                         })
                     }]
@@ -195,10 +198,6 @@ export default function Index() {
             >
                 <PageTitle title="Dashboard" size="large" />
 
-                {error && (
-                    <ErrorMessage error={error} />
-                )}
-
                 <TouchableOpacity style={styles.datePickerElement} onPress={() => setModalVisible(true)}>
                     <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.gray[500]} />
                     <Text style={styles.datePickerLabel}>
@@ -206,193 +205,192 @@ export default function Index() {
                     </Text>
                 </TouchableOpacity>
 
-                <View style={{flex: 1, gap: 20, marginBottom: 50}}>
-                    <View style={styles.chartHeader}>
-                        <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.slate[700]}]} name="shopping-bag" size={22} />
-                        <View>
-                            <Text style={styles.subTitle}>
-                                Quantidade de vendas
-                            </Text>
-                            <Text style={styles.descricao}>
-                                {formatRange(selectedRange)}
-                            </Text>
-                        </View>
-                    </View>
-                    
-                    { DATA1 && DATA1.length > 0  ? (
-                        <View style={{height: 300}}>
-                            <CartesianChart
-                                data={DATA1}
-                                chartPressState={state1}
-                                xKey="label"
-                                yKeys={["count"]}
-                                domainPadding={{ left: 30, right: 30, top: 70, bottom: 50 }}
-                                axisOptions={{
-                                    lineColor: colors.gray[200],
-                                    labelColor: colors.gray[500],
-                                    tickCount: {
-                                        x: selectedRange || 1,
-                                        y: 5
-                                    },
-                                    font: font ? font : undefined,
-                                    formatXLabel(value) {
-                                        return value || ""
-                                    },
-                                }}
-                                >
-                                {({ points, chartBounds }) => (
-                                    <>
-                                        <Bar
-                                            chartBounds={chartBounds}
-                                            points={points.count}
-                                            roundedCorners={{
-                                                topLeft: 3,
-                                                topRight: 3,
-                                        }}
-                                        >
-                                            <LinearGradient
-                                                start={vec(0, 0)}
-                                                end={vec(0, 600)}
-                                                colors={["#334155", "#33415500"]}
-                                            />
-                                        </Bar>
-                                        { isActive1 ? 
-                                            <>
-                                                <SKText
-                                                    font={font}
-                                                    x={textXPosition1}
-                                                    y={textYPosition1}
-                                                    text={value1}
-                                                    color={"#334155"}
-                                                />
-                                            </>    
-                                        : null}
-                                    </>
-                                )}
-                            </CartesianChart>
-                        </View>
+                {error 
+                    ? (
+                        <ErrorMessage error={error} />
                     ) : (
-                        <View style={styles.chartEmpty}>
-                            <Text style={{color: colors.gray[500]}}>Não há registros</Text>
-                        </View>
-                    ) }
-                </View>
-
-                <View style={{flex: 1, gap: 20}}>
-                    <View style={styles.chartHeader}>
-                        <Feather style={[styles.chartHeaderIcon, {backgroundColor: colors.emerald[700]}]} name="dollar-sign" size={22} />
-                        <View>
-                            <Text style={styles.subTitle}>
-                                Receita de vendas
-                            </Text>
-                            <Text style={styles.descricao}>
-                                {formatRange(selectedRange)}
-                            </Text>
-                        </View>
-                    </View>
-
-                    { DATA2 && DATA2.length > 0  ? (
-                        <View style={{height: 300}}>
-                            <CartesianChart
-                                data={DATA2}
-                                chartPressState={state2}
-                                xKey="label"
-                                yKeys={["total"]}
-                                domainPadding={{ left: 30, right: 30, top: 70, bottom: 50 }}
-                                axisOptions={{
-                                    lineColor: colors.gray[200],
-                                    labelColor: colors.gray[500],
-                                    tickCount: {
-                                        x: selectedRange || 1,
-                                        y: 5
-                                    },
-                                    font: font ? font : undefined,
-                                    formatXLabel(value) {
-                                    return value || ""
-                                    },
-                                    formatYLabel(value){
-                                        if (value >= 1000) {
-                                            return (value / 1000).toFixed(0) + 'k';
-                                        }
-
-                                        return `R$ ${value}`
-                                    }
-                                }}
-                                >
-                                {({ points, chartBounds }) => (
-                                    <>
-                                        <Bar
-                                            chartBounds={chartBounds}
-                                            points={points.total}
-                                            roundedCorners={{
-                                                topLeft: 3,
-                                                topRight: 3,
-                                        }}
-                                        >
-                                            <LinearGradient
-                                                start={vec(0, 0)}
-                                                end={vec(0, 600)}
-                                                colors={["#047857", "#04785700"]}
-                                            />
-                                        </Bar>
-                                        { isActive2 ? 
-                                            <>
-                                                <SKText
-                                                    font={font}
-                                                    x={textXPosition2}
-                                                    y={textYPosition2}
-                                                    text={value2}
-                                                    color={"#047857"}
-                                                />
-                                            </>    
-                                        : null}
-                                    </>
-                                )}
-                            </CartesianChart>
-                        </View>
-                    ) : (
-                        <View style={styles.chartEmpty}>
-                            <Text style={{color: colors.gray[500]}}>Não há registros</Text>
-                        </View>
-                    ) }
-                </View>
-
-                <Modal animationType="fade" transparent={true} visible={modalVisible}>
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <Text style={styles.modalTitle}>Selecionar Período</Text>
-
-                            {dashboardFilterData.map((filter, index) => (
-                                <TouchableOpacity 
-                                    key={index}
-                                    style={[styles.option, (selectedRange == filter.range) && styles.optionSelected]} 
-                                    onPress={() => handleSelectRange(filter.range)}
-                                >
-                                    <Feather 
-                                        name="calendar" 
+                        <>
+                            <View style={{flex: 1, gap: 20, marginBottom: 50}}>
+                                <View style={styles.chartHeader}>
+                                    <FontAwesome6 
+                                        style={[styles.chartHeaderIcon, {
+                                            backgroundColor: colors.blue[600],
+                                            color: colors.blue[200]
+                                        }]} 
+                                        name="tags" 
                                         size={20} 
-                                        style={
-                                            (selectedRange == filter.range) ? {color: colors.blue[100]} : {color: colors.gray[500]}
-                                        } 
-                                    />
-                                    <Text 
-                                        style={(selectedRange == filter.range) ? styles.optionLabelSelected : styles.optionLabel}
-                                    >
-                                        {filter.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-
-                            <View style={{flexDirection: "row"}}>
-                                <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-                                    <Text style={styles.cancelButtonText}>
-                                        Cancelar
-                                    </Text>
-                                </TouchableOpacity>
+                                        />
+                                    <View>
+                                        <Text style={styles.subTitle}>
+                                            Quantidade de vendas
+                                        </Text>
+                                        <Text style={styles.descricao}>
+                                            {formatRange(selectedRange)}
+                                        </Text>
+                                    </View>
+                                </View>
+                                
+                                { DATA1 && DATA1.length > 0  ? (
+                                    <View style={{height: 300}}>
+                                        <CartesianChart
+                                            data={DATA1}
+                                            chartPressState={state1}
+                                            xKey="label"
+                                            yKeys={["count"]}
+                                            domainPadding={{ left: 30, right: 30, top: 50, bottom: 0 }}
+                                            domain={{ 
+                                                x: DATA1.length === 1 ? [-0.5, 0.5] : DATA1.length === 2 ? [-0.25, 1.25] : [0, DATA1.length - 1],
+                                                y: [0, Math.max(5, maxValue1)]
+                                            }}
+                                            axisOptions={{
+                                                lineColor: colors.gray[200],
+                                                labelColor: colors.gray[500],
+                                                labelOffset: {x: 0, y: 5},
+                                                tickCount: { x: Math.min(selectedRange || 1, 10), y: 5 },
+                                                font: font ? font : undefined,
+                                                formatXLabel(value) {
+                                                    return value || ""
+                                                },
+                                            }}
+                                            >
+                                            {({ points, chartBounds }) => (
+                                                <>
+                                                    <Bar
+                                                        chartBounds={chartBounds}
+                                                        points={points.count}
+                                                        blendMode='darken'
+                                                        barWidth={Math.max(10, 40 - selectedRange * 2)}
+                                                        roundedCorners={{
+                                                            topLeft: 3,
+                                                            topRight: 3,
+                                                        }}
+                                                    >
+                                                        <LinearGradient
+                                                            start={vec(0, 0)}
+                                                            end={vec(0, 600)}
+                                                            colors={["#2563eb", "#2563eb00"]}
+                                                        />
+                                                    </Bar>
+                                                    { isActive1 ? 
+                                                        <>
+                                                            <SKText
+                                                                font={font}
+                                                                x={textXPosition1}
+                                                                y={textYPosition1}
+                                                                text={value1}
+                                                                color={"#2563eb"}
+                                                            />
+                                                        </>    
+                                                    : null}
+                                                </>
+                                            )}
+                                        </CartesianChart>
+                                    </View>
+                                ) : (
+                                    <View style={styles.chartEmpty}>
+                                        <Text style={{color: colors.gray[500]}}>Não há registros</Text>
+                                    </View>
+                                ) }
                             </View>
-                        </View>
-                    </View>
-                </Modal>
+
+                            <View style={{flex: 1, gap: 20}}>
+                                <View style={styles.chartHeader}>
+                                    <FontAwesome6 
+                                        style={[styles.chartHeaderIcon, {
+                                            backgroundColor: colors.emerald[600],
+                                            color: colors.emerald[200]
+                                        }]} 
+                                        name="sack-dollar" 
+                                        size={20}
+                                    />
+                                    <View>
+                                        <Text style={styles.subTitle}>
+                                            Receita de vendas
+                                        </Text>
+                                        <Text style={styles.descricao}>
+                                            {formatRange(selectedRange)}
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                { DATA2 && DATA2.length > 0  ? (
+                                    <View style={{height: 300}}>
+                                        <CartesianChart
+                                            data={DATA2}
+                                            chartPressState={state2}
+                                            xKey="label"
+                                            yKeys={["total"]}
+                                            domainPadding={{ left: 30, right: 30, top: 50, bottom: 0 }}
+                                            domain={{ 
+                                                x: DATA2.length === 1 ? [-0.5, 0.5] : DATA2.length === 2 ? [-0.25, 1.25] : [0, DATA2.length - 1],
+                                                y: [0, Math.max(5, maxValue2)]
+                                            }}
+                                            axisOptions={{
+                                                lineColor: colors.gray[200],
+                                                labelColor: colors.gray[500],
+                                                labelOffset: {x: 0, y: 5},
+                                                tickCount: { x: Math.min(selectedRange || 1, 10), y: 5 },
+                                                font: font ? font : undefined,
+                                                formatXLabel(value) {
+                                                return value || ""
+                                                },
+                                                formatYLabel(value){
+                                                    if (value >= 1000) {
+                                                        return (value / 1000).toFixed(0) + 'k';
+                                                    }
+
+                                                    return `R$ ${value}`
+                                                }
+                                            }}
+                                            >
+                                            {({ points, chartBounds }) => (
+                                                <>
+                                                    <Bar
+                                                        chartBounds={chartBounds}
+                                                        points={points.total}
+                                                        blendMode='darken'
+                                                        barWidth={Math.max(10, 40 - selectedRange * 2)}
+                                                        roundedCorners={{
+                                                            topLeft: 3,
+                                                            topRight: 3,
+                                                        }}
+                                                    >
+                                                        <LinearGradient
+                                                            start={vec(0, 0)}
+                                                            end={vec(0, 600)}
+                                                            colors={["#059669", "#05966900"]}
+                                                        />
+                                                    </Bar>
+                                                    { isActive2 ? 
+                                                        <>
+                                                            <SKText
+                                                                font={font}
+                                                                x={textXPosition2}
+                                                                y={textYPosition2}
+                                                                text={value2}
+                                                                color={"#059669"}
+                                                            />
+                                                        </>    
+                                                    : null}
+                                                </>
+                                            )}
+                                        </CartesianChart>
+                                    </View>
+                                ) : (
+                                    <View style={styles.chartEmpty}>
+                                        <Text style={{color: colors.gray[500]}}>Não há registros</Text>
+                                    </View>
+                                ) }
+                            </View>
+                        </>
+                    )
+                }
+                <DashboardFilterModal
+                    modalVisible={modalVisible}
+                    setModalVisible={setModalVisible}
+                    selectedRange={selectedRange}
+                    handleSelectRange={handleSelectRange}
+                />
             </Animated.ScrollView>
         </View>
     );
@@ -421,12 +419,12 @@ const styles = StyleSheet.create({
         gap: 10
     },
     chartHeaderIcon: {
-        padding: 5,
+        padding: 7,
         borderRadius: 7,
         color: "#FFF"
     },
     datePickerElement: {
-        padding: 5,
+        padding: 7,
         flexDirection: 'row',
         borderWidth: 0.5,
         alignItems: 'center',
@@ -440,64 +438,6 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: 500,
         color: colors.gray[500],
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.6)",
-    },
-    modalContent: {
-        backgroundColor: "#FFF",
-        padding: 20,
-        borderRadius: 10,
-        width: "90%"
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 600,
-        color: colors.gray[800],
-        marginBottom: 20,
-    },
-    option: {
-        paddingVertical: 10,
-        paddingHorizontal: 7,
-        width: "100%",
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        marginVertical: 2
-
-    },
-    optionLabel: {
-        fontSize: 15,
-        color: colors.gray[600]
-    },
-    optionLabelSelected: {
-        fontSize: 15,
-        color: colors.blue[100]
-    },
-    optionSubLabel: {
-        fontSize: 12,
-        fontWeight: 400,
-        color: colors.gray[400],
-    },
-    optionSelected: {
-        backgroundColor: colors.blue[600],
-        borderRadius: 6
-    },
-    cancelButton: {
-        flex: 1,
-        marginTop: 30
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        textAlign: "center",
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        color: colors.gray[600],
-        backgroundColor: colors.gray[200],
-        borderRadius: 6
     },
     chartEmpty: {
         flex: 1, 

@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, SafeAreaView } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert } from "react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
@@ -33,7 +33,7 @@ export default function Settings() {
     setLoading(true);
 
     try {
-      const empresaService = new EmpresaService();
+      const empresaService = new EmpresaService(authData?.token);
       const data = await empresaService.getAll();
       setEmpresas(data);
 
@@ -53,7 +53,7 @@ export default function Settings() {
     setLoading(true);
     
     try {
-      const caixaService = new CaixaService();
+      const caixaService = new CaixaService(authData?.token);
 
       const params = {
         empId: selectedEmpresa.COD_EMP
@@ -70,7 +70,14 @@ export default function Settings() {
   };
 
   const handleLogout = () => {
-    logout();
+    Alert.alert(
+      "Sair",
+      "Tem certeza que deseja sair da conta?",
+      [
+        { text: "Cancelar", onPress: () => {}},
+        { text: "OK", onPress: () => {logout()}}
+      ]
+    );
   }
 
   const openBottomSheet = (type: 'empresa' | 'caixa') => {
@@ -145,7 +152,7 @@ export default function Settings() {
             />
           </View>
 
-          <View>
+          <View style={{marginTop: 50}}>
             <SectionTitle title={`CONTA: ${authData?.login || "null"}`} />
             <SettingsButton 
               icon="log-out" 

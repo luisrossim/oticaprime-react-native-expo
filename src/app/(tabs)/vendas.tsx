@@ -1,24 +1,30 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Animated, Modal } from 'react-native';
 import { VendaService } from '@/services/venda-service';
 import { colors } from '@/utils/constants/colors';
 import { VendaSummary } from '@/models/venda';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ErrorMessage } from '@/components/ErrorMessage';
-import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { PageTitle } from '@/components/PageTitle';
 import { useDateFilter } from '@/context/DateFilterContext';
 import { DateFilterInfo } from '@/components/DateFilterInfo';
 import { FilterInfo } from '@/components/FilterInfo';
+import { useAuth } from '@/context/AuthContext';
+import { FormasPagamentoService } from '@/services/formas-pagamento-service';
+import { FormaPagamento } from '@/models/formaPagamento';
 
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [totalVendas, setTotalVendas] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
+    const [formasPagamento, setFormasPagamento] = useState<FormaPagamento[]>([]);
+    const [selectedFormaPagamento, setSelectedFormaPagamento] = useState<FormaPagamento | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
@@ -27,10 +33,14 @@ export default function Vendas() {
 
     const {selectedEmpresa} = useEmpresaCaixa();
     const {dateFilter} = useDateFilter();
+    const {authData} = useAuth();
 
     const scrollY = useRef(new Animated.Value(0)).current;
     const flatListRef = useRef<FlatList>(null);
 
+    useEffect(() => {
+        fetchFormasPagamento();
+    },[]);
 
     useEffect(() => {
         scrollY.setValue(0); 
@@ -38,7 +48,7 @@ export default function Vendas() {
         setVendasPaginadas([]);
         setIsCompleted(false);
         fetchVendas(1);
-    }, [selectedEmpresa, dateFilter])
+    }, [selectedEmpresa, dateFilter, selectedFormaPagamento])
 
     const fetchVendas = async (pagina: number) => {
         if (loading || isFetchingMore) return;
@@ -53,13 +63,17 @@ export default function Vendas() {
         }
 
         try {
-            const vendaService = new VendaService();
-            const params = {
+            const vendaService = new VendaService(authData?.token);
+            const params: any = {
                 dataInicial: dateFilter?.dataInicial,
                 dataFinal: dateFilter?.dataFinal,
                 empId: selectedEmpresa?.COD_EMP,
                 page: pagina
             };
+
+            if (selectedFormaPagamento) {
+                params.fpId = selectedFormaPagamento.CODIGO;
+            }
 
             const data = await vendaService.getWithPageable(params);
 
@@ -85,6 +99,36 @@ export default function Vendas() {
             setIsFetchingMore(false);
         }
     };
+
+    const fetchFormasPagamento = async () => {
+        try {
+            const formaPagamentoService = new FormasPagamentoService(authData?.token);
+            const data = await formaPagamentoService.getAll();
+            setFormasPagamento(data);
+
+        } catch (err) {
+            setError(`Erro ao buscar formas de pagamento.`);
+        }
+    };
+
+    const handleFormaPagamentoSelect = (formaPagamento: FormaPagamento) => {
+        setSelectedFormaPagamento(formaPagamento);
+        setIsModalVisible(false);
+    };
+
+    const handleClearSelection = () => {
+        setSelectedFormaPagamento(null);
+        setIsModalVisible(false);
+    };
+
+    const renderFormaPagamentoItem = ({ item }: { item: FormaPagamento }) => (
+        <TouchableOpacity
+            style={styles.formaPagamentoItem}
+            onPress={() => handleFormaPagamentoSelect(item)}
+        >
+            <Text style={styles.formaPagamentoText}>{item.DESCRICAO}</Text>
+        </TouchableOpacity>
+    );
 
     const carregarMaisVendas = () => {
         if (!isFetchingMore && !isCompleted && paginaAtual < totalPages) {
@@ -151,8 +195,8 @@ export default function Vendas() {
                             style={[styles.navBar, { 
                                 transform: [{
                                     translateY: scrollY.interpolate({
-                                        inputRange: [50, 150],
-                                        outputRange: [-50, 0], 
+                                        inputRange: [100, 200],
+                                        outputRange: [-100, 0], 
                                         extrapolate: 'clamp'
                                     })
                                 }]
@@ -179,8 +223,17 @@ export default function Vendas() {
                                     <DateFilterInfo />
                                     <FilterInfo 
                                         totalInfo={`${totalVendas || 0} vendas`} 
-                                        icon='arrow-down-right'
+                                        icon='dollar-sign'
                                     />
+                                    <TouchableOpacity
+                                        style={styles.selectButton}
+                                        onPress={() => setIsModalVisible(true)}
+                                    >
+                                        <Text style={styles.selectButtonText}>
+                                            {selectedFormaPagamento ? selectedFormaPagamento.DESCRICAO : 'TODAS AS FORMAS DE PAGAMENTO'}
+                                        </Text>
+                                        <Feather name="chevron-down" size={18} color={colors.green[500]} />
+                                    </TouchableOpacity>
                                 </View>
                             }
                             ref={flatListRef}
@@ -212,6 +265,36 @@ export default function Vendas() {
                             scrollEventThrottle={16}
                             renderItem={renderItem}
                         />
+
+                        <Modal
+                            visible={isModalVisible}
+                            transparent={true}
+                            animationType="fade"
+                            onRequestClose={() => setIsModalVisible(false)}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContent}>
+                                    <Text style={styles.modalTitle}>Selecione a forma de pagamento</Text>
+                                    <FlatList
+                                        data={formasPagamento}
+                                        keyExtractor={(item) => String(item.CODIGO)}
+                                        renderItem={renderFormaPagamentoItem}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.clearSelectionButton}
+                                        onPress={handleClearSelection}
+                                    >
+                                        <Text style={styles.clearSelectionText}>Limpar Seleção</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.closeButton}
+                                        onPress={() => setIsModalVisible(false)}
+                                    >
+                                        <Text style={styles.closeButtonText}>Fechar</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
                     </>
                 )
             }
@@ -337,5 +420,65 @@ const styles = StyleSheet.create({
     headerContainer: {
         padding: 20,
         paddingTop: 50
-    }
+    },
+    selectButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: "space-between",
+        backgroundColor: colors.green[100],
+        padding: 10,
+        marginTop: 10,
+        borderRadius: 5,
+    },
+    selectButtonText: {
+        marginRight: 10,
+        color: colors.green[700],
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 500,
+        marginBottom: 10
+    },
+    formaPagamentoItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.gray[200],
+    },
+    formaPagamentoText: {
+        color: colors.gray[500],
+    },
+    closeButton: {
+        marginTop: 10,
+        backgroundColor: colors.red[500],
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    clearSelectionButton: {
+        marginTop: 30,
+        backgroundColor: colors.gray[500],
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    clearSelectionText: {
+        color: 'white',
+        fontSize: 16,
+    },
 });
