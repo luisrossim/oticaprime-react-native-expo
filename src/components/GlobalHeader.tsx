@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { colors } from "@/utils/constants/colors";
 import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Image, Modal } from "react-native";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
@@ -8,29 +8,42 @@ import { Calendar, LocaleConfig } from "react-native-calendars";
 import { UtilitiesService } from "@/utils/utilities-service";
 import { DateFilter } from "@/models/dates";
 import { useDateFilter } from "@/context/DateFilterContext";
+import { dashboardFilterData } from "@/models/data/dashboardFilter";
+import { useDashboardFilter } from "@/context/DashboardFilterContext";
 
 LocaleConfig.locales['pt-br'] = UtilitiesService.ptBR
 LocaleConfig.defaultLocale = 'pt-br';
 
 export function GlobalHeader() {
     const {selectedEmpresa, selectedCaixa} = useEmpresaCaixa();
-    const [modalVisible, setModalVisible] = useState(false);
-
     const {updateDateFilter} = useDateFilter();
+    const {selectedRange, setSelectedRange} = useDashboardFilter();
+
     const [selectedStartDate, setSelectedStartDate] = useState<string | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<string | null>(null);
     const [markedDates, setMarkedDates] = useState<any>({});
+
+    const [modalDateVisible, setModalDateVisible] = useState(false);
+    const [modalChartVisible, setModalChartVisible] = useState(false);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     
-    const openModal = () => {
-        setModalVisible(true);
+    const openModalDate = () => {
+        setModalDateVisible(true);
     };
 
-    const closeModal = () => {
-        setModalVisible(false);
+    const closeModalDate = () => {
+        setModalDateVisible(false);
+    };
+
+    const openModalChart = () => {
+        setModalChartVisible(true);
+    };
+
+    const closeModalChart = () => {
+        setModalChartVisible(false);
     };
 
 
@@ -108,9 +121,14 @@ export function GlobalHeader() {
         } catch (err: any) {
             setError(`Erro ao salvar intervalo de data.`);
         } finally {
-            closeModal();
+            closeModalDate();
         }
     }
+
+    const handleSelectRange = (range: number) => {
+        setSelectedRange(range);
+        setModalChartVisible(false);
+    };
 
 
     return (
@@ -134,17 +152,24 @@ export function GlobalHeader() {
 
                 <View style={styles.globalHeaderActions}>
                     <TouchableOpacity 
-                        onPress={openModal} 
-                        style={{padding: 5}}
+                        onPress={openModalChart} 
+                        style={{padding: 9}}
                     >
-                        <Feather name="calendar" size={20} color={colors.gray[500]} />
+                        <Feather name="bar-chart-2" size={18} color={colors.gray[500]} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        onPress={openModalDate} 
+                        style={{padding: 9}}
+                    >
+                        <Feather name="calendar" size={18} color={colors.gray[500]} />
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={() => router.push("/settings")} 
-                        style={{paddingVertical: 5, paddingLeft: 5}}
+                        style={{paddingVertical: 9, paddingLeft: 9}}
                     >
-                        <Feather name="settings" size={20} color={colors.gray[500]} />
+                        <Feather name="settings" size={18} color={colors.gray[500]} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -152,8 +177,8 @@ export function GlobalHeader() {
             <Modal
                 animationType="fade"
                 transparent={true}
-                visible={modalVisible}
-                onRequestClose={closeModal}
+                visible={modalDateVisible}
+                onRequestClose={closeModalDate}
             >
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContainer}>
@@ -163,7 +188,6 @@ export function GlobalHeader() {
                             onDayPress={({ dateString }: any) => handleDateSelect(dateString)}
                             markingType={"period"}
                             hideExtraDays
-                            maxDate={new Date().toDateString()}
                             theme ={{
                                 todayTextColor: colors.blue[500],
                                 textMonthFontSize: 16,
@@ -174,7 +198,7 @@ export function GlobalHeader() {
 
                         <View style={styles.buttons}>
                             <TouchableOpacity 
-                                onPress={closeModal} 
+                                onPress={closeModalDate} 
                                 style={{flex: 1}}
                             >
                                 <Text style={styles.footerCancelButton}>
@@ -189,6 +213,51 @@ export function GlobalHeader() {
                             >
                                 <Text style={[selectedEndDate ? styles.footerSubmitButton : styles.footerDisabledButton]}>
                                     Aplicar
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalChartVisible}
+                onRequestClose={closeModalChart}
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Dashboard</Text>
+                            
+                        {dashboardFilterData.map((filter, index) => (
+                            <TouchableOpacity 
+                                key={index}
+                                style={[styles.option, (selectedRange == filter.range) && styles.optionSelected]} 
+                                onPress={() => {handleSelectRange(filter.range)}}
+                            >
+                                <Feather 
+                                    name="calendar" 
+                                    size={20} 
+                                    style={
+                                        (selectedRange == filter.range) ? {color: colors.blue[100]} : {color: colors.gray[500]}
+                                    } 
+                                />
+                                <Text 
+                                    style={(selectedRange == filter.range) ? styles.optionLabelSelected : styles.optionLabel}
+                                >
+                                    {filter.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+
+                        <View style={styles.buttons}>
+                            <TouchableOpacity 
+                                onPress={closeModalChart} 
+                                style={{flex: 1}}
+                            >
+                                <Text style={styles.footerCancelButton}>
+                                    Cancelar
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -224,6 +293,7 @@ const styles = StyleSheet.create({
         gap: 1
     },
     profileText: {
+        fontSize: 13,
         color: colors.gray[900],
         fontWeight: 500
     },
@@ -238,8 +308,7 @@ const styles = StyleSheet.create({
     },
     globalHeaderActions: {
         flexDirection: "row", 
-        alignItems: "center", 
-        gap: 10
+        alignItems: "center"
     },
     modalBackground: {
         flex: 1,
@@ -286,5 +355,29 @@ const styles = StyleSheet.create({
         color: colors.gray[400],
         backgroundColor: "white",
         borderRadius: 6
-    }
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 600,
+        color: colors.gray[800],
+        marginBottom: 22,
+    },
+    optionLabel: {
+        color: colors.gray[500]
+    },
+    optionLabelSelected: {
+        color: colors.blue[50]
+    },
+    optionSelected: {
+        backgroundColor: colors.blue[500],
+        borderRadius: 6
+    },
+    option: {
+        width: "100%",
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 8,
+        gap: 8,
+        marginVertical: 2
+    },
 });

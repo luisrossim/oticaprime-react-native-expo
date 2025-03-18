@@ -38,7 +38,7 @@ export default function VendaDetails() {
                 throw new Error("ID da venda não encontrado.");
             }
 
-            const vendaService = new VendaService(authData?.token);
+            const vendaService = new VendaService(authData?.accessToken);
             const data = await vendaService.getById(vendaId);
             setVenda(data);
 

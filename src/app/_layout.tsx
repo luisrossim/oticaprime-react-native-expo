@@ -5,6 +5,7 @@ import { EmpresaCaixaProvider } from "@/context/EmpresaCaixaContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { DateFilterProvider } from "@/context/DateFilterContext";
+import { DashboardFilterProvider } from "@/context/DashboardFilterContext";
 
 function MainLayout() {
     const { authData, isLoading } = useAuth();
@@ -24,52 +25,55 @@ function MainLayout() {
 
     return (
         <DateFilterProvider>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            <DashboardFilterProvider>
+                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
             
-            <Stack>
-                <Stack.Screen 
-                    name="login" 
-                    options={{ 
-                        headerShown: false,
-                        animation: "ios_from_left",
-                        gestureEnabled: false
-                    }} 
-                />
-                <Stack.Screen 
-                    name="(tabs)" 
-                    options={{ 
-                        headerShown: false, 
-                        animation: "slide_from_right" 
-                    }} 
-                />
-                <Stack.Screen 
-                    name="settings" 
-                    options={{ 
-                        headerShown: false,
-                        animation: "ios_from_right",
-                        headerTitle: "Configurações",
-                        headerBackTitle: "Painel"
-                    }} 
-                />
-                <Stack.Screen 
-                    name="venda-details" 
-                    options={{ 
-                        headerShown: false,
-                        animation: "ios_from_right",
-                        headerTitle: "Detalhes",
-                        headerBackTitle: "Vendas"
-                    }} 
-                />
-                 <Stack.Screen 
-                    name="recebimento-details" 
-                    options={{ 
-                        headerShown: false,
-                        animation: "ios_from_right",
-                        headerTitle: "Detalhes",
-                        headerBackTitle: "Recebimentos"
-                    }} 
-                />
-            </Stack>
+                <Stack>
+                    <Stack.Screen 
+                        name="login" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_left",
+                            gestureEnabled: false
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="(tabs)" 
+                        options={{ 
+                            headerShown: false, 
+                            animation: "ios_from_right" 
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="settings" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_right"
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="venda-details" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_right"
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="recebimento-details" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_right"
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="manual-usuario" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_right"
+                        }} 
+                    />
+                </Stack>
+            </DashboardFilterProvider>
         </DateFilterProvider>
     );
 }

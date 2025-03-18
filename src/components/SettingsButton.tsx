@@ -20,9 +20,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
             style={{padding: 6, backgroundColor: iconColor, borderRadius: 5}}
           />
 
-          <Text style={styles.buttonText}>
-            {title}
-          </Text>
+          <Text>{title}</Text>
         </View>
 
         <Feather name="chevron-right" size={20} color={colors.gray[500]} />
@@ -39,8 +37,5 @@ const styles = StyleSheet.create({
       paddingHorizontal: 20,
       borderBottomWidth: 0.5,
       borderBottomColor: colors.gray[300]
-    },
-    buttonText: {
-      fontWeight: 500
     }
 });

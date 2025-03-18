@@ -32,10 +32,6 @@ export const LineChart: React.FC<LineChartProps> = ({ total, values, type }) => 
                             </Text>
                             <Feather name="chevron-right" size={20} color={colors.gray[500]} />
                         </View>
-
-                        <Text style={styles.subItemText}>
-                            {`${UtilitiesService.formatarValor(item.DESCONTO_TOTAL || 0)} DE DESCONTO`}
-                        </Text>
                         
                         <Text style={styles.subItemText}>
                             {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)} (${percentagem.toFixed(1)}%)`}

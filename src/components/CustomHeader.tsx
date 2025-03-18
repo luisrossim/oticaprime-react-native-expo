@@ -21,7 +21,7 @@ export function CustomHeader({ title }: CustomHeaderProps){
                         <Feather name="chevron-left" size={24} color={colors.gray[900]} />
                     </TouchableOpacity>
 
-                    <Text style={{fontWeight: 500, fontSize: 16, marginBottom: 1}}>
+                    <Text style={{fontWeight: 500, fontSize: 16, marginBottom: 8}}>
                         {title}
                     </Text>
                 </View>
@@ -40,18 +40,18 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.gray[300],
         paddingHorizontal: 20,
         paddingTop: 35,
-        paddingBottom: 12,
+        paddingBottom: 6,
         backgroundColor: "#FFF"
     },
     subContainer: {
         width: "100%", 
         position: "relative", 
         alignItems: "center",
-        padding: 5,
+        padding: 5
     },
     backButton: {
         position: "absolute",
-        padding: 3,
+        padding: 10,
         left: 0,
         bottom: 0
     }

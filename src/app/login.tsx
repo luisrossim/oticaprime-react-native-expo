@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard, ActivityIndicator, Alert } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { colors } from "@/utils/constants/colors";
 import { Feather } from "@expo/vector-icons";
 import CustomButton from "@/components/CustomButton";
 import { AuthRequest, AuthResponse } from "@/models/auth";
-import { UserService } from "@/services/user-service";
+import { AuthService } from "@/services/auth-service";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -32,8 +32,8 @@ export default function Login() {
                 password: password
             }
 
-            const userService = new UserService();
-            const res: AuthResponse = await userService.login(credenciais);
+            const authService = new AuthService();
+            const res: AuthResponse = await authService.login(credenciais);
 
             if (res) {
                 updateAuth(res);
@@ -55,8 +55,8 @@ export default function Login() {
                     style={styles.image}
                     resizeMode="cover"
                 >
-                    <View style={styles.overlay}>
-                        <Feather name="layers" size={32} color={"rgba(255,255,255, 0.9)"} />
+                    <View>
+                        <Feather name="layers" size={32} color={"rgba(255,255,255, 0.7)"} />
                     </View>
                 </ImageBackground>
 
@@ -155,11 +155,5 @@ const styles = StyleSheet.create({
         fontWeight: 300,
         color: colors.gray[400],
         marginBottom: 3
-    },
-    overlay: {
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255, 0.7)",
-        padding: 10,
-        borderRadius: 5
     }
 });

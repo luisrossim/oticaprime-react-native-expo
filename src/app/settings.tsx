@@ -2,7 +2,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Saf
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 import { colors } from "@/utils/constants/colors";
 import { Company } from "@/models/company";
 import { SettingsButton } from "@/components/SettingsButton";
@@ -12,6 +12,7 @@ import { CaixaService } from "@/services/caixa-service";
 import { useAuth } from "@/context/AuthContext";
 import { CustomHeader } from "@/components/CustomHeader";
 import SectionTitle from "@/components/SectionTitle";
+import { router } from "expo-router";
 
 
 export default function Settings() {
@@ -33,7 +34,7 @@ export default function Settings() {
     setLoading(true);
 
     try {
-      const empresaService = new EmpresaService(authData?.token);
+      const empresaService = new EmpresaService(authData?.accessToken);
       const data = await empresaService.getAll();
       setEmpresas(data);
 
@@ -53,7 +54,7 @@ export default function Settings() {
     setLoading(true);
     
     try {
-      const caixaService = new CaixaService(authData?.token);
+      const caixaService = new CaixaService(authData?.accessToken);
 
       const params = {
         empId: selectedEmpresa.COD_EMP
@@ -117,22 +118,20 @@ export default function Settings() {
       <SafeAreaView style={{flex: 1}}>
         <CustomHeader title="Configurações" />
 
-        <View style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 80}}>
           <View style={styles.profile}>
             <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
-                style={styles.image}
+              source={{ uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
+              style={styles.image}
             />
 
-            <View style={{ gap: 5 }}>
-              <Text style={styles.selectedEmpresaTitle}>
-                {selectedEmpresa?.RAZAO_EMP || "Nenhuma empresa selecionada"}
-              </Text>
+            <Text style={styles.selectedEmpresaTitle}>
+              {selectedEmpresa?.RAZAO_EMP || "Nenhuma empresa selecionada"}
+            </Text>
 
-              <Text style={styles.selectedCaixaTitle}>
-                {selectedCaixa?.DESC_CAI || "Nenhum caixa selecionado"}
-              </Text>
-            </View>
+            <Text style={styles.selectedCaixaTitle}>
+              {selectedCaixa?.DESC_CAI || "Nenhum caixa selecionado"}
+            </Text>
           </View>
 
           <View>
@@ -150,6 +149,13 @@ export default function Settings() {
               iconColor={colors.purple[600]}
               onPress={() => openBottomSheet('caixa')}
             />
+
+            <SettingsButton
+              icon="book"
+              title="Manual do usuário"
+              iconColor={colors.slate[600]}
+              onPress={() => {router.navigate('/manual-usuario')}}
+            />
           </View>
 
           <View style={{marginTop: 50}}>
@@ -161,7 +167,7 @@ export default function Settings() {
               onPress={handleLogout}
             />
           </View>
-        </View>
+        </ScrollView>
 
         <BottomSheet
           ref={bottomSheetRef}
@@ -192,7 +198,12 @@ export default function Settings() {
                         selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedOptionButtonEmpresa,
                       ]}
                     >
-                      <Text style={selectedEmpresa?.COD_EMP === empresa.COD_EMP ? styles.selectedOptionTextEmpresa : styles.optionButtonText}>
+                      <Text style={
+                        selectedEmpresa?.COD_EMP === empresa.COD_EMP 
+                          ? styles.selectedOptionTextEmpresa 
+                          : styles.optionButtonText
+                        }
+                      >
                         {empresa.RAZAO_EMP}
                       </Text>
                     </TouchableOpacity>
@@ -220,7 +231,12 @@ export default function Settings() {
                         selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedOptionButtonCaixa,
                       ]}
                     >
-                      <Text style={selectedCaixa?.DESC_CAI === caixa.DESC_CAI ? styles.selectedOptionTextCaixa : styles.optionButtonText}>
+                      <Text style={
+                        selectedCaixa?.DESC_CAI === caixa.DESC_CAI 
+                          ? styles.selectedOptionTextCaixa 
+                          : styles.optionButtonText
+                        }
+                      >
                         {caixa.DESC_CAI}
                       </Text>
                     </TouchableOpacity>
@@ -255,14 +271,11 @@ const styles = StyleSheet.create({
   },
   profile: {
     flexDirection: 'column',
-    gap: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '600',
+    gap: 5,
+    padding: 20,
+    marginBottom: 25
   },
   contentContainer: {
     display: 'flex',
@@ -270,11 +283,6 @@ const styles = StyleSheet.create({
     gap: 2,
     paddingHorizontal: 20,
     paddingVertical: 30
-  },
-  profileTitle: {
-    fontSize: 18,
-    marginBottom: 20,
-    fontWeight: '500',
   },
   optionButtonContainer: {
     flexDirection: 'row',
@@ -300,27 +308,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.gray[600]
   },
-  subcontainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 10
-  },
   selectedEmpresaTitle: {
-    fontSize: 18, 
-    fontWeight: "600", 
+    fontSize: 16, 
+    fontWeight: 600, 
     textAlign: 'center',
     color: colors.gray[900]
   },
   selectedCaixaTitle: {
-    color: colors.gray[500], 
-    textAlign: 'center', 
-    marginBottom: 25
+    textAlign: 'center',
+    color: colors.gray[500]
   },
   image: { 
     width: 85, 
     height: 85, 
-    borderRadius: 50
+    borderRadius: 50,
+    marginBottom: 10
   }
 });

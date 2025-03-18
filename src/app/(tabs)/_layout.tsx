@@ -1,4 +1,4 @@
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { colors } from "@/utils/constants/colors";
 import { Platform, Pressable, View } from "react-native";
@@ -25,11 +25,7 @@ export default function Layout(){
                     animation: "shift",
                     tabBarActiveTintColor: "#FFF",
                     tabBarInactiveTintColor: colors.gray[500],
-                    tabBarStyle: {
-                        backgroundColor: colors.gray[900],
-                        paddingTop: 6,
-                        height: 90
-                    },
+                    tabBarStyle: { backgroundColor: colors.gray[900] },
                     tabBarButton: (props) => (
                         <Pressable {...props} android_ripple={{ borderless: false, color: "transparent" }}>
                             {props.children}

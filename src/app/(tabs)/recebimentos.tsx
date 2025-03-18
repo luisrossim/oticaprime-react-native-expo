@@ -50,11 +50,25 @@ export default function Recebimentos() {
 
     const fetchRecebimentos = async (pagina: number) => {
         if (loading || isFetchingMore) return;
+
+        if (!selectedEmpresa) {
+            setLoading(false);
+            setError("Nenhuma empresa selecionada.");
+            return;
+        }
+
+        
+        if (!selectedCaixa) {
+            setLoading(false);
+            setError("Nenhum caixa selecionado.");
+            return;
+        }
+        
         setLoading(true);
         setError(null);
 
         try {
-            const recebimentosService = new RecebimentosService(authData?.token);
+            const recebimentosService = new RecebimentosService(authData?.accessToken);
             const params: any = {
                 caixaId: selectedCaixa?.COD_CAI,
                 empId: selectedEmpresa?.COD_EMP,
@@ -74,6 +88,7 @@ export default function Recebimentos() {
             setRecebimentosResumo((prev): any => (pagina === 1 ? data.registros : [...prev, ...data.registros]));
             if (pagina >= data.pageable.totalPages) setIsCompleted(true);
             setPaginaAtual(pagina);
+            
         } catch (err: any) {
             setError(`Error: ${err.response.data.message || err}`);
         } finally {
@@ -84,7 +99,7 @@ export default function Recebimentos() {
 
     const fetchFormasPagamento = async () => {
         try {
-            const formaPagamentoService = new FormasPagamentoService(authData?.token);
+            const formaPagamentoService = new FormasPagamentoService(authData?.accessToken);
             const data = await formaPagamentoService.getAll();
             setFormasPagamento(data);
 
@@ -236,9 +251,13 @@ export default function Recebimentos() {
                             )}
                             scrollEventThrottle={16}
                             ListEmptyComponent={() => (
-                                <View style={styles.emptyContainer}>
-                                    <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
-                                </View>
+                                (loading) ? (
+                                    <ActivityIndicator size="large" color={colors.cyan[500]} style={{padding: 40}} />
+                                ) : (
+                                    <View style={styles.emptyContainer}>
+                                        <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+                                    </View>
+                                )
                             )}
                             renderItem={renderItem} 
                         />
@@ -410,12 +429,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: "space-between",
         backgroundColor: colors.cyan[100],
-        padding: 10,
+        padding: 8,
         marginTop: 10,
         borderRadius: 5,
     },
     selectButtonText: {
-        marginRight: 10,
+        fontSize: 13,
         color: colors.cyan[700],
     },
     modalOverlay: {

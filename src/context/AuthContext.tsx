@@ -1,12 +1,14 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AuthResponse } from "@/models/auth";
+import { AuthResponse, RefreshAuthRequest } from "@/models/auth";
 import { useEmpresaCaixa } from "./EmpresaCaixaContext";
+import { AuthService } from "@/services/auth-service";
 
 type AuthContextType = {
     authData: AuthResponse | null;
     isLoading: boolean;
     updateAuth: (AuthResponse: AuthResponse) => Promise<void>;
+    tryRefreshAccessToken: (refreshToken: string) => Promise<AuthResponse | null>;
     logout: () => Promise<void>;
 };
 
@@ -18,28 +20,72 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { updateEmpresa, updateCaixa } = useEmpresaCaixa(); 
 
     useEffect(() => {
-        const loadAuthData = async () => {
-            try {
-                const storedAuthData = await AsyncStorage.getItem("@authData");
-                if (storedAuthData) {
-                    setAuthData(JSON.parse(storedAuthData));
-                }
-            } catch (error) {
-                console.error("Erro ao carregar usuário:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-    
         loadAuthData();
     }, []);
+
+    const loadAuthData = async () => {
+        try {
+            const storedAuthData = await AsyncStorage.getItem("@authData");
+
+            if (!storedAuthData) {
+                throw new Error('Informações do usuário desconhecidas.')
+            }
+
+            const parsedAuthData: AuthResponse = JSON.parse(storedAuthData);
+            setAuthData(parsedAuthData);
+
+            const isTokenValid = await checkJWTExpiration(parsedAuthData.accessToken, parsedAuthData.refreshToken);
+
+            if (!isTokenValid) {
+                throw new Error('Token de acesso inválido.')
+            }
+            
+        } catch (error) {
+            await logout();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const checkJWTExpiration = async (accessToken: string, refreshToken: string) => {
+        try {
+            const authService = new AuthService(accessToken);
+            const response = await authService.checkAccessToken();
+            return true;
+
+        } catch (error) {
+            const updatedAuthData = await tryRefreshAccessToken(refreshToken);
+
+            if (updatedAuthData) {
+                await updateAuth(updatedAuthData); 
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    const tryRefreshAccessToken = async (refreshToken: string) => {
+        try {
+            const request: RefreshAuthRequest = {
+                refreshToken: refreshToken
+            }
+            
+            const authService = new AuthService();
+            const response = await authService.updateAccessToken(request);
+            return response;
+
+        } catch (error) {
+            return null;
+        }
+    };
 
     const updateAuth = async (authData: AuthResponse) => {
         try {
             await AsyncStorage.setItem("@authData", JSON.stringify(authData));
             setAuthData(authData);
         } catch (error) {
-            console.error("Erro ao salvar usuário:", error);
+            await logout();
         }
     };
 
@@ -50,12 +96,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             updateEmpresa(null);
             updateCaixa(null);
         } catch (error) {
-            console.error("Erro ao remover usuário:", error);
+            console.error("Erro ao deslogar usuário:", error);
         }
     };
 
     return (
-        <AuthContext.Provider value={{ authData, isLoading, updateAuth, logout }}>
+        <AuthContext.Provider value={{ authData, isLoading, updateAuth, tryRefreshAccessToken, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { colors } from '@/utils/constants/colors';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
@@ -37,7 +37,7 @@ export default function RecebimentoDetails() {
                 throw new Error("ID do recebimento não encontrado.");
             }
 
-            const recebimentosService = new RecebimentosService(authData?.token);
+            const recebimentosService = new RecebimentosService(authData?.accessToken);
             const data = await recebimentosService.getById(recebimentoId);
             setRecebimento(data);
 
@@ -53,6 +53,12 @@ export default function RecebimentoDetails() {
             router.push(`/venda-details?id=${recebimento.COD_VENDA}`);
         }
     };
+
+    const limitarNome = (nome: string, limite: number = 30) => {
+        if (nome.length <= limite) return nome;
+        const posEspaco = nome.indexOf(' ', limite);
+        return posEspaco === -1 ? nome.slice(0, limite) : nome.slice(0, posEspaco);
+    }
 
 
     if (loading) {
@@ -80,7 +86,7 @@ export default function RecebimentoDetails() {
                     <View style={styles.section}>
                         <RecebimentoDetailsLine 
                             label="CLIENTE"
-                            value={recebimento!.NOME_CLI} 
+                            value={`${limitarNome(recebimento!.NOME_CLI)}`} 
                         />
                         <RecebimentoDetailsLine 
                             label="VALOR CONTA"
@@ -123,7 +129,7 @@ export default function RecebimentoDetails() {
                     <SectionTitle title="VENDA" />
                     <LineDetailButton 
                             label='DETALHES DA VENDA'
-                            onPress={() => {router.push(`/venda-details?id=${recebimento!.COD_VENDA}`)}}
+                            onPress={handleNavigateToVendas}
                         />
                 </ScrollView>
             )}

@@ -53,6 +53,12 @@ export default function Vendas() {
     const fetchVendas = async (pagina: number) => {
         if (loading || isFetchingMore) return;
 
+        if (!selectedEmpresa) {
+            setLoading(false);
+            setError("Nenhuma empresa selecionada.");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -63,7 +69,7 @@ export default function Vendas() {
         }
 
         try {
-            const vendaService = new VendaService(authData?.token);
+            const vendaService = new VendaService(authData?.accessToken);
             const params: any = {
                 dataInicial: dateFilter?.dataInicial,
                 dataFinal: dateFilter?.dataFinal,
@@ -92,8 +98,8 @@ export default function Vendas() {
                 setPaginaAtual(pagina);
             }
 
-        } catch (err) {
-            setError(`Erro ao buscar vendas.`);
+        } catch (err: any) {
+            setError(`Error: ${err.response.data.message || err}`);
         } finally {
             setLoading(false);
             setIsFetchingMore(false);
@@ -102,7 +108,7 @@ export default function Vendas() {
 
     const fetchFormasPagamento = async () => {
         try {
-            const formaPagamentoService = new FormasPagamentoService(authData?.token);
+            const formaPagamentoService = new FormasPagamentoService(authData?.accessToken);
             const data = await formaPagamentoService.getAll();
             setFormasPagamento(data);
 
@@ -254,9 +260,13 @@ export default function Vendas() {
                                 ) : null
                             }
                             ListEmptyComponent={() => (
-                                <View style={styles.emptyContainer}>
-                                    <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
-                                </View>
+                                 (loading) ? (
+                                    <ActivityIndicator size="large" color={colors.cyan[500]} style={{padding: 40}} />
+                                ) : (
+                                    <View style={styles.emptyContainer}>
+                                        <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+                                    </View>
+                                )
                             )}
                             onScroll={Animated.event(
                                 [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -426,12 +436,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: "space-between",
         backgroundColor: colors.green[100],
-        padding: 10,
+        padding: 8,
         marginTop: 10,
         borderRadius: 5,
     },
     selectButtonText: {
-        marginRight: 10,
+        fontSize: 13,
         color: colors.green[700],
     },
     modalOverlay: {

@@ -6,6 +6,14 @@ import { CaixaDetails } from "@/models/caixa";
 import { CaixaService } from "@/services/caixa-service";
 import { colors } from "@/utils/constants/colors";
 import { useEffect, useRef, useState } from "react";
+import { LineChart } from "@/components/LineChart";
+import { UtilitiesService } from "@/utils/utilities-service";
+import { LineDetail } from "@/components/LineDetail";
+import SectionTitle from "@/components/SectionTitle";
+import { Feather } from "@expo/vector-icons";
+import { useDateFilter } from "@/context/DateFilterContext";
+import { useAuth } from "@/context/AuthContext";
+import { DateFilterInfo } from "@/components/DateFilterInfo";
 import {
   View,
   StyleSheet,
@@ -14,16 +22,6 @@ import {
   Animated,
   TouchableOpacity,
 } from "react-native";
-import { LineChart } from "@/components/LineChart";
-import { UtilitiesService } from "@/utils/utilities-service";
-import { LineDetail, LineDetailButton } from "@/components/LineDetail";
-import SectionTitle from "@/components/SectionTitle";
-import { Feather } from "@expo/vector-icons";
-import { useDateFilter } from "@/context/DateFilterContext";
-import { useAuth } from "@/context/AuthContext";
-import { DateFilterInfo } from "@/components/DateFilterInfo";
-import { FilterInfo } from "@/components/FilterInfo";
-import { router } from "expo-router";
 
 export default function Caixa() {
   const [caixaDetails, setCaixaDetails] = useState<CaixaDetails | null>(null);
@@ -51,7 +49,7 @@ export default function Caixa() {
 
     if (!selectedCaixa || !selectedEmpresa) {
       setLoading(false);
-      setError("Error: Nenhum caixa selecionado.");
+      setError("Nenhum caixa selecionado.");
       return;
     }
 
@@ -63,7 +61,7 @@ export default function Caixa() {
         dataFinal: dateFilter?.dataFinal,
       };
 
-      const caixaService = new CaixaService(authData?.token);
+      const caixaService = new CaixaService(authData?.accessToken);
       const result = await caixaService.getCaixaDetails(params);
 
       if (result) {
@@ -186,7 +184,7 @@ export default function Caixa() {
 
                   <LineDetail
                     label="VENDAS CONCLUÍDAS"
-                    value={caixaDetails.VENDAS.TOTAL_VENDAS || 0}
+                    value={(caixaDetails.VENDAS.TOTAL_VENDAS - caixaDetails.VENDAS.TOTAL_CORTESIAS_OUTROS) || 0}
                     isBRL={false}
                   />
                   <LineDetail
@@ -221,11 +219,6 @@ export default function Caixa() {
                       )}
                     </Text>
                   </View>
-
-                  <LineDetailButton
-                    label="CONTAS PENDENTES"
-                    onPress={() => {router.push('/recebimentos')}}
-                  />
                 </View>
               </View>
             )}

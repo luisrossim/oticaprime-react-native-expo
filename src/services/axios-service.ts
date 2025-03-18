@@ -1,4 +1,4 @@
-import { EnvironmentDev } from '@/environments/environment-dev';
+import { Environment } from '@/environments/environment';
 import axios, { AxiosInstance } from 'axios';
 
 export class AxiosService<T> {
@@ -9,7 +9,7 @@ export class AxiosService<T> {
     this.path = path;
     
     this.api = axios.create({
-      baseURL: EnvironmentDev.urlBase
+      baseURL: Environment.urlBase
     });
 
     this.api.interceptors.request.use(

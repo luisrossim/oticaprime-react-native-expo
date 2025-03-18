@@ -1,8 +1,8 @@
-import { DashboardFilterModal } from '@/components/DashboardFilterModal';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { PageTitle } from '@/components/PageTitle';
 import { useAuth } from '@/context/AuthContext';
+import { useDashboardFilter } from '@/context/DashboardFilterContext';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { EmpresaReports } from '@/models/company';
 import { EmpresaService } from '@/services/empresa-service';
@@ -18,8 +18,7 @@ import { Bar, CartesianChart, useChartPressState } from 'victory-native';
 const inter = require('@/assets/fonts/inter.ttf')
 
 export default function Index() {
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedRange, setSelectedRange] = useState<number>(24);
+    const {selectedRange} = useDashboardFilter();
 
     const {selectedEmpresa} = useEmpresaCaixa();
     const {authData} = useAuth();
@@ -63,7 +62,7 @@ export default function Index() {
         }
 
         try {
-            const empresaService = new EmpresaService(authData?.token);
+            const empresaService = new EmpresaService(authData?.accessToken);
 
             const params = {
                 id: selectedEmpresa.COD_EMP,
@@ -77,7 +76,7 @@ export default function Index() {
             }
 
         } catch (err) {
-            setError(`Erro ao buscar relatórios.`);
+            setError(`Error: Erro ao buscar relatórios.` + err);
         } finally {
             setLoading(false);
         }
@@ -106,11 +105,6 @@ export default function Index() {
 
     const maxValue1 = Math.max(...DATA1.map(d => d.count), 1);
     const maxValue2 = Math.max(...DATA2.map(d => d.total), 1);
-
-    const handleSelectRange = (range: number) => {
-        setSelectedRange(range);
-        setModalVisible(false);
-    };
 
 
     const value1 = useDerivedValue(() => {
@@ -198,19 +192,12 @@ export default function Index() {
             >
                 <PageTitle title="Dashboard" size="large" />
 
-                <TouchableOpacity style={styles.datePickerElement} onPress={() => setModalVisible(true)}>
-                    <Feather style={{marginRight: 4}} name="calendar" size={20} color={colors.gray[500]} />
-                    <Text style={styles.datePickerLabel}>
-                        {formatRange(selectedRange)}
-                    </Text>
-                </TouchableOpacity>
-
                 {error 
                     ? (
                         <ErrorMessage error={error} />
                     ) : (
                         <>
-                            <View style={{flex: 1, gap: 20, marginBottom: 50}}>
+                            <View style={{flex: 1, gap: 20, marginBottom: 50, marginTop: 10}}>
                                 <View style={styles.chartHeader}>
                                     <FontAwesome6 
                                         style={[styles.chartHeaderIcon, {
@@ -385,12 +372,6 @@ export default function Index() {
                         </>
                     )
                 }
-                <DashboardFilterModal
-                    modalVisible={modalVisible}
-                    setModalVisible={setModalVisible}
-                    selectedRange={selectedRange}
-                    handleSelectRange={handleSelectRange}
-                />
             </Animated.ScrollView>
         </View>
     );
@@ -422,22 +403,6 @@ const styles = StyleSheet.create({
         padding: 7,
         borderRadius: 7,
         color: "#FFF"
-    },
-    datePickerElement: {
-        padding: 7,
-        flexDirection: 'row',
-        borderWidth: 0.5,
-        alignItems: 'center',
-        borderColor: colors.gray[400],
-        alignSelf: 'flex-start',
-        borderRadius: 5,
-        gap: 3,
-        marginBottom: 55
-    },
-    datePickerLabel: {
-        fontSize: 15,
-        fontWeight: 500,
-        color: colors.gray[500],
     },
     chartEmpty: {
         flex: 1, 
