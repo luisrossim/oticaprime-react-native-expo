@@ -38,9 +38,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300],
-        paddingHorizontal: 20,
-        paddingTop: 35,
-        paddingBottom: 7,
+        paddingHorizontal: 15,
+        paddingTop: 25,
+        paddingBottom: 14,
         backgroundColor: "#FFF"
     },
     subContainer: {

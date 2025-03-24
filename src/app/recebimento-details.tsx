@@ -83,55 +83,61 @@ export default function RecebimentoDetails() {
                         <PageTitle title={`Recebimento #${id}`} size="small" />
                     </View>
 
-                    <SectionTitle title="INFORMAÇÕES" />
-                    <View style={styles.section}>
-                        <RecebimentoDetailsLine 
-                            label="Cliente"
-                            value={`${limitarNome(recebimento!.NOME_CLI)}`} 
-                        />
-                        <RecebimentoDetailsLine 
-                            label="Valor da conta"
-                            value={UtilitiesService.formatarValor(recebimento!.VALOR_CTR)} 
-                        />
-                        <RecebimentoDetailsLine 
-                            label="Vencimento"
-                            value={new Date(recebimento!.VENCTO_CTR).toLocaleDateString()} 
-                        />
-                        <RecebimentoDetailsLine 
-                            label="Desconto"
-                            value={UtilitiesService.formatarValor(recebimento!.DESCONTO_CONCEDIDO)} 
-                        />
-                        <RecebimentoDetailsLine 
-                            label="Acréscimo"
-                            value={UtilitiesService.formatarValor(recebimento!.ACRESCIMO_RECEBIDO)} 
-                        />
-                        <RecebimentoDetailsLine 
-                            label="Pago em"
-                            value={new Date(recebimento!.DTPAGTO_CTR).toLocaleDateString()} 
-                        />
-                        <RecebimentoDetailsLine 
-                            label="Valor pago"
-                            value={UtilitiesService.formatarValor(recebimento!.VLRPAGO_CTR)} 
-                        />
+                    <View style={styles.cardSection}>
+                        <SectionTitle title="INFORMAÇÕES" />
+                        <View style={styles.section}>
+                            <RecebimentoDetailsLine 
+                                label="Cliente"
+                                value={`${limitarNome(recebimento!.NOME_CLI)}`} 
+                            />
+                            <RecebimentoDetailsLine 
+                                label="Vencimento"
+                                value={new Date(recebimento!.VENCTO_CTR).toLocaleDateString()} 
+                            />
+                            <RecebimentoDetailsLine 
+                                label="Valor da conta"
+                                value={UtilitiesService.formatarValor(recebimento!.VALOR_CTR)} 
+                            />
+                            <RecebimentoDetailsLine 
+                                label="Desconto"
+                                value={UtilitiesService.formatarValor(recebimento!.DESCONTO_CONCEDIDO)} 
+                            />
+                            <RecebimentoDetailsLine 
+                                label="Acréscimo"
+                                value={UtilitiesService.formatarValor(recebimento!.ACRESCIMO_RECEBIDO)} 
+                            />
+                            <RecebimentoDetailsLine 
+                                label="Pago em"
+                                value={new Date(recebimento!.DTPAGTO_CTR).toLocaleDateString()} 
+                            />
+                            <RecebimentoDetailsLine 
+                                label="Valor pago"
+                                value={UtilitiesService.formatarValor(recebimento!.VLRPAGO_CTR)} 
+                            />
+                        </View>
                     </View>
 
-                    <SectionTitle title="DOCUMENTO" />
-                    <View style={styles.section}>
-                        <RecebimentoDetailsItem 
-                            icon="file" 
-                            detail={`N° ${recebimento!.NUMDOCUMENTO_CTR}`} 
-                        />
-                        <RecebimentoDetailsItem 
-                            icon="ellipsis" 
-                            detail={`Sequência ${recebimento!.SEQUENCIA_CTR}`} 
-                        />
+                    <View style={styles.cardSection}>
+                        <SectionTitle title="DOCUMENTO" />
+                        <View style={styles.section}>
+                            <RecebimentoDetailsItem 
+                                icon="file" 
+                                detail={`N° ${recebimento!.NUMDOCUMENTO_CTR}`} 
+                            />
+                            <RecebimentoDetailsItem 
+                                icon="ellipsis" 
+                                detail={`SEQUÊNCIA ${recebimento!.SEQUENCIA_CTR}`} 
+                            />
+                        </View>
                     </View>
 
-                    <SectionTitle title="VENDA" />
-                    <LineDetailButton 
-                        label='Detalhes da venda'
-                        onPress={handleNavigateToVendas}
-                    />
+                    <View style={styles.cardSection}>
+                        <SectionTitle title="VENDA" />
+                        <LineDetailButton 
+                            label='Detalhes da venda'
+                            onPress={handleNavigateToVendas}
+                        />
+                        </View>
                 </ScrollView>
             )}
         </SafeAreaView>
@@ -148,20 +154,18 @@ const styles = StyleSheet.create({
         flexDirection: "column", 
         alignItems: 'center',
         marginBottom: 30,
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
         gap: 10
     },
     iconElement: {
-        backgroundColor: colors.cyan[500],
+        backgroundColor: colors.indigo[600],
         borderRadius: 60,
         color: colors.cyan[200],
         padding: 10,
         marginBottom: 2
     },
     section: {
-        paddingVertical: 15,
-        marginBottom: 10,
-        gap: 10
+        paddingTop: 10
     },
     recebimentoText: {
         fontSize: 16,
@@ -184,4 +188,13 @@ const styles = StyleSheet.create({
         marginLeft: 8,
         fontSize: 16,
     },
+    cardSection: {
+        marginTop: 10,
+        marginBottom: 30,
+        marginHorizontal: 15,
+        borderWidth: 1,
+        borderColor: colors.slate[200],
+        borderRadius: 16,
+        overflow: "hidden"
+    }
 });

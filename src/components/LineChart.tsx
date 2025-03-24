@@ -15,8 +15,7 @@ interface LineChartProps {
 
 export const LineChart: React.FC<LineChartProps> = ({ total, values, type }) => {
     return (
-        <View style={styles.container}>
-
+        <View style={{flex: 1}}>
             {values.map((item, index) => {
                 const percentagem = (item.VALOR_TOTAL / total) * 100;
 
@@ -24,25 +23,23 @@ export const LineChart: React.FC<LineChartProps> = ({ total, values, type }) => 
                     <TouchableOpacity 
                         key={index} 
                         style={styles.lineContainer}
-                        onPress={() => {router.push(`${type == 'recebimentos' ? '/recebimentos' : '/vendas'}`)}}
+                        onPress={() => router.push(type === 'recebimentos' ? '/recebimentos' : '/vendas')}
                     >
-                        <View style={{width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
-                            <Text style={styles.label}>
-                                {`${item.DESCRICAO} (${item.QUANTIDADE})`}
-                            </Text>
-                            <Feather name="chevron-right" size={20} color={colors.gray[500]} />
+                        <View style={styles.rowContainer}>
+                            <View style={[styles.colorIndicator, { backgroundColor: getColor(index) }]} />
+                            <View style={styles.textContainer}>
+                                <View style={styles.headerRow}>
+                                    <Text style={styles.label}>
+                                        {`${item.DESCRICAO} (${item.QUANTIDADE})`}
+                                    </Text>
+                                    <Feather name="chevron-right" size={20} color={colors.slate[400]} />
+                                </View>
+                                <Text style={styles.subItemText}>
+                                    {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)} (${percentagem.toFixed(1)}%)`}
+                                </Text>
+                                <View style={[styles.line, { width: `${percentagem}%`, backgroundColor: getColor(index) }]} />
+                            </View>
                         </View>
-                        
-                        <Text style={styles.subItemText}>
-                            {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)} (${percentagem.toFixed(1)}%)`}
-                        </Text>
-
-                        <View
-                            style={[
-                                styles.line,
-                                { width: `${percentagem}%`, backgroundColor: getColor(index) },
-                            ]}
-                        />
                     </TouchableOpacity>
                 );
             })}
@@ -57,31 +54,38 @@ const getColor = (index: number) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
-    title: {
-        fontSize: 24,
-        marginBottom: 20,
-    },
     lineContainer: {
-        flexDirection: "column",
-        padding: 20,
-        gap: 5,
-        width: "100%",
-        borderBottomWidth: 0.5,
-        borderBottomColor: colors.gray[300]
+        padding: 20
+    },
+    rowContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+    colorIndicator: {
+        width: 15,
+        height: 15,
+        borderRadius: 60,
+    },
+    textContainer: {
+        flex: 1,
+    },
+    headerRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
     },
     label: {
-        fontWeight: 500,
-        color: colors.gray[900]
-    },
-    line: {
-        height: 4,
-        marginTop: 5
+        fontWeight: 600,
+        color: colors.slate[700],
     },
     subItemText: {
         fontSize: 13,
-        color: colors.gray[500]
+        color: colors.slate[500],
+    },
+    line: {
+        height: 4,
+        borderRadius: 2,
+        marginTop: 5,
     },
 });

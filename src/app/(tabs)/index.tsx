@@ -1,4 +1,4 @@
-import { ChartHeader } from '@/components/ChartHeader';
+import { ChartContainer } from '@/components/ChartContainer';
 import { CustomBarChart } from '@/components/CustomBarChart';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
@@ -10,7 +10,6 @@ import { EmpresaReports } from '@/models/company';
 import { EmpresaService } from '@/services/empresa-service';
 import { colors } from '@/utils/constants/colors';
 import { UtilitiesService } from '@/utils/utilities-service';
-import { Feather} from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Text, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
@@ -119,7 +118,7 @@ export default function Index() {
                             <Text style={{color: colors.slate[500], fontWeight: 300}}>Acompanhe o desempenho da sua empresa através de gráficos interativos.</Text>
                         </View>
 
-                        <ChartHeader
+                        <ChartContainer
                             title='Quantidade de vendas'
                             selectedRange={selectedRange}
                             icon='shopping-bag'
@@ -133,9 +132,9 @@ export default function Index() {
                                     <Text style={{color: colors.slate[500]}}>Sem registros</Text>
                                 </View>
                             )}
-                        </ChartHeader>
+                        </ChartContainer>
 
-                        <ChartHeader
+                        <ChartContainer
                             title='Receita de vendas'
                             selectedRange={selectedRange}
                             icon='dollar-sign'
@@ -209,9 +208,9 @@ export default function Index() {
                             ) : (
                                 <Text style={styles.empty}>Sem registros</Text>
                             )}
-                        </ChartHeader>
+                        </ChartContainer>
 
-                        <ChartHeader
+                        <ChartContainer
                             title='Análise dos vendedores'
                             selectedRange={selectedRange}
                             icon='users'
@@ -221,9 +220,9 @@ export default function Index() {
                             <Text style={styles.empty}>
                                 Em breve
                             </Text>
-                        </ChartHeader>
+                        </ChartContainer>
 
-                        <ChartHeader
+                        <ChartContainer
                             title='Formas de pagamento'
                             selectedRange={selectedRange}
                             icon='credit-card'
@@ -233,7 +232,7 @@ export default function Index() {
                             <Text style={styles.empty}>
                                 Em breve
                             </Text>
-                        </ChartHeader>
+                        </ChartContainer>
                     </ScrollView>
                 )
             }
@@ -319,6 +318,7 @@ const styles = StyleSheet.create({
         textAlign: "center", 
         paddingBottom: 50, 
         fontWeight: 300,
+        fontSize: 13,
         color: colors.slate[500]
     }
 });

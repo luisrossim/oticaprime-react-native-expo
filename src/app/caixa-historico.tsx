@@ -13,9 +13,8 @@ import { LineDetail } from '@/components/LineDetail';
 import SectionTitle from '@/components/SectionTitle';
 import { PageTitle } from '@/components/PageTitle';
 import { UtilitiesService } from '@/utils/utilities-service';
-import { FilterInfo } from '@/components/FilterInfo';
-import { DateFilterInfo } from '@/components/DateFilterInfo';
-import { FilterOrdem } from '@/components/FilterOrdem';
+import { FilterInfoPage } from '@/components/FilterInfoPage';
+import { LoadingIndicator } from '@/components/LoadingIndicator';
 
 type IconName = "arrow-up" | "arrow-down" | "circle";
 
@@ -111,15 +110,27 @@ export default function CaixaHistorico() {
         }
     };
 
+    const handleDateText = (): string => {
+        if (!dateFilter) {
+            return "-";
+        }
+
+        if (dateFilter?.dataInicial == dateFilter?.dataFinal) {
+            return String(dateFilter?.dataInicial);
+        }
+
+        return `${String(dateFilter?.dataInicial)} até ${String(dateFilter?.dataFinal)}`
+    }
+
     const getIconConfig = (record: CaixaLancamentosHistorico): { name: IconName, backgroundColor: string } => {
         if (record.FLAG_SOMAR.includes('S')) {
             if (record.DEB_CRED.includes('D')) {
-                return { name: "arrow-up", backgroundColor: colors.red[500] };
+                return { name: "arrow-up", backgroundColor: colors.red[600] };
             } else {
-                return { name: "arrow-down", backgroundColor: colors.green[500] };
+                return { name: "arrow-down", backgroundColor: colors.emerald[600] };
             }
         } 
-        return { name: "circle", backgroundColor: colors.slate[500] };
+        return { name: "circle", backgroundColor: colors.slate[400] };
     };
 
     const ItemHistorico = React.memo(({ item, onPress }: { item: CaixaLancamentosHistorico, onPress: (item: CaixaLancamentosHistorico) => void }) => {
@@ -175,25 +186,32 @@ export default function CaixaHistorico() {
             setSelectedItem(null);
         }, 200);
     };
+
+    
+    if (error) {
+        return <ErrorMessage error={error} />
+    }
     
     
     return (
         <View style={styles.container}>
-            <CustomHeader title="Analítico do caixa" />
+            <CustomHeader title="Saldo e Lançamentos" />
 
-            {error
-                ? (
-                    <ErrorMessage error={error} />
-                ) : (
-                    <FlatList
-                        ListHeaderComponent={
-                            <View>
+            {loading ? (
+                <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
+                    <ActivityIndicator size="large" color={colors.sky[500]} style={{padding: 40}} />
+                </View>
+            ) : (
+                <FlatList
+                    ListHeaderComponent={
+                        <View>
+                            <View style={styles.cardSection}>
                                 <View style={{backgroundColor: colors.blue[600], padding: 40, gap: 10}}>
                                     <Text style={{color: colors.cyan[300], textAlign: "center"}}>
                                         {selectedCaixa?.DESC_CAI}
                                     </Text>  
 
-                                    <Text style={{textAlign: "center", fontSize: 32, fontWeight: 600, color: colors.cyan[200]}}>
+                                    <Text style={{textAlign: "center", fontSize: 32, fontWeight: 500, color: colors.cyan[200]}}>
                                         {UtilitiesService.formatarValor(analitico?.saldoFinal || 0)}
                                     </Text>
 
@@ -205,18 +223,21 @@ export default function CaixaHistorico() {
                                 </View>
 
                                 <View>
-                                    <SectionTitle title={`ATUAL (${dateFilter?.dataInicial} até ${dateFilter?.dataFinal})`} />
+                                    <SectionTitle 
+                                        title="ATUAL"
+                                        subtitle={handleDateText()}
+                                    />
                                     <LineDetail
-                                        label="Saída"
+                                        label="SAÍDA"
                                         value={analitico?.saldoAtual.debito || 0}
                                         isBRL={true}
                                         color={colors.red[600]}
                                     />
                                     <LineDetail
-                                        label="Entrada"
+                                        label="ENTRADA"
                                         value={analitico?.saldoAtual.credito || 0}
                                         isBRL={true}
-                                        color={colors.green[600]}
+                                        color={colors.emerald[600]}
                                     />
                                     <LineDetail
                                         label="Saldo"
@@ -227,72 +248,69 @@ export default function CaixaHistorico() {
                                 </View>
 
                                 <View>
-                                    <SectionTitle title={`ANTERIOR (até ${dateFilter?.dataInicial})`} />
+                                    <SectionTitle 
+                                        title="ANTERIOR" 
+                                        subtitle={`até ${dateFilter?.dataInicial}`}
+                                    />
                                     <LineDetail
-                                        label="Saída"
+                                        label="SAÍDA"
                                         value={analitico?.saldoAnterior.debito || 0}
                                         isBRL={true}
                                         color={colors.red[600]}
                                     />
                                     <LineDetail
-                                        label="Entrada"
+                                        label="ENTRADA"
                                         value={analitico?.saldoAnterior.credito || 0}
                                         isBRL={true}
-                                        color={colors.green[600]}
+                                        color={colors.emerald[600]}
                                     />
-                                     <LineDetail
-                                        label="Saldo"
+                                        <LineDetail
+                                        label="SALDO"
                                         value={analitico?.saldoAnterior.saldo || 0}
                                         isBRL={true}
                                         color={colors.blue[600]}
                                     />
                                 </View>
-
-                                <View style={{paddingHorizontal: 20, paddingTop: 50, marginBottom: 10}}>
-                                    <PageTitle 
-                                        title="Lançamentos" 
-                                        size="large" 
-                                    />
-                                    <DateFilterInfo />
-                                    <FilterInfo 
-                                        totalInfo={`${totalLancamentos || 0} lançamentos`} 
-                                        icon='repeat'
-                                    />
-                                    <FilterOrdem />     
-                                </View>
                             </View>
-                        }
-                        ref={flatListRef}
-                        data={historico}
-                        keyExtractor={(item, index) => String(item.CODIGO) + "_" + index}
-                        initialNumToRender={20}
-                        maxToRenderPerBatch={20}
-                        showsVerticalScrollIndicator={false}
-                        ListFooterComponent={
-                            isFetchingMore ? (
-                                <ActivityIndicator size="large" color={colors.slate[500]} style={{padding: 40}} />
-                            ) : !isCompleted && historico.length > 0 ? (
-                                <TouchableOpacity 
-                                    style={styles.loadMoreButton}
-                                    onPress={carregarMaisHistorico} 
-                                >
-                                    <Feather size={25} color={colors.slate[700]} name="plus" />
-                                </TouchableOpacity>
-                            ) : null
-                        }
-                        ListEmptyComponent={() => (
-                            (loading) ? (
-                                <ActivityIndicator size="large" color={colors.slate[500]} style={{padding: 40}} />
-                            ) : (
-                                <View style={styles.emptyContainer}>
-                                    <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
-                                </View>
-                            )
-                        )}
-                        renderItem={renderItem}
-                    />
-                )
-            }
+
+                            <View style={{paddingHorizontal: 20, paddingTop: 50, marginBottom: 10}}>
+                                <PageTitle 
+                                    title="Lançamentos" 
+                                    size="large" 
+                                />
+                                <FilterInfoPage 
+                                    totalInfo={`${totalLancamentos || 0} lançamentos`} 
+                                    icon='repeat'
+                                />       
+                            </View>
+                        </View>
+                    }
+                    ref={flatListRef}
+                    data={historico}
+                    keyExtractor={(item, index) => String(item.CODIGO) + "_" + index}
+                    initialNumToRender={20}
+                    maxToRenderPerBatch={20}
+                    showsVerticalScrollIndicator={false}
+                    ListFooterComponent={
+                        isFetchingMore ? (
+                            <ActivityIndicator size="large" color={colors.slate[500]} style={{padding: 40}} />
+                        ) : !isCompleted && historico.length > 0 ? (
+                            <TouchableOpacity 
+                                style={styles.loadMoreButton}
+                                onPress={carregarMaisHistorico} 
+                            >
+                                <Feather size={25} color={colors.slate[700]} name="plus" />
+                            </TouchableOpacity>
+                        ) : null
+                    }
+                    ListEmptyComponent={() => (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+                        </View>
+                    )}
+                    renderItem={renderItem}
+                />
+            )}
 
             {selectedItem && (
                 <Modal
@@ -306,7 +324,7 @@ export default function CaixaHistorico() {
                             <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Detalhes</Text>
                                 <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                                    <Feather name="x" size={20} color={colors.gray[500]} />
+                                    <Feather name="x" size={20} style={styles.iconModal} />
                                 </TouchableOpacity>
                             </View>
 
@@ -357,7 +375,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
-        paddingTop: 50,
+        paddingVertical: 50,
     },
     emptyText: {
         fontSize: 16,
@@ -445,10 +463,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        backgroundColor: '#FFF',
+        width: '92%',
         padding: 20,
-        borderRadius: 10,
-        width: '90%',
+        backgroundColor: '#FFF',
+        borderRadius: 20
     },
     modalTitle: {
         fontSize: 18,
@@ -468,8 +486,18 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 20
     },
-    closeButtonText: {
-        color: '#FFF',
-        fontSize: 16,
+    iconModal: {
+        color: colors.slate[500],
+        backgroundColor: colors.slate[100],
+        borderRadius: 60,
+        padding: 5
+    },
+    cardSection: {
+        marginTop: 20,
+        marginHorizontal: 15,
+        borderWidth: 1,
+        borderColor: colors.slate[200],
+        borderRadius: 16,
+        overflow: "hidden"
     }
 });

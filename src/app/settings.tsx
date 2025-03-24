@@ -138,27 +138,25 @@ export default function Settings() {
             </Text>
           </View>
 
-          <View>
-            <SectionTitle title="INFORMAÇÕES" />
-
+          <View style={styles.actionsContainer}>
             <SettingsButton
               icon="briefcase"
               title="Selecionar empresa"
-              iconColor={colors.slate[500]}
+              iconColor={colors.slate[600]}
               onPress={() => openBottomSheet('empresa')}
             />
 
             <SettingsButton
               icon="box"
               title="Selecionar caixa"
-              iconColor={colors.slate[500]}
+              iconColor={colors.slate[600]}
               onPress={() => openBottomSheet('caixa')}
             />
 
             <SettingsButton
               icon="book"
               title="Manual do usuário"
-              iconColor={colors.slate[500]}
+              iconColor={colors.slate[600]}
               onPress={() => {router.navigate('/manual-usuario')}}
             />
 
@@ -300,8 +298,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 60,
     marginVertical: 5,
-    borderWidth: 1,
-    borderColor: colors.slate[200]
+    backgroundColor: colors.slate[100]
   },
   selectedOptionButtonEmpresa: {
     backgroundColor: colors.blue[600]
@@ -319,6 +316,7 @@ const styles = StyleSheet.create({
   },
   optionButtonText: {
     fontSize: 13,
+    fontWeight: 500,
     color: colors.slate[500]
   },
   selectedEmpresaTitle: { 
@@ -337,5 +335,14 @@ const styles = StyleSheet.create({
     height: 90, 
     borderRadius: 50,
     marginBottom: 10
+  },
+  actionsContainer: {
+    marginHorizontal: 15,
+    paddingVertical: 10, 
+    borderRadius: 16, 
+    borderWidth: 1,
+    borderColor: colors.slate[200],
+    backgroundColor: colors.slate[100],
+    overflow: "hidden"
   }
 });

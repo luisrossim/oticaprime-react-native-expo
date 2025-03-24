@@ -4,42 +4,30 @@ import { PageTitle } from "@/components/PageTitle";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import { CaixaService } from "@/services/caixa-service";
 import { colors } from "@/utils/constants/colors";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { LineChart } from "@/components/LineChart";
 import { UtilitiesService } from "@/utils/utilities-service";
 import { LineDetail, LineDetailButton } from "@/components/LineDetail";
-import SectionTitle from "@/components/SectionTitle";
 import { useDateFilter } from "@/context/DateFilterContext";
 import { useAuth } from "@/context/AuthContext";
-import { DateFilterInfo } from "@/components/DateFilterInfo";
 import { router } from "expo-router";
-import {
-  View,
-  StyleSheet,
-  Text,
-  ScrollView,
-  Animated,
-  TouchableOpacity,
-} from "react-native";
+import { View, StyleSheet, Text, ScrollView } from "react-native";
 import { CaixaDetails } from "@/models/caixa";
+import SectionTitle from "@/components/SectionTitle";
 
 
 export default function Caixa() {
   const [caixaDetails, setCaixaDetails] = useState<CaixaDetails | null>(null);
-  const { selectedCaixa, selectedEmpresa } = useEmpresaCaixa();
+  const {selectedCaixa, selectedEmpresa} = useEmpresaCaixa();
 
   const { dateFilter } = useDateFilter();
   const { authData } = useAuth();
-
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const scrollViewRef = useRef<ScrollView>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   
   useEffect(() => {
-    scrollY.setValue(0);
     setCaixaDetails(null);
     fetchCaixaInfo();
   }, [selectedEmpresa, selectedCaixa, dateFilter]);
@@ -82,159 +70,123 @@ export default function Caixa() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{flex: 1}}>
       {error ? (
         <ErrorMessage error={error} />
-      ) : (
-        <>
-          <Animated.View
-            style={[
-              styles.navBar,
-              {
-                transform: [
-                  {
-                    translateY: scrollY.interpolate({
-                      inputRange: [100, 200],
-                      outputRange: [-100, 0],
-                      extrapolate: "clamp",
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            <TouchableOpacity
-              style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}
-              onPress={() =>
-                scrollViewRef.current?.scrollTo({ y: 0, animated: true })
-              }
-            >
-              <Text style={styles.navBarTitle}>Caixa</Text>
-              <Text style={{color: colors.fuchsia[200], fontSize: 13}}>
-                  {String(dateFilter?.dataInicial)} até {String(dateFilter?.dataFinal)}
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+      ) 
+      : (
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={{ paddingBottom: 100 }}
+        >
+          <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
+            <PageTitle title="Caixa" size="large" />
+            <Text style={{color: colors.slate[500], fontWeight: 300}}>Análise de saldo, lançamentos, recebimentos de crediário e outras informações do caixa.</Text>
 
-          <Animated.ScrollView
-            ref={scrollViewRef}
-            style={styles.container}
-            contentContainerStyle={{ paddingBottom: 100 }}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-              { useNativeDriver: true }
+            {error && (
+              <ErrorMessage error={error} />
             )}
-          >
-            <View style={{ paddingHorizontal: 20, marginBottom: 25 }}>
-              <PageTitle title="Caixa" size="large" />
+          </View>
 
-              {error ? (
-                <ErrorMessage error={error} />
-              ) : (
-                <DateFilterInfo />
-              )}
-            </View>
+          {caixaDetails && (
+            <View>
+              <View style={styles.caixaSection}>
+                <SectionTitle title="ANALÍTICO DO CAIXA" />
 
-            {caixaDetails && (
-              <View>
-                <View style={styles.caixaSection}>
-                  <SectionTitle title="ANALÍTICO DO CAIXA" />
+                <LineDetailButton
+                  label="Saldo e Lançamentos"
+                  onPress={() => {router.push("/caixa-historico")}}
+                />
+              </View>
 
-                  <LineDetailButton
-                    label="Saldo e lançamentos"
-                    onPress={() => {router.push("/caixa-historico")}}
-                  />
+              <View style={styles.caixaSection}>
+                <SectionTitle title="TOTAL DE RECEBIMENTO DE CREDIÁRIO" />
+
+                <View style={{ paddingHorizontal: 15 }}>
+                  <Text style={styles.totalValue}>
+                    {UtilitiesService.formatarValor(
+                      caixaDetails.TOTAL_RECEBIDO
+                    )}
+                  </Text>
                 </View>
 
-                <View style={styles.caixaSection}>
-                  <SectionTitle title="TOTAL DE RECEBIMENTO DE CREDIÁRIO" />
+                <LineDetail
+                  label="Baixas"
+                  value={caixaDetails.TOTAL_BAIXAS}
+                  isBRL={false}
+                />
+                <LineDetail
+                  label="Acréscimo recebido"
+                  value={caixaDetails.TOTAL_ACRESCIMO_RECEBIDO}
+                  isBRL={true}
+                />
+                <LineDetail
+                  label="Desconto concedido"
+                  value={caixaDetails.TOTAL_DESCONTO_CONCEDIDO}
+                  isBRL={true}
+                />
+                <LineChart
+                  total={caixaDetails.TOTAL_RECEBIDO}
+                  values={caixaDetails.FORMAS_PAGAMENTO}
+                  type="recebimentos"
+                />
+              </View>
 
-                  <View style={{ paddingHorizontal: 20 }}>
-                    <Text style={styles.totalValue}>
-                      {UtilitiesService.formatarValor(
-                        caixaDetails.TOTAL_RECEBIDO
-                      )}
-                    </Text>
-                  </View>
+              <View style={styles.caixaSection}>
+                <SectionTitle title="ANALÍTICO DE VENDAS" />
 
-                  <LineDetail
-                    label="Baixas"
-                    value={caixaDetails.TOTAL_BAIXAS}
-                    isBRL={false}
-                  />
-                  <LineDetail
-                    label="Acréscimo recebido"
-                    value={caixaDetails.TOTAL_ACRESCIMO_RECEBIDO}
-                    isBRL={true}
-                  />
-                  <LineDetail
-                    label="Desconto concedido"
-                    value={caixaDetails.TOTAL_DESCONTO_CONCEDIDO}
-                    isBRL={true}
-                  />
-                  <LineChart
-                    total={caixaDetails.TOTAL_RECEBIDO}
-                    values={caixaDetails.FORMAS_PAGAMENTO}
-                    type="recebimentos"
-                  />
+                <View style={{ paddingHorizontal: 20 }}>
+                  <Text style={styles.totalValue}>
+                    {UtilitiesService.formatarValor(
+                      caixaDetails.VENDAS.TOTAL_VALOR_VENDAS || 0
+                    )}
+                  </Text>
                 </View>
 
-                <View style={styles.caixaSection}>
-                  <SectionTitle title="ANALÍTICO DE VENDAS" />
+                <LineDetail
+                  label="Vendas concluídas"
+                  value={(caixaDetails.VENDAS.TOTAL_VENDAS - caixaDetails.VENDAS.TOTAL_CORTESIAS_OUTROS) || 0}
+                  isBRL={false}
+                />
+                <LineDetail
+                  label="Cortesias e outros"
+                  value={caixaDetails.VENDAS.TOTAL_CORTESIAS_OUTROS || 0}
+                  isBRL={false}
+                />
+                <LineDetail
+                  label="Canceladas"
+                  value={caixaDetails.VENDAS.TOTAL_VENDAS_CANCELADAS || 0}
+                  isBRL={false}
+                />
+                <LineDetail
+                  label="Desconto em itens"
+                  value={caixaDetails.VENDAS.TOTAL_DESCONTO_VENDAS || 0}
+                  isBRL={true}
+                />
+                <LineChart
+                  total={caixaDetails.VENDAS.TOTAL_VALOR_VENDAS}
+                  values={caixaDetails.VENDAS.FORMAS_PAGAMENTO_VENDAS}
+                  type="vendas"
+                />
+              </View>
 
-                  <View style={{ paddingHorizontal: 20 }}>
-                    <Text style={styles.totalValue}>
-                      {UtilitiesService.formatarValor(
-                        caixaDetails.VENDAS.TOTAL_VALOR_VENDAS || 0
-                      )}
-                    </Text>
-                  </View>
+              <View style={styles.caixaSection}>
+                <SectionTitle title="TOTAL DE CONTAS A RECEBER PENDENTES" />
 
-                  <LineDetail
-                    label="Vendas concluídas"
-                    value={(caixaDetails.VENDAS.TOTAL_VENDAS - caixaDetails.VENDAS.TOTAL_CORTESIAS_OUTROS) || 0}
-                    isBRL={false}
-                  />
-                  <LineDetail
-                    label="Cortesias e outros"
-                    value={caixaDetails.VENDAS.TOTAL_CORTESIAS_OUTROS || 0}
-                    isBRL={false}
-                  />
-                  <LineDetail
-                    label="Canceladas"
-                    value={caixaDetails.VENDAS.TOTAL_VENDAS_CANCELADAS || 0}
-                    isBRL={false}
-                  />
-                  <LineDetail
-                    label="Desconto em itens"
-                    value={caixaDetails.VENDAS.TOTAL_DESCONTO_VENDAS || 0}
-                    isBRL={true}
-                  />
-                  <LineChart
-                    total={caixaDetails.VENDAS.TOTAL_VALOR_VENDAS}
-                    values={caixaDetails.VENDAS.FORMAS_PAGAMENTO_VENDAS}
-                    type="vendas"
-                  />
-                </View>
-
-                <View style={styles.caixaSection}>
-                  <SectionTitle title="TOTAL DE CONTAS A RECEBER PENDENTES" />
-
-                  <View style={{ paddingHorizontal: 20 }}>
-                    <Text style={styles.totalValue}>
-                      {UtilitiesService.formatarValor(
-                        caixaDetails.TOTAL_CONTAS_RECEBER || 0
-                      )}
-                    </Text>
-                    <Text style={{color: colors.gray[400], fontWeight: 300}}>
-                      *de acordo com a data de vencimento
-                    </Text>
-                  </View>
+                <View style={{ paddingHorizontal: 15 }}>
+                  <Text style={styles.totalValue}>
+                    {UtilitiesService.formatarValor(
+                      caixaDetails.TOTAL_CONTAS_RECEBER || 0
+                    )}
+                  </Text>
+                  <Text style={styles.tip}>
+                    *de acordo com a data de vencimento
+                  </Text>
                 </View>
               </View>
-            )}
-          </Animated.ScrollView>
-        </>
+            </View>
+          )}
+        </ScrollView>
       )}
     </View>
   );
@@ -252,7 +204,12 @@ const styles = StyleSheet.create({
   },
   caixaSection: {
     marginTop: 10,
-    marginBottom: 40,
+    marginBottom: 30,
+    marginHorizontal: 15,
+    borderWidth: 1,
+    borderColor: colors.slate[200],
+    borderRadius: 16,
+    overflow: "hidden"
   },
   lineContainer: {
     flexDirection: "column",
@@ -291,4 +248,9 @@ const styles = StyleSheet.create({
     color: colors.fuchsia[200],
     fontWeight: 600,
   },
+  tip: {
+    color: colors.gray[500], 
+    fontWeight: 300, 
+    paddingBottom: 20
+  }
 });

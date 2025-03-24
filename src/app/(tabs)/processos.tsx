@@ -5,15 +5,11 @@ import { Feather } from '@expo/vector-icons';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { PageTitle } from '@/components/PageTitle';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
-import { UtilitiesService } from '@/utils/utilities-service';
 import { useDateFilter } from '@/context/DateFilterContext';
 import { useAuth } from '@/context/AuthContext';
-import { DateFilterInfo } from '@/components/DateFilterInfo';
-import { FilterInfo } from '@/components/FilterInfo';
-import { router } from 'expo-router';
 import { ProcessosLiberadosService } from '@/services/processos-service';
 import { ProcessosLiberados } from '@/models/processosLiberados';
-import { FilterOrdem } from '@/components/FilterOrdem';
+import { FilterInfoPage } from '@/components/FilterInfoPage';
 
 export default function Processos() {
     const { selectedEmpresa, selectedCaixa } = useEmpresaCaixa();
@@ -159,10 +155,8 @@ export default function Processos() {
                                 style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}
                                 onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
                             >
-                                <Text style={styles.navBarTitle}>Processos lib.</Text>
-                                <Text style={{color: colors.slate[700], fontSize: 13}}>
-                                    {String(dateFilter?.dataInicial)} até {String(dateFilter?.dataFinal)}
-                                </Text>
+                                <Text style={styles.navBarTitle}>Processos liberados</Text>
+                                <Feather name="chevron-up" color={colors.slate[700]} />
                             </TouchableOpacity>
                         </Animated.View>
 
@@ -173,12 +167,10 @@ export default function Processos() {
                                         title="Processos liberados" 
                                         size="large" 
                                     />
-                                    <DateFilterInfo />
-                                    <FilterInfo 
+                                    <FilterInfoPage
                                         totalInfo={`${totalProcessos || 0} processos`} 
                                         icon='check-circle'
                                     />
-                                    <FilterOrdem />
                                 </View>
                             }
                             ref={flatListRef}
@@ -230,7 +222,7 @@ export default function Processos() {
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Detalhes</Text>
                                 <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                                    <Feather name="x" size={20} color={colors.slate[500]} />
+                                    <Feather name="x" size={18} style={styles.iconModal} />
                                 </TouchableOpacity>
                             </View>
 
@@ -275,7 +267,7 @@ const styles = StyleSheet.create({
         fontWeight: 600
     },
     headerContainer: {
-        padding: 20,
+        padding: 15,
         paddingTop: 50
     },
     dateContainer: {
@@ -378,10 +370,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        backgroundColor: '#FFF',
+        width: '92%',
         padding: 20,
-        borderRadius: 10,
-        width: '90%',
+        backgroundColor: '#FFF',
+        borderRadius: 20
     },
     modalTitle: {
         fontSize: 18,
@@ -404,5 +396,11 @@ const styles = StyleSheet.create({
     closeButtonText: {
         color: '#FFF',
         fontSize: 16,
+    },
+    iconModal: {
+        color: colors.slate[500],
+        backgroundColor: colors.slate[100],
+        borderRadius: 60,
+        padding: 5
     }
 });

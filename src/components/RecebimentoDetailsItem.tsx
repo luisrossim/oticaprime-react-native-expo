@@ -15,7 +15,7 @@ interface RecebimentoDetailsLineProps {
 export const RecebimentoDetailsItem = (props: RecebimentoDetailsItemProps) => {
     return (
         <View style={styles.recebimentoDetailsItem}>
-            <FontAwesome6 name={props.icon} size={18} color={colors.cyan[600]} style={styles.icon} />
+            <FontAwesome6 name={props.icon} size={15} color={colors.indigo[800]} style={styles.icon} />
             <Text style={styles.recebimentoDetailsText}>
                 {props.detail}
             </Text>
@@ -26,10 +26,10 @@ export const RecebimentoDetailsItem = (props: RecebimentoDetailsItemProps) => {
 export const RecebimentoDetailsLine = (props: RecebimentoDetailsLineProps) => {
     return (
         <View style={styles.recebimentoDetailsLine}>
-            <Text style={{color: colors.gray[700]}}>
+            <Text style={{color: colors.slate[700], fontWeight: 500}}>
                 {props.label}:
             </Text>
-            <Text style={{fontSize: 13, color: colors.gray[500]}}>
+            <Text style={{fontSize: 13, color: colors.slate[500]}}>
                 {props.value}
             </Text>
         </View>
@@ -42,14 +42,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 15,
-        paddingHorizontal: 20
+        paddingHorizontal: 15,
+        marginBottom: 10
     },
     recebimentoDetailsLine: {
         width: "100%",
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: "space-between",
-        paddingHorizontal: 20
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.slate[100]
     },
     recebimentoDetailsText: {
         flex: 1,
@@ -58,9 +62,9 @@ const styles = StyleSheet.create({
     icon: {
         textAlign: "center",
         padding: 10,
-        width: 40,
-        height: 40,
-        backgroundColor: colors.cyan[200],
+        width: 35,
+        height: 35,
+        backgroundColor: colors.sky[300],
         borderRadius: 50
     }
 })

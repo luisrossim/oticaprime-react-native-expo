@@ -10,12 +10,10 @@ import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { PageTitle } from '@/components/PageTitle';
 import { useDateFilter } from '@/context/DateFilterContext';
-import { DateFilterInfo } from '@/components/DateFilterInfo';
-import { FilterInfo } from '@/components/FilterInfo';
 import { useAuth } from '@/context/AuthContext';
 import { FormasPagamentoService } from '@/services/formas-pagamento-service';
 import { FormaPagamento } from '@/models/formaPagamento';
-import { FilterOrdem } from '@/components/FilterOrdem';
+import { FilterInfoPage } from '@/components/FilterInfoPage';
 
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
@@ -133,6 +131,9 @@ export default function Vendas() {
             style={styles.formaPagamentoItem}
             onPress={() => handleFormaPagamentoSelect(item)}
         >
+            {(selectedFormaPagamento?.CODIGO == item.CODIGO || !selectedFormaPagamento) && (
+                <Feather name="check-circle" color={colors.blue[500]} />
+            )}
             <Text style={styles.formaPagamentoText}>{item.DESCRICAO}</Text>
         </TouchableOpacity>
     );
@@ -214,9 +215,7 @@ export default function Vendas() {
                                 onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
                             >
                                 <Text style={styles.navBarTitle}>Vendas</Text>
-                                <Text style={{color: colors.green[200], fontSize: 13}}>
-                                    {String(dateFilter?.dataInicial)} até {String(dateFilter?.dataFinal)}
-                                </Text>
+                                <Feather name="chevron-up" color={colors.lime[200]} />
                             </TouchableOpacity>
                         </Animated.View>
 
@@ -227,18 +226,21 @@ export default function Vendas() {
                                         title="Vendas" 
                                         size="large" 
                                     />
-                                    <DateFilterInfo />
-                                    <FilterInfo 
+
+                                    <FilterInfoPage
                                         totalInfo={`${totalVendas || 0} vendas`} 
                                         icon='dollar-sign'
                                     />
-                                    <FilterOrdem />
+
                                     <TouchableOpacity
                                         style={styles.selectButton}
                                         onPress={() => setIsModalVisible(true)}
                                     >
                                         <Text style={styles.selectButtonText}>
-                                            {selectedFormaPagamento ? selectedFormaPagamento.DESCRICAO : 'TODAS AS FORMAS DE PAGAMENTO'}
+                                            {selectedFormaPagamento 
+                                                ? selectedFormaPagamento.DESCRICAO 
+                                                : 'TODAS AS FORMAS DE PAGAMENTO'
+                                            }
                                         </Text>
                                         <Feather name="chevron-down" size={18} color={colors.slate[400]} />
                                     </TouchableOpacity>
@@ -250,25 +252,30 @@ export default function Vendas() {
                             initialNumToRender={20}
                             maxToRenderPerBatch={20}
                             ListFooterComponent={
-                                isFetchingMore ? (
-                                    <ActivityIndicator size="large" color={colors.green[500]} style={{padding: 40}} />
-                                ) : !isCompleted && vendasPaginadas.length > 0 ? (
-                                    <TouchableOpacity 
-                                        style={styles.loadMoreButton}
-                                        onPress={carregarMaisVendas} 
-                                    >
-                                        <Feather size={25} color={colors.green[600]} name="plus" />
-                                    </TouchableOpacity>
-                                ) : null
+                                isFetchingMore 
+                                    ? (
+                                        <ActivityIndicator size="large" color={colors.green[500]} style={{padding: 40}} />
+                                    ) 
+                                    : !isCompleted && vendasPaginadas.length > 0 ? (
+                                        <TouchableOpacity 
+                                            style={styles.loadMoreButton}
+                                            onPress={carregarMaisVendas} 
+                                        >
+                                            <Feather size={25} color={colors.green[600]} name="plus" />
+                                        </TouchableOpacity>
+                                    ) 
+                                    : null
                             }
                             ListEmptyComponent={() => (
-                                 (loading) ? (
-                                    <ActivityIndicator size="large" color={colors.cyan[500]} style={{padding: 40}} />
-                                ) : (
-                                    <View style={styles.emptyContainer}>
-                                        <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
-                                    </View>
-                                )
+                                (loading) 
+                                    ? (
+                                        <ActivityIndicator size="large" color={colors.cyan[500]} style={{padding: 40}} />
+                                    ) 
+                                    : (
+                                        <View style={styles.emptyContainer}>
+                                            <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+                                        </View>
+                                    )
                             )}
                             onScroll={Animated.event(
                                 [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -285,8 +292,9 @@ export default function Vendas() {
                             onRequestClose={() => setIsModalVisible(false)}
                         >
                             <View style={styles.modalOverlay}>
-                                <View style={styles.modalContent}>
-                                    <Text style={styles.modalTitle}>Formas de pagamento</Text>
+                                <View style={styles.modalContainer}>
+                                    <Text style={styles.modalTitle}>Forma de pagamento</Text>
+                                    <Text style={styles.modalSubTitle}>Selecione uma forma de pagamento específica ou todas.</Text>
                                     <FlatList
                                         data={formasPagamento}
                                         keyExtractor={(item) => String(item.CODIGO)}
@@ -294,7 +302,7 @@ export default function Vendas() {
                                     />
                                     <View style={styles.buttons}>
                                         <TouchableOpacity onPress={handleClearSelection} style={styles.footerClearButton}>
-                                            <Feather name="check-circle" size={16} color={colors.blue[50]} />
+                                            <Feather name="check-circle" size={16} color={colors.cyan[100]} />
                                             <Text style={styles.modalButtonText}>Selecionar todas</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity onPress={() => setIsModalVisible(false)}>
@@ -372,9 +380,9 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start'
     },
     iconElement: {
-        backgroundColor: colors.green[500],
+        backgroundColor: colors.emerald[600],
         borderRadius: 60,
-        color: colors.green[100],
+        color: colors.lime[200],
         padding: 10
     },
     vendedor: {
@@ -412,17 +420,17 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 45,
-        backgroundColor: colors.green[600],
+        backgroundColor: colors.emerald[600],
         justifyContent: 'center',
         paddingHorizontal: 20,
         zIndex: 10
     },
     navBarTitle: {
-        color: colors.green[200],
+        color: colors.lime[200],
         fontWeight: 600
     },
     headerContainer: {
-        padding: 20,
+        padding: 15,
         paddingTop: 50
     },
     selectButton: {
@@ -448,21 +456,28 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    modalContent: {
-        width: '90%',
-        backgroundColor: 'white',
-        borderRadius: 10,
+    modalContainer: {
+        width: '92%',
         padding: 20,
+        backgroundColor: '#FFF',
+        borderRadius: 20
     },
     modalTitle: {
         fontSize: 22,
-        fontWeight: 500,
-        marginBottom: 15
+        fontWeight: 600,
+        color: colors.gray[800],
+        marginBottom: 6,
+    },
+    modalSubTitle: {
+        color: colors.slate[500], 
+        fontWeight: 300,
+        marginBottom: 24,
     },
     formaPagamentoItem: {
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200],
+        flexDirection: "row",
+        gap: 5,
+        alignItems: "center",
+        padding: 10
     },
     formaPagamentoText: {
         color: colors.gray[500],
@@ -472,28 +487,29 @@ const styles = StyleSheet.create({
         gap: 10
     },
     footerCancelButton: {
-        width: "100%",
         fontSize: 16,
         textAlign: "center",
         paddingHorizontal: 20,
-        paddingVertical: 10,
-        color: colors.gray[600],
-        backgroundColor: colors.gray[200],
-        borderRadius: 6
+        paddingVertical: 12,
+        color: colors.slate[500],
+        backgroundColor: colors.slate[100],
+        borderRadius: 60
     },
     footerClearButton: {
+        fontSize: 16,
         flexDirection: "row",
-        justifyContent: "center",
         alignItems: "center",
-        gap: 6,
+        justifyContent: "center",
+        gap: 10,
         paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingVertical: 12,
+        color: colors.cyan[100],
         backgroundColor: colors.blue[600],
-        borderRadius: 6
+        borderRadius: 60
     },
     modalButtonText: {
         fontSize: 16,
-        color: colors.blue[50],
+        color: colors.cyan[100],
         textAlign: "center",
-    }
+    },
 });

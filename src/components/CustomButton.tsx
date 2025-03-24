@@ -24,8 +24,8 @@ export default function CustomButton({ label, onPress, style, icon }: CustomButt
 const styles = StyleSheet.create({
     button: {
         backgroundColor: colors.sky[900],
-        paddingVertical: 14,
-        paddingHorizontal: 20,
+        paddingVertical: 16,
+        paddingHorizontal: 22,
         borderRadius: 60,
         alignItems: "center",
         justifyContent: "center",

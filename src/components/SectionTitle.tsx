@@ -3,27 +3,37 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 interface SectionTitleProps {
-    title: string
+    title: string;
+    subtitle: string;
 }
 
-export default function SectionTitle(props: SectionTitleProps) {
+export default function SectionTitle({title, subtitle}: SectionTitleProps) {
     return (
         <View style={styles.container}>
             <Text style={styles.text}>
-                {props.title}
+                {title}
             </Text>
+
+            {subtitle && (
+                <Text style={styles.text}>
+                    {subtitle}
+                </Text>
+            )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.slate[50],
-        paddingHorizontal: 20,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        backgroundColor: colors.slate[100],
+        paddingHorizontal: 15,
         paddingVertical: 10
     },
     text: {
-        color: colors.slate[400], 
+        color: colors.slate[500], 
         fontSize: 11,
         fontWeight: 500
     },

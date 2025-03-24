@@ -12,7 +12,7 @@ interface ChartHeaderProps {
   children: React.ReactNode;
 }
 
-export function ChartHeader({ title, selectedRange, icon, iconColor, backgroundColor, children }: ChartHeaderProps) {
+export function ChartContainer({ title, selectedRange, icon, iconColor, backgroundColor, children }: ChartHeaderProps) {
   return (
     <View style={styles.chartContainer}>
         <View style={styles.chartAlign}>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     borderWidth: 1, 
     borderColor: colors.slate[200], 
-    borderRadius: 12, 
+    borderRadius: 16, 
     margin: 15,
     overflow: "hidden"
   },

@@ -16,7 +16,7 @@ LocaleConfig.defaultLocale = 'pt-br';
 
 export function GlobalHeader() {
     const {selectedEmpresa, selectedCaixa} = useEmpresaCaixa();
-    const {updateDateFilter} = useDateFilter();
+    const {dateFilter, updateDateFilter} = useDateFilter();
     const {selectedRange, setSelectedRange} = useDashboardFilter();
 
     const [selectedStartDate, setSelectedStartDate] = useState<string | null>(null);
@@ -46,8 +46,11 @@ export function GlobalHeader() {
         setModalChartVisible(false);
     };
 
-
     const formatDate = (dateString: string) => dateString.split('-').reverse().join('/');
+
+    const firstMarkedDate = Object.keys(markedDates).length > 0 
+        ? Object.keys(markedDates).sort()[0]
+        : new Date().toISOString().split("T")[0];
 
     const handleEmpresaNome = (razaoSocial: string | undefined): string => {
         if (!razaoSocial) return "";
@@ -61,6 +64,17 @@ export function GlobalHeader() {
         return res;
     }
 
+    const handleDateText = (): string => {
+        if (!dateFilter) {
+            return "-";
+        }
+
+        if (dateFilter?.dataInicial == dateFilter?.dataFinal) {
+            return String(dateFilter?.dataInicial);
+        }
+
+        return `${String(dateFilter?.dataInicial)} até ${String(dateFilter?.dataFinal)}`
+    }
 
     const handleDateSelect = (date: string) => {
         if (!selectedStartDate || selectedEndDate) {
@@ -131,6 +145,7 @@ export function GlobalHeader() {
     };
 
 
+
     return (
         <SafeAreaView>
             <View style={styles.container}>
@@ -147,6 +162,9 @@ export function GlobalHeader() {
                         <Text style={styles.profileSubText}>
                             {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : "-"}
                         </Text>
+                        <Text style={styles.dateText}>
+                            {handleDateText()}
+                        </Text>
                     </View>
                 </View>
 
@@ -155,21 +173,21 @@ export function GlobalHeader() {
                         onPress={openModalChart} 
                         style={{padding: 8}}
                     >
-                        <Feather name="bar-chart-2" size={21} color={colors.gray[500]} />
+                        <Feather name="bar-chart-2" size={20} color={colors.gray[500]} />
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={openModalDate} 
                         style={{padding: 8}}
                     >
-                        <Feather name="calendar" size={21} color={colors.gray[500]} />
+                        <Feather name="calendar" size={20} color={colors.gray[500]} />
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={() => router.push("/settings")} 
                         style={{paddingVertical: 8, paddingLeft: 8}}
                     >
-                        <Feather name="settings" size={21} color={colors.gray[500]} />
+                        <Feather name="settings" size={20} color={colors.gray[500]} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -182,11 +200,15 @@ export function GlobalHeader() {
             >
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Calendário</Text>
+                        <Text style={styles.modalSubTitle}>Acompanhe caixas, vendas, recebimentos e processos liberados.</Text>
+
                         <Calendar
                             style={{margin: 0}}
                             markedDates={markedDates}
                             onDayPress={({ dateString }: any) => handleDateSelect(dateString)}
                             markingType={"period"}
+                            initialDate={firstMarkedDate} 
                             hideExtraDays
                             theme ={{
                                 todayTextColor: colors.blue[500],
@@ -229,7 +251,7 @@ export function GlobalHeader() {
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>Dashboard</Text>
-                        <Text style={styles.modalSubTitle}>Dashboard</Text>
+                        <Text style={styles.modalSubTitle}>Selecione um período e acompanhe os gráficos em tempo real.</Text>
                             
                         {dashboardFilterData.map((filter, index) => (
                             <TouchableOpacity 
@@ -269,7 +291,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300],
         paddingHorizontal: 15,
-        paddingTop: 30,
+        paddingTop: 20,
         paddingBottom: 12,
         backgroundColor: "#FFF"
     },
@@ -282,22 +304,22 @@ const styles = StyleSheet.create({
     profileContainer: {
         flexDirection: "column", 
         alignItems: "flex-start", 
-        gap: 1
+        gap: 2
     },
     profileText: {
-        fontSize: 13,
-        fontWeight: 500,
+        fontSize: 12,
+        fontWeight: 600,
         color: colors.gray[700]
     },
     profileSubText: {
-        fontSize: 11, 
-        fontWeight: 300,
-        color: colors.gray[700]
+        fontSize: 10, 
+        fontWeight: 400,
+        color: colors.gray[500]
     },
     image: { 
-        width: 35, 
-        height: 35, 
-        borderRadius: 50
+        width: 45, 
+        height: 45, 
+        borderRadius: 60
     },
     globalHeaderActions: {
         flexDirection: "row", 
@@ -353,11 +375,12 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 600,
         color: colors.gray[800],
-        marginBottom: 22,
+        marginBottom: 6,
     },
     modalSubTitle: {
         color: colors.slate[500], 
-        fontWeight: 300
+        fontWeight: 300,
+        marginBottom: 24,
     },
     optionLabel: {
         color: colors.gray[500]
@@ -366,7 +389,7 @@ const styles = StyleSheet.create({
         color: colors.blue[50]
     },
     optionSelected: {
-        backgroundColor: colors.blue[500],
+        backgroundColor: colors.blue[600],
         borderRadius: 60
     },
     option: {
@@ -374,5 +397,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         padding: 12,
         marginVertical: 2
+    },
+    dateText: {
+        fontWeight: 500,
+        color: colors.blue[600],
+        fontSize: 11
     }
 });

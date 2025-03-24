@@ -37,12 +37,10 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
 const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
-    paddingVertical: 12,
+    paddingVertical: 10,
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.slate[200]
+    paddingHorizontal: 20
   },
   buttonContainer: {
     alignItems: 'center', 
@@ -54,7 +52,7 @@ const styles = StyleSheet.create({
     borderRadius: 60
   },
   buttonLabel: {
-    fontWeight: 500, 
-    color: colors.slate[800]
+    fontWeight: 500,
+    color: colors.slate[600]
   }
 });

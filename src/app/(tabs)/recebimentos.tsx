@@ -10,12 +10,10 @@ import { useDateFilter } from '@/context/DateFilterContext';
 import { RecebimentosService } from '@/services/recebimentos-service';
 import { RecebimentoSummary } from '@/models/recebimento';
 import { useAuth } from '@/context/AuthContext';
-import { DateFilterInfo } from '@/components/DateFilterInfo';
-import { FilterInfo } from '@/components/FilterInfo';
 import { FormaPagamento } from '@/models/formaPagamento';
 import { FormasPagamentoService } from '@/services/formas-pagamento-service';
 import { router } from 'expo-router';
-import { FilterOrdem } from '@/components/FilterOrdem';
+import { FilterInfoPage } from '@/components/FilterInfoPage';
 
 export default function Recebimentos() {
     const { selectedEmpresa, selectedCaixa } = useEmpresaCaixa();
@@ -117,6 +115,9 @@ export default function Recebimentos() {
             style={styles.formaPagamentoItem}
             onPress={() => handleFormaPagamentoSelect(item)}
         >
+            {(selectedFormaPagamento?.CODIGO == item.CODIGO || !selectedFormaPagamento) && (
+                <Feather name="check-circle" color={colors.blue[500]} />
+            )}
             <Text style={styles.formaPagamentoText}>{item.DESCRICAO}</Text>
         </TouchableOpacity>
     );
@@ -192,10 +193,8 @@ export default function Recebimentos() {
                                 style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}
                                 onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
                             >
-                                <Text style={styles.navBarTitle}>Recebimentos de cred.</Text>
-                                <Text style={{color: colors.cyan[200], fontSize: 13}}>
-                                    {String(dateFilter?.dataInicial)} até {String(dateFilter?.dataFinal)}
-                                </Text>
+                                <Text style={styles.navBarTitle}>Recebimentos de crediário</Text>
+                                <Feather name="chevron-up" color={colors.cyan[200]} />
                             </TouchableOpacity>
                         </Animated.View>
 
@@ -206,12 +205,12 @@ export default function Recebimentos() {
                                         title="Recebimentos de crediário" 
                                         size="large" 
                                     />
-                                    <DateFilterInfo />
-                                    <FilterInfo 
+
+                                    <FilterInfoPage
                                         totalInfo={`${totalRecebimentos || 0} recebimentos`} 
                                         icon='arrow-down-right'
                                     />
-                                    <FilterOrdem />
+
                                     <TouchableOpacity
                                         style={styles.selectButton}
                                         onPress={() => setIsModalVisible(true)}
@@ -230,13 +229,13 @@ export default function Recebimentos() {
                             maxToRenderPerBatch={20}
                             ListFooterComponent={
                                 isFetchingMore ? (
-                                    <ActivityIndicator size="large" color={colors.cyan[500]} style={{padding: 40}} />
+                                    <ActivityIndicator size="large" color={colors.indigo[500]} style={{padding: 40}} />
                                 ) : (!isCompleted && recebimentosResumo.length > 0) ? (
                                     <TouchableOpacity 
                                         style={styles.loadMoreButton} 
                                         onPress={carregarMaisVendas}
                                     >
-                                        <Feather size={25} color={colors.cyan[600]} name="plus" />
+                                        <Feather size={25} color={colors.indigo[600]} name="plus" />
                                     </TouchableOpacity>
                                 ) : null
                             }
@@ -247,7 +246,7 @@ export default function Recebimentos() {
                             scrollEventThrottle={16}
                             ListEmptyComponent={() => (
                                 (loading) ? (
-                                    <ActivityIndicator size="large" color={colors.cyan[500]} style={{padding: 40}} />
+                                    <ActivityIndicator size="large" color={colors.indigo[500]} style={{padding: 40}} />
                                 ) : (
                                     <View style={styles.emptyContainer}>
                                         <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
@@ -264,8 +263,10 @@ export default function Recebimentos() {
                             onRequestClose={() => setIsModalVisible(false)}
                         >
                             <View style={styles.modalOverlay}>
-                                <View style={styles.modalContent}>
-                                    <Text style={styles.modalTitle}>Formas de pagamento</Text>
+                                <View style={styles.modalContainer}>
+                                    <Text style={styles.modalTitle}>Forma de pagamento</Text>
+                                    <Text style={styles.modalSubTitle}>Selecione uma forma de pagamento específica ou todas.</Text>
+
                                     <FlatList
                                         data={formasPagamento}
                                         keyExtractor={(item) => String(item.CODIGO)}
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 45,
-        backgroundColor: colors.cyan[600],
+        backgroundColor: colors.indigo[600],
         justifyContent: 'center',
         paddingHorizontal: 20,
         zIndex: 10
@@ -310,7 +311,7 @@ const styles = StyleSheet.create({
         fontWeight: 600
     },
     headerContainer: {
-        padding: 20,
+        padding: 15,
         paddingTop: 50
     },
     dateContainer: {
@@ -393,8 +394,8 @@ const styles = StyleSheet.create({
     iconElement: {
         borderRadius: 60,
         padding: 10,
-        backgroundColor: colors.cyan[500], 
-        color: colors.cyan[100]
+        backgroundColor: colors.indigo[600], 
+        color: colors.cyan[200]
     },
     vendedor: {
         fontWeight: 'bold',
@@ -442,21 +443,28 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    modalContent: {
-        width: '90%',
-        backgroundColor: 'white',
-        borderRadius: 10,
+    modalContainer: {
+        width: '92%',
         padding: 20,
+        backgroundColor: '#FFF',
+        borderRadius: 20
     },
     modalTitle: {
         fontSize: 22,
-        fontWeight: 500,
-        marginBottom: 20
+        fontWeight: 600,
+        color: colors.gray[800],
+        marginBottom: 6,
+    },
+    modalSubTitle: {
+        color: colors.slate[500], 
+        fontWeight: 300,
+        marginBottom: 24,
     },
     formaPagamentoItem: {
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200],
+        flexDirection: "row",
+        gap: 5,
+        alignItems: "center",
+        padding: 10
     },
     formaPagamentoText: {
         color: colors.gray[500],
@@ -466,24 +474,25 @@ const styles = StyleSheet.create({
         gap: 10
     },
     footerCancelButton: {
-        width: "100%",
         fontSize: 16,
         textAlign: "center",
         paddingHorizontal: 20,
-        paddingVertical: 10,
-        color: colors.gray[600],
-        backgroundColor: colors.gray[200],
-        borderRadius: 6
+        paddingVertical: 12,
+        color: colors.slate[500],
+        backgroundColor: colors.slate[100],
+        borderRadius: 60
     },
     footerClearButton: {
+        fontSize: 16,
         flexDirection: "row",
-        justifyContent: "center",
         alignItems: "center",
-        gap: 6,
+        justifyContent: "center",
+        gap: 10,
         paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingVertical: 12,
+        color: colors.indigo[100],
         backgroundColor: colors.blue[600],
-        borderRadius: 6
+        borderRadius: 60
     },
     modalButtonText: {
         fontSize: 16,

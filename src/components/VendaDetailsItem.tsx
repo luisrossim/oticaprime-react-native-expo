@@ -10,7 +10,7 @@ interface VendaDetailsItemProps {
 export const VendaDetailsItem = (props: VendaDetailsItemProps) => {
     return (
         <View style={styles.vendaDetailsItem}>
-            <FontAwesome6 name={props.icon} size={18} color={colors.green[600]} style={styles.icon} />
+            <FontAwesome6 name={props.icon} size={14} color={colors.lime[900]} style={styles.icon} />
             <Text style={styles.vendaDetailsText}>
                 {props.detail}
             </Text>
@@ -24,18 +24,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 15,
-        paddingHorizontal: 20
+        paddingHorizontal: 15
     },
     vendaDetailsText: {
         flex: 1,
+        fontSize: 13,
         color: colors.gray[700]
     },
     icon: {
         textAlign: "center",
         padding: 10,
-        width: 40,
-        height: 40,
-        backgroundColor: colors.green[200],
+        width: 35,
+        height: 35,
+        backgroundColor: colors.green[300],
         borderRadius: 50
     }
 })
