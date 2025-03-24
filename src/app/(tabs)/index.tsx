@@ -1,3 +1,5 @@
+import { ChartHeader } from '@/components/ChartHeader';
+import { CustomBarChart } from '@/components/CustomBarChart';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { PageTitle } from '@/components/PageTitle';
@@ -8,45 +10,28 @@ import { EmpresaReports } from '@/models/company';
 import { EmpresaService } from '@/services/empresa-service';
 import { colors } from '@/utils/constants/colors';
 import { UtilitiesService } from '@/utils/utilities-service';
-import { Feather, FontAwesome6 } from '@expo/vector-icons';
-import { LinearGradient, vec, Text as SKText, useFont } from '@shopify/react-native-skia';
-import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Animated } from 'react-native';
-import { useDerivedValue } from 'react-native-reanimated';
-import { Bar, CartesianChart, useChartPressState } from 'victory-native';
+import { Feather} from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, ScrollView, Text, Dimensions } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 
-const inter = require('@/assets/fonts/inter.ttf')
 
 export default function Index() {
     const {selectedRange} = useDashboardFilter();
-
     const {selectedEmpresa} = useEmpresaCaixa();
     const {authData} = useAuth();
-    const font = useFont(inter, 12);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const scrollY = useRef(new Animated.Value(0)).current;
-    const scrollViewRef = useRef<ScrollView>(null);
 
-    const [DATA1, setDATA1] = useState<{label: string, count:number}[]>([]) 
-    const [DATA2, setDATA2] = useState<{label: string, total:number}[]>([])
-
-    const { state: state1, isActive: isActive1 } = useChartPressState({
-        x: "Jan",
-        y: { count: 0 }
-    });
+    const chartWidth = Dimensions.get("window").width - 50;
+    const [clickedValue, setClickedValue] = useState<{label: string, value: string} | null>(null); 
+    const [chartData, setChartData] = useState<{ labels: string[], sales: number[] }>({ labels: [], sales: [] });
+    const [chartData2, setChartData2] = useState<{ month: string; value: number }[]>([]);
     
-    const { state: state2, isActive: isActive2 } = useChartPressState({
-        x: "Jan",
-        y: { total: 0 }
-    });
-
 
     useEffect(() => {
-        scrollY.setValue(0); 
-        setDATA1([]);
-        setDATA2([]);
+        setClickedValue(null);
         fetchReports();
     }, [selectedRange, selectedEmpresa])
 
@@ -70,10 +55,7 @@ export default function Index() {
             };
 
             const data = await empresaService.getReports(params);
-
-            if (data) {
-                buildCharts(data);
-            }
+            buildCharts(data);
 
         } catch (err) {
             setError(`Error: Erro ao buscar relatórios.` + err);
@@ -82,73 +64,37 @@ export default function Index() {
         }
     };
 
-    const buildCharts = (data: EmpresaReports) => {
-        if (!data || !Array.isArray(data.totalVendasMensal)) return;
-        
-        const formattedData1 = data.totalVendasMensal.map(report => ({
-            label: report.MES && report.MES >= 1 && report.MES <= 12 
-                ? UtilitiesService.monthNames[report.MES - 1] 
-                : "Desconhecido",
-            count: report.QUANTIDADE_VENDAS ?? 0
-        }));
+
+    function buildCharts(data: EmpresaReports) {
+       if (!data || !data.totalVendasMensal) return;
     
-        const formattedData2 = data.totalVendasMensal.map(report => ({
-            label: report.MES && report.MES >= 1 && report.MES <= 12 
-                ? UtilitiesService.monthNames[report.MES - 1] 
-                : "Desconhecido",
-            total: report.TOTAL_VENDAS ?? 0
-        }));
+        const vendasMensais = data.totalVendasMensal.slice(-selectedRange);
     
-        setDATA1(formattedData1);
-        setDATA2(formattedData2);
+        const labels = vendasMensais.map(item => UtilitiesService.monthNamesUpper[item.MES - 1]);
+        const salesData = vendasMensais.map(item => item.TOTAL_VENDAS);
+
+        const chartData = vendasMensais.map(item => ({
+            month: `${UtilitiesService.monthNamesUpper[item.MES - 1]} ${String(item.ANO).slice(-2)}`,
+            value: item.QUANTIDADE_VENDAS,
+        }));
+
+        setChartData({ labels, sales: salesData });
+        setChartData2(chartData);
+    }
+
+    const formatValue = (value: number) => {
+        if (value >= 1000000) {
+            return (value / 1000000).toFixed(1) + 'M';
+        } else if (value >= 1000) {
+            return (value / 1000).toFixed(0) + 'k';
+        }
+        return value.toString();
     };
 
-    const maxValue1 = Math.max(...DATA1.map(d => d.count), 1);
-    const maxValue2 = Math.max(...DATA2.map(d => d.total), 1);
-
-
-    const value1 = useDerivedValue(() => {
-        return state1.y.count.value?.value ? `${state1.y.count.value.value}` : "0";
-    }, [state1]);
-    
-    const value2 = useDerivedValue(() => {
-        return state2.y.total.value?.value ? `R$ ${state2.y.total.value.value}` : "R$ 0";
-    }, [state2]);
-
-    const textYPosition1 = useDerivedValue(() => {
-        return state1.y.count.position.value - 15;
-    }, [state1]);
-
-    const textYPosition2 = useDerivedValue(() => {
-        return state2.y.total.position.value - 15;
-    }, [state2]);
-
-    const textXPosition1 = useDerivedValue(() => {
-        if(!font) {
-            return 0;
-        }
-        
-        return (
-            state1.x.position.value - font.measureText(value1.value).width / 2
-        );
-    }, [state1, font]);
-
-    const textXPosition2 = useDerivedValue(() => {
-        if(!font) {
-            return 0;
-        }
-        
-        return (
-            state2.x.position.value - font.measureText(value2.value).width / 2
-        );
-    }, [state2, font]);
-
-
-    const formatRange = (selectedRange: number | null) => {
-        if (selectedRange === null) return "Selecionar período";
-        if (selectedRange === 0) return "Mês atual";
-        if (selectedRange === 1) return "Mês passado";
-        return `${selectedRange} meses`;
+    const handleDataPointClick = (data: any) => {
+        const label = chartData2[data.index].month;
+        const value = UtilitiesService.formatarValor(data.value);
+        setClickedValue({label: label, value: value});
     };
 
 
@@ -159,220 +105,138 @@ export default function Index() {
 
     return (
         <View style={{flex: 1}}>
-            <Animated.View 
-                style={[styles.navBar, { 
-                    transform: [{
-                        translateY: scrollY.interpolate({
-                            inputRange: [100, 200],
-                            outputRange: [-100, 0], 
-                            extrapolate: 'clamp'
-                        })
-                    }]
-                }]}
-            > 
-                <Text style={styles.navBarTitle}>
-                    Dashboard
-                </Text>
-                <TouchableOpacity 
-                    style={styles.scrollToTopButton} 
-                    onPress={() => scrollViewRef.current?.scrollTo({y: 0, animated: true})}
-                >
-                    <Feather name="chevron-up" size={18} color={colors.gray[200]} />
-                </TouchableOpacity>
-            </Animated.View>
-                
-            <Animated.ScrollView 
-                style={styles.container} 
-                contentContainerStyle={{paddingBottom: 100}}
-                ref={scrollViewRef}
-                onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                    { useNativeDriver: true }
-                )} 
-            >
-                <PageTitle title="Dashboard" size="large" />
+            {error 
+                ? (
+                    <ErrorMessage error={error} />
+                ) : (                         
+                    <ScrollView 
+                        style={styles.container} 
+                        contentContainerStyle={{paddingBottom: 100}}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        <View style={{paddingHorizontal: 15, marginBottom: 10}}>
+                            <PageTitle title="Dashboard" size="large" />
+                            <Text style={{color: colors.slate[500], fontWeight: 300}}>Acompanhe o desempenho da sua empresa através de gráficos interativos.</Text>
+                        </View>
 
-                {error 
-                    ? (
-                        <ErrorMessage error={error} />
-                    ) : (
-                        <>
-                            <View style={{flex: 1, gap: 20, marginBottom: 50, marginTop: 10}}>
-                                <View style={styles.chartHeader}>
-                                    <FontAwesome6 
-                                        style={[styles.chartHeaderIcon, {
-                                            backgroundColor: colors.blue[600],
-                                            color: colors.blue[200]
-                                        }]} 
-                                        name="tags" 
-                                        size={20} 
+                        <ChartHeader
+                            title='Quantidade de vendas'
+                            selectedRange={selectedRange}
+                            icon='shopping-bag'
+                            iconColor={colors.cyan[200]}
+                            backgroundColor={colors.blue[600]}
+                        >
+                            {chartData2.length > 0 ? (
+                                <CustomBarChart data={chartData2} />
+                            ) : (
+                                <View style={{alignItems: "center", paddingVertical: 80, borderWidth: 1, borderColor: colors.slate[200], marginHorizontal: 20}}>
+                                    <Text style={{color: colors.slate[500]}}>Sem registros</Text>
+                                </View>
+                            )}
+                        </ChartHeader>
+
+                        <ChartHeader
+                            title='Receita de vendas'
+                            selectedRange={selectedRange}
+                            icon='dollar-sign'
+                            iconColor={colors.lime[200]}
+                            backgroundColor={colors.green[600]}
+                        >
+                            {chartData.labels.length > 0 ? (
+                                <View style={{position: "relative"}}>
+                                    <View style={{paddingTop: 30}}>
+                                        <LineChart
+                                            data={{
+                                                labels: chartData.labels,
+                                                datasets: [{
+                                                    data: chartData.sales
+                                                }]
+                                            }}
+                                            width={chartWidth}
+                                            height={300}
+                                            onDataPointClick={handleDataPointClick}
+                                            yAxisLabel="R$ "
+                                            verticalLabelRotation={selectedRange >= 12 ? -70 : 0}
+                                            formatYLabel={(value) => formatValue(Number(value))}
+                                            yLabelsOffset={10}
+                                            xLabelsOffset={10}
+                                            fromZero
+                                            bezier
+                                            chartConfig={{
+                                                backgroundColor: "#FFF",
+                                                backgroundGradientFrom:"#FFF",
+                                                backgroundGradientTo: "#FFF", 
+                                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                                labelColor: (opacity = 1) => `rgba(0, 0, 0, 0.5)`,
+                                                propsForBackgroundLines: {
+                                                    stroke: colors.slate[100],
+                                                    strokeWidth: 1,
+                                                    strokeDasharray: "0",
+                                                },
+                                                propsForHorizontalLabels: {
+                                                    fontSize: 11
+                                                },
+                                                propsForVerticalLabels: {
+                                                    fontSize: 9
+                                                },
+                                                propsForDots: {
+                                                    r: "4",
+                                                    fill: "#fff",
+                                                    strokeWidth: "1",
+                                                    stroke: colors.green[600],
+                                                },
+                                                fillShadowGradientFrom: colors.green[500],
+                                                fillShadowGradientTo: colors.green[500],
+                                                fillShadowGradientFromOpacity: 1,
+                                                fillShadowGradientToOpacity: 0, 
+                                                strokeWidth: 1
+                                            }}
                                         />
-                                    <View>
-                                        <Text style={styles.subTitle}>
-                                            Quantidade de vendas
-                                        </Text>
-                                        <Text style={styles.descricao}>
-                                            {formatRange(selectedRange)}
-                                        </Text>
                                     </View>
+
+                                    {clickedValue !== null && (
+                                        <View style={styles.selectedContainer}>
+                                            <View style={styles.selectedIcon}></View>
+                                            <Text style={styles.selectedText}>
+                                                {clickedValue.value}
+                                            </Text>
+                                            <Text style={styles.selectedText}>
+                                                ({clickedValue.label})
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
-                                
-                                { DATA1 && DATA1.length > 0  ? (
-                                    <View style={{height: 300}}>
-                                        <CartesianChart
-                                            data={DATA1}
-                                            chartPressState={state1}
-                                            xKey="label"
-                                            yKeys={["count"]}
-                                            domainPadding={{ left: 30, right: 30, top: 50, bottom: 0 }}
-                                            domain={{ 
-                                                x: DATA1.length === 1 ? [-0.5, 0.5] : DATA1.length === 2 ? [-0.25, 1.25] : [0, DATA1.length - 1],
-                                                y: [0, Math.max(5, maxValue1)]
-                                            }}
-                                            axisOptions={{
-                                                lineColor: colors.gray[200],
-                                                labelColor: colors.gray[500],
-                                                labelOffset: {x: 0, y: 5},
-                                                tickCount: { x: Math.min(selectedRange || 1, 10), y: 5 },
-                                                font: font ? font : undefined,
-                                                formatXLabel(value) {
-                                                    return value || ""
-                                                },
-                                            }}
-                                            >
-                                            {({ points, chartBounds }) => (
-                                                <>
-                                                    <Bar
-                                                        chartBounds={chartBounds}
-                                                        points={points.count}
-                                                        blendMode='darken'
-                                                        barWidth={Math.max(10, 40 - selectedRange * 2)}
-                                                        roundedCorners={{
-                                                            topLeft: 3,
-                                                            topRight: 3,
-                                                        }}
-                                                    >
-                                                        <LinearGradient
-                                                            start={vec(0, 0)}
-                                                            end={vec(0, 600)}
-                                                            colors={["#2563eb", "#2563eb00"]}
-                                                        />
-                                                    </Bar>
-                                                    { isActive1 ? 
-                                                        <>
-                                                            <SKText
-                                                                font={font}
-                                                                x={textXPosition1}
-                                                                y={textYPosition1}
-                                                                text={value1}
-                                                                color={"#2563eb"}
-                                                            />
-                                                        </>    
-                                                    : null}
-                                                </>
-                                            )}
-                                        </CartesianChart>
-                                    </View>
-                                ) : (
-                                    <View style={styles.chartEmpty}>
-                                        <Text style={{color: colors.gray[500]}}>Não há registros</Text>
-                                    </View>
-                                ) }
-                            </View>
+                            ) : (
+                                <Text style={styles.empty}>Sem registros</Text>
+                            )}
+                        </ChartHeader>
 
-                            <View style={{flex: 1, gap: 20}}>
-                                <View style={styles.chartHeader}>
-                                    <FontAwesome6 
-                                        style={[styles.chartHeaderIcon, {
-                                            backgroundColor: colors.emerald[600],
-                                            color: colors.emerald[200]
-                                        }]} 
-                                        name="sack-dollar" 
-                                        size={20}
-                                    />
-                                    <View>
-                                        <Text style={styles.subTitle}>
-                                            Receita de vendas
-                                        </Text>
-                                        <Text style={styles.descricao}>
-                                            {formatRange(selectedRange)}
-                                        </Text>
-                                    </View>
-                                </View>
+                        <ChartHeader
+                            title='Análise dos vendedores'
+                            selectedRange={selectedRange}
+                            icon='users'
+                            iconColor={colors.orange[200]}
+                            backgroundColor={colors.red[600]}
+                        >
+                            <Text style={styles.empty}>
+                                Em breve
+                            </Text>
+                        </ChartHeader>
 
-                                { DATA2 && DATA2.length > 0  ? (
-                                    <View style={{height: 300}}>
-                                        <CartesianChart
-                                            data={DATA2}
-                                            chartPressState={state2}
-                                            xKey="label"
-                                            yKeys={["total"]}
-                                            domainPadding={{ left: 30, right: 30, top: 50, bottom: 0 }}
-                                            domain={{ 
-                                                x: DATA2.length === 1 ? [-0.5, 0.5] : DATA2.length === 2 ? [-0.25, 1.25] : [0, DATA2.length - 1],
-                                                y: [0, Math.max(5, maxValue2)]
-                                            }}
-                                            axisOptions={{
-                                                lineColor: colors.gray[200],
-                                                labelColor: colors.gray[500],
-                                                labelOffset: {x: 0, y: 5},
-                                                tickCount: { x: Math.min(selectedRange || 1, 10), y: 5 },
-                                                font: font ? font : undefined,
-                                                formatXLabel(value) {
-                                                return value || ""
-                                                },
-                                                formatYLabel(value){
-                                                    if (value >= 1000) {
-                                                        return (value / 1000).toFixed(0) + 'k';
-                                                    }
-
-                                                    return `R$ ${value}`
-                                                }
-                                            }}
-                                            >
-                                            {({ points, chartBounds }) => (
-                                                <>
-                                                    <Bar
-                                                        chartBounds={chartBounds}
-                                                        points={points.total}
-                                                        blendMode='darken'
-                                                        barWidth={Math.max(10, 40 - selectedRange * 2)}
-                                                        roundedCorners={{
-                                                            topLeft: 3,
-                                                            topRight: 3,
-                                                        }}
-                                                    >
-                                                        <LinearGradient
-                                                            start={vec(0, 0)}
-                                                            end={vec(0, 600)}
-                                                            colors={["#059669", "#05966900"]}
-                                                        />
-                                                    </Bar>
-                                                    { isActive2 ? 
-                                                        <>
-                                                            <SKText
-                                                                font={font}
-                                                                x={textXPosition2}
-                                                                y={textYPosition2}
-                                                                text={value2}
-                                                                color={"#059669"}
-                                                            />
-                                                        </>    
-                                                    : null}
-                                                </>
-                                            )}
-                                        </CartesianChart>
-                                    </View>
-                                ) : (
-                                    <View style={styles.chartEmpty}>
-                                        <Text style={{color: colors.gray[500]}}>Não há registros</Text>
-                                    </View>
-                                ) }
-                            </View>
-                        </>
-                    )
-                }
-            </Animated.ScrollView>
+                        <ChartHeader
+                            title='Formas de pagamento'
+                            selectedRange={selectedRange}
+                            icon='credit-card'
+                            iconColor={colors.gray[200]}
+                            backgroundColor={colors.slate[600]}
+                        >
+                            <Text style={styles.empty}>
+                                Em breve
+                            </Text>
+                        </ChartHeader>
+                    </ScrollView>
+                )
+            }
         </View>
     );
 }
@@ -380,44 +244,12 @@ export default function Index() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
         paddingVertical: 50,
         backgroundColor: "#FFF"
     },
-    subTitle: {
-        color: colors.gray[700], 
-        fontWeight: 500, 
-        fontSize: 18
-    },
-    descricao: {
-        color: colors.gray[500],
-        fontWeight: 300,
-        fontSize: 14
-    },
-    chartHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10
-    },
-    chartHeaderIcon: {
-        padding: 7,
-        borderRadius: 7,
-        color: "#FFF"
-    },
-    chartEmpty: {
-        flex: 1, 
-        justifyContent: "center", 
-        alignItems: "center", 
-        height: 300,
-        borderWidth: 0.5,
-        borderColor: colors.gray[300]
-    },
     scrollToTopButton: {
-        position: 'absolute',
-        right: 16,
-        bottom: 8,
-        padding: 5,
-        borderRadius: 20,
+        flexDirection: "row",
+        justifyContent: "space-between"
     },
     navBar: {
         position: 'absolute',
@@ -425,13 +257,68 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 45,
-        backgroundColor: colors.slate[600],
+        backgroundColor: colors.slate[700],
         justifyContent: 'center',
         paddingHorizontal: 20,
         zIndex: 10
     },
     navBarTitle: {
-        color: colors.gray[200],
+        color: colors.slate[400],
         fontWeight: 600
     },
+    valueDisplay: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: colors.slate[100],
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    valueText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: colors.slate[900]
+    },
+    chartContainer: {
+        paddingTop: 30
+    },
+    chartHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 16,
+        gap: 8
+    },
+    title: {
+        color: colors.slate[700],
+        fontWeight: 500,
+        fontSize: 16,
+        marginBottom: 2
+    },
+    subTitle: {
+        fontSize: 11,
+        color: colors.slate[500],
+    },
+    selectedText: {
+        color: colors.slate[500],
+        fontSize: 12
+    },
+    selectedContainer: {
+        position: 'absolute',
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+        top: -20,
+        left: 20,
+    },
+    selectedIcon: {
+        width: 7,
+        height: 7,
+        borderRadius: 60,
+        backgroundColor: colors.green[600]
+    },
+    empty: {
+        textAlign: "center", 
+        paddingBottom: 50, 
+        fontWeight: 300,
+        color: colors.slate[500]
+    }
 });

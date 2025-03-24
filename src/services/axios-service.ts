@@ -37,6 +37,11 @@ export class AxiosService<T> {
     return response.data;
   }
 
+  async getByIdWithParam(id1: number | string, id2: number | string): Promise<T> {
+    const response = await this.api.get<T>(`${this.path}/${id1}/${id2}`);
+    return response.data;
+  }
+
   async getAllByParam(params: Record<string, any>): Promise<T[]> {
       const response = await this.api.get<T[]>(this.path, { params });
       return response.data;

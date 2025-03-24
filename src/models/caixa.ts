@@ -1,3 +1,5 @@
+import { Pageable } from "./pageable"
+
 export interface Caixa {
     COD_CAI: number,
     COD_EMP: number,
@@ -29,4 +31,35 @@ export interface CaixaVendasDetails {
     TOTAL_VENDAS_CANCELADAS: number,
     TOTAL_CORTESIAS_OUTROS: number,
     FORMAS_PAGAMENTO_VENDAS: FormasPagamentoTotal[]
+}
+
+export interface CaixaLancamentosHistorico {
+    CODIGO: number
+    NOME_USU: string
+    DATA: string
+    HISTORICO: string
+    VALOR: number
+    DEB_CRED: string
+    FLAG_SOMAR: string
+    COD_BAIXA_CREDIARIO: number
+    COD_VENDA: number
+    TIPO_MOVIMENTO: string
+}
+
+export interface CaixaSaldo {
+    credito: number
+    debito: number 
+    saldo: number
+}
+
+export interface CaixaAnalitico {
+    historico: CaixaLancamentosHistorico[]
+    saldoAnterior: CaixaSaldo
+    saldoAtual: CaixaSaldo
+    saldoFinal: number
+}
+
+export interface CaixaAnaliticoPaginado {
+    analitico: CaixaAnalitico
+    pageable: Pageable
 }

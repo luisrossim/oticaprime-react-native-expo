@@ -11,14 +11,14 @@ export const DateFilterInfo = () => {
             <Feather 
                 name="calendar"
                 size={16}
-                color={colors.gray[500]} 
+                color={colors.gray[600]} 
             />
             {dateFilter ? (
-                    <Text style={{color: colors.gray[500]}}>
-                        {String(dateFilter.dataFinal)} - {String(dateFilter.dataInicial)}
+                    <Text style={{color: colors.gray[600]}}>
+                        {String(dateFilter.dataInicial)} até {String(dateFilter.dataFinal)}
                     </Text>
                 ) : (
-                    <Text style={{color: colors.gray[500]}}>
+                    <Text style={{color: colors.gray[600]}}>
                         Nenhum intervalo selecionado.
                     </Text>
                 )

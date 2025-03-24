@@ -24,8 +24,8 @@ export default function Layout(){
                     tabBarShowLabel: true,
                     animation: "shift",
                     tabBarActiveTintColor: "#FFF",
-                    tabBarInactiveTintColor: colors.gray[500],
-                    tabBarStyle: { backgroundColor: colors.gray[900] },
+                    tabBarInactiveTintColor: colors.slate[500],
+                    tabBarStyle: { backgroundColor: colors.slate[900] },
                     tabBarButton: (props) => (
                         <Pressable {...props} android_ripple={{ borderless: false, color: "transparent" }}>
                             {props.children}
@@ -48,7 +48,7 @@ export default function Layout(){
                     options={{
                         tabBarLabel: "Caixa",
                         tabBarIcon: ({ color, size }) => (
-                            <Feather name="box" size={size} color={color} />
+                            <Feather name="box" size={size - 2} color={color} />
                         )
                     }}
                 />
@@ -58,7 +58,7 @@ export default function Layout(){
                     options={{
                         tabBarLabel: "Vendas",
                         tabBarIcon: ({ color, size }) => (
-                            <Feather name="dollar-sign" size={size} color={color} />
+                            <Feather name="dollar-sign" size={size - 2} color={color} />
                         )
                     }}
                 />
@@ -66,9 +66,19 @@ export default function Layout(){
                 <Tabs.Screen
                     name="recebimentos"
                     options={{
-                        tabBarLabel: "Recebimentos",
+                        tabBarLabel: "Recebimentos de crediário",
                         tabBarIcon: ({ color, size }) => (
                             <Feather name="arrow-down-right" size={size} color={color} />
+                        )
+                    }}
+                />
+
+                <Tabs.Screen
+                    name="processos"
+                    options={{
+                        tabBarLabel: "Processos Liberados",
+                        tabBarIcon: ({ color, size }) => (
+                            <Feather name="check-circle" size={size - 2} color={color} />
                         )
                     }}
                 />

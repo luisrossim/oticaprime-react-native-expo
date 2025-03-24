@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard, ActivityIndicator, Alert } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { colors } from "@/utils/constants/colors";
-import { Feather } from "@expo/vector-icons";
 import CustomButton from "@/components/CustomButton";
 import { AuthRequest, AuthResponse } from "@/models/auth";
 import { AuthService } from "@/services/auth-service";
@@ -40,8 +39,13 @@ export default function Login() {
             }
 
         } catch (err: any) {
-            Alert.alert(err.response.data.message || err);
-            setLoading(false);
+            const errorMessage =
+                err.response?.data?.message ||
+                err.response?.data ||
+                "Erro ao realizar login.";
+        
+            Alert.alert(errorMessage);
+            
         } finally {
             setLoading(false);
         }
@@ -51,13 +55,10 @@ export default function Login() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
                 <ImageBackground 
-                    source={{ uri: "https://images.unsplash.com/photo-1601031368146-49b73fcaebb1?q=80&w=1930&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }} 
+                    source={{ uri: "https://images.unsplash.com/photo-1639781895346-054825a58d4a?q=80&w=2127&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }} 
                     style={styles.image}
                     resizeMode="cover"
                 >
-                    <View>
-                        <Feather name="layers" size={32} color={"rgba(255,255,255, 0.7)"} />
-                    </View>
                 </ImageBackground>
 
                 <View style={styles.loginContainer}>
@@ -100,12 +101,12 @@ export default function Login() {
                         }
                     </View>
 
-                    <View style={{alignItems: "center"}}>
+                    <View style={{alignItems: "center", gap: 1}}>
                         <Text style={styles.titleFooter}>
                             ÓTICA PRIME
                         </Text>
                         <Text style={styles.titleFooter}>
-                            {'\u00A9'} ATIP 2025 v.1.01
+                            {'\u00A9'} ATIP INF. 2025 v.1.2
                         </Text>
                     </View>
                 </View>
@@ -140,19 +141,18 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[300],
         padding: 14,
-        borderRadius: 5,
+        borderRadius: 8,
         fontSize: 15
     },
     image: {
         width: "100%",
-        height: 220,
+        height: 240,
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: colors.gray[100]
     },
     titleFooter: {
         fontSize: 10,
-        fontWeight: 300,
         color: colors.gray[400],
         marginBottom: 3
     }

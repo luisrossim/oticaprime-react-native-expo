@@ -13,25 +13,27 @@ import { useAuth } from "@/context/AuthContext";
 import { CustomHeader } from "@/components/CustomHeader";
 import SectionTitle from "@/components/SectionTitle";
 import { router } from "expo-router";
+import { ErrorMessage } from "@/components/ErrorMessage";
 
 
 export default function Settings() {
+  const {selectedEmpresa, selectedCaixa, updateEmpresa, updateCaixa} = useEmpresaCaixa();
+  const {logout, authData} = useAuth();
   const [empresas, setEmpresas] = useState<Company[]>([]);
   const [caixas, setCaixas] = useState<Caixa[]>([]);
 
-  const { logout, authData } = useAuth();
-  const { selectedEmpresa, selectedCaixa, updateEmpresa, updateCaixa } = useEmpresaCaixa();
-
   const snapPoints = useMemo(() => ['75%'], []);
-  const [bottomSheetType, setBottomSheetType] = useState<'empresa' | 'caixa' | null>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const [bottomSheetType, setBottomSheetType] = useState<'empresa' | 'caixa' | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
 
+
   const fetchEmpresasAtivas = async () => {
     setLoading(true);
+    setError(null);
 
     try {
       const empresaService = new EmpresaService(authData?.accessToken);
@@ -52,6 +54,7 @@ export default function Settings() {
     }
 
     setLoading(true);
+    setError(null);
     
     try {
       const caixaService = new CaixaService(authData?.accessToken);
@@ -112,6 +115,7 @@ export default function Settings() {
     ), []
   );
 
+
   
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#FFF"}}>
@@ -121,51 +125,49 @@ export default function Settings() {
         <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 80}}>
           <View style={styles.profile}>
             <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
+              source={{uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
               style={styles.image}
             />
 
             <Text style={styles.selectedEmpresaTitle}>
-              {selectedEmpresa?.RAZAO_EMP || "Nenhuma empresa selecionada"}
+              {selectedEmpresa?.RAZAO_EMP || "-"}
             </Text>
 
             <Text style={styles.selectedCaixaTitle}>
-              {selectedCaixa?.DESC_CAI || "Nenhum caixa selecionado"}
+              {selectedCaixa?.DESC_CAI || "-"}
             </Text>
           </View>
 
           <View>
             <SectionTitle title="INFORMAÇÕES" />
+
             <SettingsButton
-              icon="home"
+              icon="briefcase"
               title="Selecionar empresa"
-              iconColor={colors.blue[600]}
+              iconColor={colors.slate[500]}
               onPress={() => openBottomSheet('empresa')}
             />
 
             <SettingsButton
               icon="box"
               title="Selecionar caixa"
-              iconColor={colors.purple[600]}
+              iconColor={colors.slate[500]}
               onPress={() => openBottomSheet('caixa')}
             />
 
             <SettingsButton
               icon="book"
               title="Manual do usuário"
-              iconColor={colors.slate[600]}
+              iconColor={colors.slate[500]}
               onPress={() => {router.navigate('/manual-usuario')}}
             />
-          </View>
 
-          <View style={{marginTop: 50}}>
-            <SectionTitle title={`CONTA: ${authData?.login || "null"}`} />
             <SettingsButton 
               icon="log-out" 
               title="Sair" 
-              iconColor={colors.red[600]}
+              iconColor={colors.red[500]}
               onPress={handleLogout}
-            />
+            />  
           </View>
         </ScrollView>
 
@@ -178,7 +180,7 @@ export default function Settings() {
         >
           <BottomSheetView style={styles.contentContainer}>
             {bottomSheetType === 'empresa' ? (
-              <>
+              <View>
                 <Text style={styles.bottomTitle}>
                   Selecionar empresa
                 </Text>
@@ -187,8 +189,12 @@ export default function Settings() {
                 </Text>
 
                 {loading ? (
-                  <ActivityIndicator size="large" color={colors.blue[700]} />
-                ) : (
+                  <ActivityIndicator 
+                    size="large" 
+                    color={colors.blue[700]} 
+                  />
+                ) 
+                : (
                   empresas.map((empresa) => (
                     <TouchableOpacity
                       key={empresa.COD_EMP}
@@ -209,9 +215,10 @@ export default function Settings() {
                     </TouchableOpacity>
                   ))
                 )}
-              </>
-            ) : (
-              <>
+              </View>
+            ) 
+            : (
+              <View>
                 <Text style={styles.bottomTitle}>
                   Selecionar caixa
                 </Text>
@@ -219,9 +226,15 @@ export default function Settings() {
                   Os dados serão sincronizados e exibidos de acordo com o caixa selecionado.
                 </Text>
 
+                {error && ( <ErrorMessage error={error} /> )}
+
                 {loading ? (
-                  <ActivityIndicator size="large" color={colors.purple[700]} />
-                ) : (
+                  <ActivityIndicator 
+                    size="large" 
+                    color={colors.purple[700]} 
+                  />
+                ) 
+                : (
                   caixas.map((caixa, index) => (
                     <TouchableOpacity
                       key={index}
@@ -242,7 +255,7 @@ export default function Settings() {
                     </TouchableOpacity>
                   ))
                 )}
-              </>
+              </View>
             )}
           </BottomSheetView>
         </BottomSheet>
@@ -263,14 +276,11 @@ const styles = StyleSheet.create({
     fontWeight: "600", 
     marginBottom: 5
   },
-  bottomSubTitle: {
-    fontSize: 14, 
-    fontWeight: "300", 
-    color: colors.gray[500], 
+  bottomSubTitle: { 
+    color: colors.slate[500], 
     marginBottom: 26
   },
   profile: {
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
@@ -287,14 +297,17 @@ const styles = StyleSheet.create({
   optionButtonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
-    borderRadius: 5
+    padding: 20,
+    borderRadius: 60,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: colors.slate[200]
   },
   selectedOptionButtonEmpresa: {
-    backgroundColor: colors.blue[700]
+    backgroundColor: colors.blue[600]
   },
   selectedOptionButtonCaixa: {
-    backgroundColor: colors.purple[700]
+    backgroundColor: colors.purple[600]
   },
   selectedOptionTextEmpresa: {
     color: colors.cyan[100],
@@ -306,21 +319,22 @@ const styles = StyleSheet.create({
   },
   optionButtonText: {
     fontSize: 13,
-    color: colors.gray[600]
+    color: colors.slate[500]
   },
-  selectedEmpresaTitle: {
-    fontSize: 16, 
-    fontWeight: 600, 
-    textAlign: 'center',
-    color: colors.gray[900]
+  selectedEmpresaTitle: { 
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: 600,
+    color: colors.slate[800]
   },
   selectedCaixaTitle: {
-    textAlign: 'center',
-    color: colors.gray[500]
+    textAlign: "center",
+    fontSize: 12,
+    color: colors.slate[500]
   },
   image: { 
-    width: 85, 
-    height: 85, 
+    width: 90, 
+    height: 90, 
     borderRadius: 50,
     marginBottom: 10
   }

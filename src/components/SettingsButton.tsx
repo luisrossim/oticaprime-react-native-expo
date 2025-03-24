@@ -5,37 +5,56 @@ import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 type SettingsButtonProps = {
   title: string;
   icon: string;
-  iconColor?: string;
+  iconColor: string;
   onPress: () => void;
 };
 
 export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, iconColor, onPress }) => {
     return (
       <TouchableOpacity style={styles.button} onPress={onPress}>
-        <View style={{alignItems: 'center', flexDirection: 'row', gap: 10}}>
+        <View style={styles.buttonContainer}>
           <Feather 
             name={icon as keyof typeof Feather.glyphMap} 
-            size={15}
+            size={18}
             color="#FFF"
-            style={{padding: 6, backgroundColor: iconColor, borderRadius: 5}}
+            style={[styles.buttonIcon, {backgroundColor: iconColor}]}
           />
 
-          <Text>{title}</Text>
+          <Text style={styles.buttonLabel}>
+            {title}
+          </Text>
         </View>
 
-        <Feather name="chevron-right" size={20} color={colors.gray[500]} />
+        <Feather 
+          name="chevron-right" 
+          size={18} 
+          color={colors.slate[400]} 
+        />
       </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
-    button: {
-      flexDirection: 'row',
-      paddingVertical: 15,
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      borderBottomWidth: 0.5,
-      borderBottomColor: colors.gray[300]
-    }
+  button: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.slate[200]
+  },
+  buttonContainer: {
+    alignItems: 'center', 
+    flexDirection: 'row', 
+    gap: 10
+  },
+  buttonIcon: {
+    padding: 8,
+    borderRadius: 60
+  },
+  buttonLabel: {
+    fontWeight: 500, 
+    color: colors.slate[800]
+  }
 });

@@ -1,4 +1,5 @@
-import { Pageable } from "./pageable.js";
+import { Pageable } from "./pageable"
+
 
 export interface Recebimento extends RecebimentoSummary {
     COD_EMP: number
@@ -13,6 +14,7 @@ export interface Recebimento extends RecebimentoSummary {
 
 export interface RecebimentoSummary {
     COD_CTR: number
+    SEQUENCIA_CTR: string
     NOME_CLI: string
     DTPAGTO_CTR: string
     VLRPAGO_CTR: number

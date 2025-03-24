@@ -12,14 +12,13 @@ export class UtilitiesService {
         return `${format(startDate, "dd/MM/yyyy")} - ${format(endDate, "dd/MM/yyyy")}`;
     };
 
-    static monthNames = [
-        "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", 
-        "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-    ];
-
     static formatarData = (data: Date): string => {
         return data.toLocaleDateString();
     };
+
+    static monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+    static monthNamesUpper = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
 
     static ptBR = {
         monthNames: [

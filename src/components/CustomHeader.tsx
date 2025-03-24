@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.gray[300],
         paddingHorizontal: 20,
         paddingTop: 35,
-        paddingBottom: 6,
+        paddingBottom: 7,
         backgroundColor: "#FFF"
     },
     subContainer: {

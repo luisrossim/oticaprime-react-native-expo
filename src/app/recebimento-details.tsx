@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { colors } from '@/utils/constants/colors';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
@@ -16,8 +16,9 @@ import { RecebimentoDetailsItem, RecebimentoDetailsLine } from '@/components/Rec
 import { LineDetailButton } from '@/components/LineDetail';
 
 export default function RecebimentoDetails() {
-    const { id } = useLocalSearchParams();
+    const { id, sequencia } = useLocalSearchParams();
     const recebimentoId = Array.isArray(id) ? id[0] : id;
+    const sequenciaNum = Array.isArray(sequencia) ? sequencia[0] : sequencia;
     const [recebimento, setRecebimento] = useState<Recebimento>();
 
     const { authData } = useAuth();
@@ -38,7 +39,7 @@ export default function RecebimentoDetails() {
             }
 
             const recebimentosService = new RecebimentosService(authData?.accessToken);
-            const data = await recebimentosService.getById(recebimentoId);
+            const data = await recebimentosService.getByIdWithParam(recebimentoId, sequenciaNum);
             setRecebimento(data);
 
         } catch (err) {
@@ -85,36 +86,32 @@ export default function RecebimentoDetails() {
                     <SectionTitle title="INFORMAÇÕES" />
                     <View style={styles.section}>
                         <RecebimentoDetailsLine 
-                            label="CLIENTE"
+                            label="Cliente"
                             value={`${limitarNome(recebimento!.NOME_CLI)}`} 
                         />
                         <RecebimentoDetailsLine 
-                            label="VALOR CONTA"
+                            label="Valor da conta"
                             value={UtilitiesService.formatarValor(recebimento!.VALOR_CTR)} 
                         />
                         <RecebimentoDetailsLine 
-                            label="VENCIMENTO"
+                            label="Vencimento"
                             value={new Date(recebimento!.VENCTO_CTR).toLocaleDateString()} 
                         />
                         <RecebimentoDetailsLine 
-                            label="PAGO EM"
-                            value={new Date(recebimento!.DTPAGTO_CTR).toLocaleDateString()} 
-                        />
-                    </View>
-
-                    <SectionTitle title="VALORES" />
-                    <View style={styles.section}>
-                        <RecebimentoDetailsLine 
-                            label="VALOR PAGO"
-                            value={UtilitiesService.formatarValor(recebimento!.VLRPAGO_CTR)} 
-                        />
-                        <RecebimentoDetailsLine 
-                            label="DESCONTO"
+                            label="Desconto"
                             value={UtilitiesService.formatarValor(recebimento!.DESCONTO_CONCEDIDO)} 
                         />
                         <RecebimentoDetailsLine 
-                            label="ACRÉSCIMO"
+                            label="Acréscimo"
                             value={UtilitiesService.formatarValor(recebimento!.ACRESCIMO_RECEBIDO)} 
+                        />
+                        <RecebimentoDetailsLine 
+                            label="Pago em"
+                            value={new Date(recebimento!.DTPAGTO_CTR).toLocaleDateString()} 
+                        />
+                        <RecebimentoDetailsLine 
+                            label="Valor pago"
+                            value={UtilitiesService.formatarValor(recebimento!.VLRPAGO_CTR)} 
                         />
                     </View>
 
@@ -122,15 +119,19 @@ export default function RecebimentoDetails() {
                     <View style={styles.section}>
                         <RecebimentoDetailsItem 
                             icon="file" 
-                            detail={recebimento!.NUMDOCUMENTO_CTR} 
+                            detail={`N° ${recebimento!.NUMDOCUMENTO_CTR}`} 
+                        />
+                        <RecebimentoDetailsItem 
+                            icon="ellipsis" 
+                            detail={`Sequência ${recebimento!.SEQUENCIA_CTR}`} 
                         />
                     </View>
 
                     <SectionTitle title="VENDA" />
                     <LineDetailButton 
-                            label='DETALHES DA VENDA'
-                            onPress={handleNavigateToVendas}
-                        />
+                        label='Detalhes da venda'
+                        onPress={handleNavigateToVendas}
+                    />
                 </ScrollView>
             )}
         </SafeAreaView>

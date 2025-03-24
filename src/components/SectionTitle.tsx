@@ -18,14 +18,13 @@ export default function SectionTitle(props: SectionTitleProps) {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.gray[100],
+        backgroundColor: colors.slate[50],
         paddingHorizontal: 20,
-        paddingVertical: 10,
-    
+        paddingVertical: 10
     },
     text: {
-        color: "#878b94", 
-        fontSize: 12,
+        color: colors.slate[400], 
+        fontSize: 11,
         fontWeight: 500
     },
 });

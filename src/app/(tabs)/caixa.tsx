@@ -2,18 +2,17 @@ import { ErrorMessage } from "@/components/ErrorMessage";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { PageTitle } from "@/components/PageTitle";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
-import { CaixaDetails } from "@/models/caixa";
 import { CaixaService } from "@/services/caixa-service";
 import { colors } from "@/utils/constants/colors";
 import { useEffect, useRef, useState } from "react";
 import { LineChart } from "@/components/LineChart";
 import { UtilitiesService } from "@/utils/utilities-service";
-import { LineDetail } from "@/components/LineDetail";
+import { LineDetail, LineDetailButton } from "@/components/LineDetail";
 import SectionTitle from "@/components/SectionTitle";
-import { Feather } from "@expo/vector-icons";
 import { useDateFilter } from "@/context/DateFilterContext";
 import { useAuth } from "@/context/AuthContext";
 import { DateFilterInfo } from "@/components/DateFilterInfo";
+import { router } from "expo-router";
 import {
   View,
   StyleSheet,
@@ -22,6 +21,8 @@ import {
   Animated,
   TouchableOpacity,
 } from "react-native";
+import { CaixaDetails } from "@/models/caixa";
+
 
 export default function Caixa() {
   const [caixaDetails, setCaixaDetails] = useState<CaixaDetails | null>(null);
@@ -40,10 +41,10 @@ export default function Caixa() {
   useEffect(() => {
     scrollY.setValue(0);
     setCaixaDetails(null);
-    fetchCaixaDetails();
+    fetchCaixaInfo();
   }, [selectedEmpresa, selectedCaixa, dateFilter]);
 
-  const fetchCaixaDetails = async () => {
+  const fetchCaixaInfo = async () => {
     setLoading(true);
     setError(null);
 
@@ -102,18 +103,16 @@ export default function Caixa() {
               },
             ]}
           >
-            <Text style={styles.navBarTitle}>Caixa</Text>
             <TouchableOpacity
-              style={styles.scrollToTopButton}
+              style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}
               onPress={() =>
                 scrollViewRef.current?.scrollTo({ y: 0, animated: true })
               }
             >
-              <Feather
-                name="chevron-up"
-                size={18}
-                color={colors.fuchsia[200]}
-              />
+              <Text style={styles.navBarTitle}>Caixa</Text>
+              <Text style={{color: colors.fuchsia[200], fontSize: 13}}>
+                  {String(dateFilter?.dataInicial)} até {String(dateFilter?.dataFinal)}
+              </Text>
             </TouchableOpacity>
           </Animated.View>
 
@@ -139,7 +138,16 @@ export default function Caixa() {
             {caixaDetails && (
               <View>
                 <View style={styles.caixaSection}>
-                  <SectionTitle title="TOTAL RECEBIDO" />
+                  <SectionTitle title="ANALÍTICO DO CAIXA" />
+
+                  <LineDetailButton
+                    label="Saldo e lançamentos"
+                    onPress={() => {router.push("/caixa-historico")}}
+                  />
+                </View>
+
+                <View style={styles.caixaSection}>
+                  <SectionTitle title="TOTAL DE RECEBIMENTO DE CREDIÁRIO" />
 
                   <View style={{ paddingHorizontal: 20 }}>
                     <Text style={styles.totalValue}>
@@ -150,17 +158,17 @@ export default function Caixa() {
                   </View>
 
                   <LineDetail
-                    label="BAIXAS"
+                    label="Baixas"
                     value={caixaDetails.TOTAL_BAIXAS}
                     isBRL={false}
                   />
                   <LineDetail
-                    label="ACRÉSCIMO RECEBIDO"
+                    label="Acréscimo recebido"
                     value={caixaDetails.TOTAL_ACRESCIMO_RECEBIDO}
                     isBRL={true}
                   />
                   <LineDetail
-                    label="DESCONTO CONCEDIDO"
+                    label="Desconto concedido"
                     value={caixaDetails.TOTAL_DESCONTO_CONCEDIDO}
                     isBRL={true}
                   />
@@ -172,7 +180,7 @@ export default function Caixa() {
                 </View>
 
                 <View style={styles.caixaSection}>
-                  <SectionTitle title="TOTAL ANALÍTICO DE VENDAS" />
+                  <SectionTitle title="ANALÍTICO DE VENDAS" />
 
                   <View style={{ paddingHorizontal: 20 }}>
                     <Text style={styles.totalValue}>
@@ -183,22 +191,22 @@ export default function Caixa() {
                   </View>
 
                   <LineDetail
-                    label="VENDAS CONCLUÍDAS"
+                    label="Vendas concluídas"
                     value={(caixaDetails.VENDAS.TOTAL_VENDAS - caixaDetails.VENDAS.TOTAL_CORTESIAS_OUTROS) || 0}
                     isBRL={false}
                   />
                   <LineDetail
-                    label="CORTESIAS E OUTROS"
+                    label="Cortesias e outros"
                     value={caixaDetails.VENDAS.TOTAL_CORTESIAS_OUTROS || 0}
                     isBRL={false}
                   />
                   <LineDetail
-                    label="CANCELADAS"
+                    label="Canceladas"
                     value={caixaDetails.VENDAS.TOTAL_VENDAS_CANCELADAS || 0}
                     isBRL={false}
                   />
                   <LineDetail
-                    label="DESCONTO EM ITENS"
+                    label="Desconto em itens"
                     value={caixaDetails.VENDAS.TOTAL_DESCONTO_VENDAS || 0}
                     isBRL={true}
                   />
@@ -217,6 +225,9 @@ export default function Caixa() {
                       {UtilitiesService.formatarValor(
                         caixaDetails.TOTAL_CONTAS_RECEBER || 0
                       )}
+                    </Text>
+                    <Text style={{color: colors.gray[400], fontWeight: 300}}>
+                      *de acordo com a data de vencimento
                     </Text>
                   </View>
                 </View>
@@ -241,7 +252,7 @@ const styles = StyleSheet.create({
   },
   caixaSection: {
     marginTop: 10,
-    marginBottom: 50,
+    marginBottom: 40,
   },
   lineContainer: {
     flexDirection: "column",
@@ -264,13 +275,6 @@ const styles = StyleSheet.create({
     color: colors.gray[900],
     marginTop: 15,
     marginBottom: 5
-  },
-  scrollToTopButton: {
-    position: "absolute",
-    right: 16,
-    bottom: 8,
-    padding: 5,
-    borderRadius: 20,
   },
   navBar: {
     position: "absolute",

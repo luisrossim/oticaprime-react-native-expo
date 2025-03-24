@@ -2,32 +2,27 @@ import { colors } from "@/utils/constants/colors";
 import { Feather } from "@expo/vector-icons";
 import { View, Text, StyleSheet } from "react-native"
 
-interface FilterInfoProps {
-    totalInfo: string,
-    icon: string
-}
-
-export const FilterInfo = (props: FilterInfoProps) => {
+export const FilterOrdem = () => {
     return (
-       <View style={styles.totalResults}>
+       <View style={styles.container}>
             <Feather 
-                name={props.icon as keyof typeof Feather.glyphMap} 
+                name="chevrons-down" 
                 size={16} 
                 color={colors.gray[600]} 
             />
             <Text style={{color: colors.gray[600]}}>
-                {props.totalInfo}
+                Mais recentes
             </Text>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    totalResults: {
+    container: {
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'flex-start',
         gap: 5,
-        marginBottom: 2
+        marginTop: 2
     }
 })

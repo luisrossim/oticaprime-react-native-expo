@@ -26,7 +26,7 @@ export const RecebimentoDetailsItem = (props: RecebimentoDetailsItemProps) => {
 export const RecebimentoDetailsLine = (props: RecebimentoDetailsLineProps) => {
     return (
         <View style={styles.recebimentoDetailsLine}>
-            <Text style={{fontSize: 13, color: colors.gray[500]}}>
+            <Text style={{color: colors.gray[700]}}>
                 {props.label}:
             </Text>
             <Text style={{fontSize: 13, color: colors.gray[500]}}>

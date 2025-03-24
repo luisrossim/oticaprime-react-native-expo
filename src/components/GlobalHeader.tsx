@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { colors } from "@/utils/constants/colors";
 import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Image, Modal } from "react-native";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
@@ -71,7 +71,7 @@ export function GlobalHeader() {
                     selected: true, 
                     startingDay: true, 
                     endingDay: true, 
-                    color: colors.blue[600], 
+                    color: colors.blue[500], 
                     textColor: "white" 
                 },
             });
@@ -142,10 +142,10 @@ export function GlobalHeader() {
 
                     <View style={styles.profileContainer}>
                         <Text style={styles.profileText}>
-                            {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : "Nenhuma empresa"}
+                            {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : "-"}
                         </Text>
                         <Text style={styles.profileSubText}>
-                            {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : "Nenhum caixa selecionado"}
+                            {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : "-"}
                         </Text>
                     </View>
                 </View>
@@ -153,23 +153,23 @@ export function GlobalHeader() {
                 <View style={styles.globalHeaderActions}>
                     <TouchableOpacity 
                         onPress={openModalChart} 
-                        style={{padding: 9}}
+                        style={{padding: 8}}
                     >
-                        <Feather name="bar-chart-2" size={18} color={colors.gray[500]} />
+                        <Feather name="bar-chart-2" size={21} color={colors.gray[500]} />
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={openModalDate} 
-                        style={{padding: 9}}
+                        style={{padding: 8}}
                     >
-                        <Feather name="calendar" size={18} color={colors.gray[500]} />
+                        <Feather name="calendar" size={21} color={colors.gray[500]} />
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={() => router.push("/settings")} 
-                        style={{paddingVertical: 9, paddingLeft: 9}}
+                        style={{paddingVertical: 8, paddingLeft: 8}}
                     >
-                        <Feather name="settings" size={18} color={colors.gray[500]} />
+                        <Feather name="settings" size={21} color={colors.gray[500]} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -229,6 +229,7 @@ export function GlobalHeader() {
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>Dashboard</Text>
+                        <Text style={styles.modalSubTitle}>Dashboard</Text>
                             
                         {dashboardFilterData.map((filter, index) => (
                             <TouchableOpacity 
@@ -236,16 +237,7 @@ export function GlobalHeader() {
                                 style={[styles.option, (selectedRange == filter.range) && styles.optionSelected]} 
                                 onPress={() => {handleSelectRange(filter.range)}}
                             >
-                                <Feather 
-                                    name="calendar" 
-                                    size={20} 
-                                    style={
-                                        (selectedRange == filter.range) ? {color: colors.blue[100]} : {color: colors.gray[500]}
-                                    } 
-                                />
-                                <Text 
-                                    style={(selectedRange == filter.range) ? styles.optionLabelSelected : styles.optionLabel}
-                                >
+                                <Text style={(selectedRange == filter.range) ? styles.optionLabelSelected : styles.optionLabel}>
                                     {filter.label}
                                 </Text>
                             </TouchableOpacity>
@@ -276,7 +268,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: 0.5,
         borderBottomColor: colors.gray[300],
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
         paddingTop: 30,
         paddingBottom: 12,
         backgroundColor: "#FFF"
@@ -294,12 +286,13 @@ const styles = StyleSheet.create({
     },
     profileText: {
         fontSize: 13,
-        color: colors.gray[900],
-        fontWeight: 500
+        fontWeight: 500,
+        color: colors.gray[700]
     },
     profileSubText: {
         fontSize: 11, 
-        color: colors.gray[500]
+        fontWeight: 300,
+        color: colors.gray[700]
     },
     image: { 
         width: 35, 
@@ -320,7 +313,7 @@ const styles = StyleSheet.create({
         width: '92%',
         padding: 20,
         backgroundColor: '#FFF',
-        borderRadius: 10
+        borderRadius: 20
     },
     buttons: {
         flexDirection: "row", 
@@ -333,19 +326,19 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: "center",
         paddingHorizontal: 20,
-        paddingVertical: 10,
-        color: colors.gray[600],
-        backgroundColor: colors.gray[200],
-        borderRadius: 6
+        paddingVertical: 12,
+        color: colors.slate[500],
+        backgroundColor: colors.slate[100],
+        borderRadius: 60
     },
     footerSubmitButton: {
         fontSize: 16,
         textAlign: "center",
         paddingHorizontal: 20,
-        paddingVertical: 10,
-        color: colors.blue[50],
+        paddingVertical: 12,
+        color: colors.cyan[100],
         backgroundColor: colors.blue[600],
-        borderRadius: 6
+        borderRadius: 60
     },
     footerDisabledButton: {
         fontSize: 16,
@@ -362,6 +355,10 @@ const styles = StyleSheet.create({
         color: colors.gray[800],
         marginBottom: 22,
     },
+    modalSubTitle: {
+        color: colors.slate[500], 
+        fontWeight: 300
+    },
     optionLabel: {
         color: colors.gray[500]
     },
@@ -370,14 +367,12 @@ const styles = StyleSheet.create({
     },
     optionSelected: {
         backgroundColor: colors.blue[500],
-        borderRadius: 6
+        borderRadius: 60
     },
     option: {
         width: "100%",
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 8,
-        gap: 8,
+        paddingHorizontal: 12,
+        padding: 12,
         marginVertical: 2
-    },
+    }
 });

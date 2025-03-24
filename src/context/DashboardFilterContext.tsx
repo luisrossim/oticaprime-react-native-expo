@@ -8,7 +8,7 @@ interface DashboardFilterContextType {
 const DashboardFilterContext = createContext<DashboardFilterContextType | undefined>(undefined);
 
 export const DashboardFilterProvider = ({ children }: { children: ReactNode }) => {
-    const [selectedRange, setSelectedRange] = useState<number>(24);
+    const [selectedRange, setSelectedRange] = useState<number>(12);
 
     return (
         <DashboardFilterContext.Provider value={{ selectedRange, setSelectedRange }}>

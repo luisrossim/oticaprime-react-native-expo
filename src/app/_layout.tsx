@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "react-native";
-import { EmpresaCaixaProvider } from "@/context/EmpresaCaixaContext";
+import { EmpresaCaixaProvider, useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { DateFilterProvider } from "@/context/DateFilterContext";
@@ -9,14 +9,17 @@ import { DashboardFilterProvider } from "@/context/DashboardFilterContext";
 
 function MainLayout() {
     const { authData, isLoading } = useAuth();
+    const { selectedEmpresa } = useEmpresaCaixa();
     const router = useRouter();
 
     useEffect(() => {        
         if (!isLoading) {
-            if (authData) {
-                router.replace("/(tabs)");
-            } else {
+            if (!authData) {
                 router.replace("/login");
+            } else if (!selectedEmpresa) {
+                router.replace("/welcome");
+            } else {
+                router.replace("/(tabs)");
             }
         }
     }, [authData, isLoading]);
@@ -26,7 +29,7 @@ function MainLayout() {
     return (
         <DateFilterProvider>
             <DashboardFilterProvider>
-                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+                <StatusBar barStyle="default" backgroundColor="#FFF" />
             
                 <Stack>
                     <Stack.Screen 
@@ -38,9 +41,17 @@ function MainLayout() {
                         }} 
                     />
                     <Stack.Screen 
-                        name="(tabs)" 
+                        name="welcome" 
                         options={{ 
                             headerShown: false, 
+                            animation: "ios_from_right" 
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="(tabs)"
+                        options={{ 
+                            headerShown: false,
+                            gestureEnabled: false, 
                             animation: "ios_from_right" 
                         }} 
                     />
@@ -60,6 +71,13 @@ function MainLayout() {
                     />
                     <Stack.Screen 
                         name="recebimento-details" 
+                        options={{ 
+                            headerShown: false,
+                            animation: "ios_from_right"
+                        }} 
+                    />
+                    <Stack.Screen 
+                        name="caixa-historico" 
                         options={{ 
                             headerShown: false,
                             animation: "ios_from_right"

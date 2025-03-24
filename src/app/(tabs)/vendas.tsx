@@ -15,6 +15,7 @@ import { FilterInfo } from '@/components/FilterInfo';
 import { useAuth } from '@/context/AuthContext';
 import { FormasPagamentoService } from '@/services/formas-pagamento-service';
 import { FormaPagamento } from '@/models/formaPagamento';
+import { FilterOrdem } from '@/components/FilterOrdem';
 
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
@@ -208,14 +209,14 @@ export default function Vendas() {
                                 }]
                             }]}
                         > 
-                            <Text style={styles.navBarTitle}>
-                                Vendas
-                            </Text>
-                            <TouchableOpacity 
-                                style={styles.scrollToTopButton} 
+                            <TouchableOpacity
+                                style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}
                                 onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
                             >
-                                <Feather name="chevron-up" size={18} color={colors.cyan[200]} />
+                                <Text style={styles.navBarTitle}>Vendas</Text>
+                                <Text style={{color: colors.green[200], fontSize: 13}}>
+                                    {String(dateFilter?.dataInicial)} até {String(dateFilter?.dataFinal)}
+                                </Text>
                             </TouchableOpacity>
                         </Animated.View>
 
@@ -231,6 +232,7 @@ export default function Vendas() {
                                         totalInfo={`${totalVendas || 0} vendas`} 
                                         icon='dollar-sign'
                                     />
+                                    <FilterOrdem />
                                     <TouchableOpacity
                                         style={styles.selectButton}
                                         onPress={() => setIsModalVisible(true)}
@@ -238,7 +240,7 @@ export default function Vendas() {
                                         <Text style={styles.selectButtonText}>
                                             {selectedFormaPagamento ? selectedFormaPagamento.DESCRICAO : 'TODAS AS FORMAS DE PAGAMENTO'}
                                         </Text>
-                                        <Feather name="chevron-down" size={18} color={colors.green[500]} />
+                                        <Feather name="chevron-down" size={18} color={colors.slate[400]} />
                                     </TouchableOpacity>
                                 </View>
                             }
@@ -284,24 +286,23 @@ export default function Vendas() {
                         >
                             <View style={styles.modalOverlay}>
                                 <View style={styles.modalContent}>
-                                    <Text style={styles.modalTitle}>Selecione a forma de pagamento</Text>
+                                    <Text style={styles.modalTitle}>Formas de pagamento</Text>
                                     <FlatList
                                         data={formasPagamento}
                                         keyExtractor={(item) => String(item.CODIGO)}
                                         renderItem={renderFormaPagamentoItem}
                                     />
-                                    <TouchableOpacity
-                                        style={styles.clearSelectionButton}
-                                        onPress={handleClearSelection}
-                                    >
-                                        <Text style={styles.clearSelectionText}>Limpar Seleção</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={styles.closeButton}
-                                        onPress={() => setIsModalVisible(false)}
-                                    >
-                                        <Text style={styles.closeButtonText}>Fechar</Text>
-                                    </TouchableOpacity>
+                                    <View style={styles.buttons}>
+                                        <TouchableOpacity onPress={handleClearSelection} style={styles.footerClearButton}>
+                                            <Feather name="check-circle" size={16} color={colors.blue[50]} />
+                                            <Text style={styles.modalButtonText}>Selecionar todas</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                                            <Text style={styles.footerCancelButton}>
+                                                Cancelar
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
                         </Modal>
@@ -373,7 +374,7 @@ const styles = StyleSheet.create({
     iconElement: {
         backgroundColor: colors.green[500],
         borderRadius: 60,
-        color: colors.green[200],
+        color: colors.green[100],
         padding: 10
     },
     vendedor: {
@@ -420,13 +421,6 @@ const styles = StyleSheet.create({
         color: colors.green[200],
         fontWeight: 600
     },
-    scrollToTopButton: {
-        position: 'absolute',
-        right: 16,
-        bottom: 8,
-        padding: 5,
-        borderRadius: 20,
-    },
     headerContainer: {
         padding: 20,
         paddingTop: 50
@@ -435,14 +429,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: "space-between",
-        backgroundColor: colors.green[100],
-        padding: 8,
+        borderWidth: 1,
+        borderColor: colors.slate[200],
+        backgroundColor: colors.slate[50],
+        paddingHorizontal: 12,
+        paddingVertical: 8,
         marginTop: 10,
-        borderRadius: 5,
+        borderRadius: 60,
     },
     selectButtonText: {
-        fontSize: 13,
-        color: colors.green[700],
+        fontSize: 12,
+        fontWeight: 500,
+        color: colors.slate[500],
     },
     modalOverlay: {
         flex: 1,
@@ -459,36 +457,43 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 22,
         fontWeight: 500,
-        marginBottom: 10
+        marginBottom: 15
     },
     formaPagamentoItem: {
-        padding: 10,
+        paddingVertical: 10,
         borderBottomWidth: 1,
         borderBottomColor: colors.gray[200],
     },
     formaPagamentoText: {
         color: colors.gray[500],
     },
-    closeButton: {
-        marginTop: 10,
-        backgroundColor: colors.red[500],
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
+    buttons: {
+        marginTop: 25,
+        gap: 10
     },
-    closeButtonText: {
-        color: 'white',
+    footerCancelButton: {
+        width: "100%",
         fontSize: 16,
+        textAlign: "center",
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        color: colors.gray[600],
+        backgroundColor: colors.gray[200],
+        borderRadius: 6
     },
-    clearSelectionButton: {
-        marginTop: 30,
-        backgroundColor: colors.gray[500],
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
+    footerClearButton: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 6,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        backgroundColor: colors.blue[600],
+        borderRadius: 6
     },
-    clearSelectionText: {
-        color: 'white',
+    modalButtonText: {
         fontSize: 16,
-    },
+        color: colors.blue[50],
+        textAlign: "center",
+    }
 });
