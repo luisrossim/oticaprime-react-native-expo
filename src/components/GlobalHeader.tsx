@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { colors } from "@/utils/constants/colors";
-import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Image, Modal } from "react-native";
+import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Modal } from "react-native";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
@@ -25,6 +25,8 @@ export function GlobalHeader() {
 
     const [modalDateVisible, setModalDateVisible] = useState(false);
     const [modalChartVisible, setModalChartVisible] = useState(false);
+
+    const [firstLetter, setFirstLetter] = useState<string>("");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -52,21 +54,30 @@ export function GlobalHeader() {
         ? Object.keys(markedDates).sort()[0]
         : new Date().toISOString().split("T")[0];
 
-    const handleEmpresaNome = (razaoSocial: string | undefined): string => {
-        if (!razaoSocial) return "";
-        
-        const match = razaoSocial.match(/(?:OTICO)\s+(.+)/i);
-        return match ? match[1] : "";
-    };
+        const handleEmpresaNome = (razaoSocial: string | undefined): string => {
+            if (!razaoSocial) return "";
+
+            const match = razaoSocial.match(/(?:OTICO)\s+(.+)/i);
+            if (match) {
+              let nome = match[1];
+          
+              if (nome.length > 18) {
+                nome = nome.substring(0, 18) + ".";
+              }
+              return nome;
+            }
+          
+            return "";
+          };
 
     const handleCaixaName = (nome: string | undefined): string => {
-        const res = (nome?.includes("COFRE") ? "CAIXA COFRE" : "CAIXA NORMAL")
+        const res = (nome?.includes("COFRE") ? "(CAIXA 2)" : "(CAIXA 1)")
         return res;
     }
 
     const handleDateText = (): string => {
         if (!dateFilter) {
-            return "-";
+            return "";
         }
 
         if (dateFilter?.dataInicial == dateFilter?.dataFinal) {
@@ -150,18 +161,19 @@ export function GlobalHeader() {
         <SafeAreaView>
             <View style={styles.container}>
                 <View style={styles.subcontainer}>
-                    <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
-                        style={styles.image}
-                    />
+                    <View style={styles.letter}>
+                        <Text style={{color: colors.slate[500]}}>{UtilitiesService.getFirstLetter(selectedEmpresa?.RAZAO_EMP)}</Text>
+                    </View>
 
                     <View style={styles.profileContainer}>
-                        <Text style={styles.profileText}>
-                            {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : "-"}
-                        </Text>
-                        <Text style={styles.profileSubText}>
-                            {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : "-"}
-                        </Text>
+                        <View style={{flexDirection: "row", alignItems: "center", gap: 3}}>
+                            <Text style={styles.profileText}>
+                                {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : ""}
+                            </Text>
+                            <Text style={styles.profileSubText}>
+                                {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : ""}
+                            </Text>
+                        </View>
                         <Text style={styles.dateText}>
                             {handleDateText()}
                         </Text>
@@ -173,21 +185,21 @@ export function GlobalHeader() {
                         onPress={openModalChart} 
                         style={{padding: 8}}
                     >
-                        <Feather name="bar-chart-2" size={20} color={colors.gray[500]} />
+                        <Feather name="bar-chart-2" size={19} color={colors.gray[500]} />
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={openModalDate} 
                         style={{padding: 8}}
                     >
-                        <Feather name="calendar" size={20} color={colors.gray[500]} />
+                        <Feather name="calendar" size={19} color={colors.gray[500]} />
                     </TouchableOpacity>
 
                     <TouchableOpacity 
                         onPress={() => router.push("/settings")} 
                         style={{paddingVertical: 8, paddingLeft: 8}}
                     >
-                        <Feather name="settings" size={20} color={colors.gray[500]} />
+                        <Feather name="settings" size={19} color={colors.gray[500]} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -288,10 +300,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottomWidth: 0.5,
-        borderBottomColor: colors.gray[300],
+        borderBottomWidth: 1,
+        borderBottomColor: colors.slate[200],
         paddingHorizontal: 15,
-        paddingTop: 20,
+        paddingTop: 35,
         paddingBottom: 12,
         backgroundColor: "#FFF"
     },
@@ -304,10 +316,10 @@ const styles = StyleSheet.create({
     profileContainer: {
         flexDirection: "column", 
         alignItems: "flex-start", 
-        gap: 2
+        gap: 1
     },
     profileText: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 600,
         color: colors.gray[700]
     },
@@ -317,8 +329,8 @@ const styles = StyleSheet.create({
         color: colors.gray[500]
     },
     image: { 
-        width: 45, 
-        height: 45, 
+        width: 32, 
+        height: 32, 
         borderRadius: 60
     },
     globalHeaderActions: {
@@ -378,8 +390,8 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     modalSubTitle: {
-        color: colors.slate[500], 
         fontWeight: 300,
+        color: colors.slate[700], 
         marginBottom: 24,
     },
     optionLabel: {
@@ -402,5 +414,15 @@ const styles = StyleSheet.create({
         fontWeight: 500,
         color: colors.blue[600],
         fontSize: 11
+    },
+    letter: {
+        width: 32, 
+        height: 32, 
+        borderRadius: 60, 
+        alignItems: "center", 
+        justifyContent: "center", 
+        borderWidth: 0.5, 
+        borderColor: colors.slate[500], 
+        backgroundColor: "#FFF"
     }
 });

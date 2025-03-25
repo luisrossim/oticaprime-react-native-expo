@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from "react-native";
 
 interface SectionTitleProps {
     title: string;
-    subtitle: string;
+    subtitle?: string;
 }
 
 export default function SectionTitle({title, subtitle}: SectionTitleProps) {

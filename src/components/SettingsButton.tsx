@@ -53,6 +53,6 @@ const styles = StyleSheet.create({
   },
   buttonLabel: {
     fontWeight: 500,
-    color: colors.slate[600]
+    color: colors.slate[700]
   }
 });

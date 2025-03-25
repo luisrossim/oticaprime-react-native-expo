@@ -1,5 +1,5 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert } from "react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, ImageBackground } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
@@ -11,9 +11,9 @@ import { Caixa } from "@/models/caixa";
 import { CaixaService } from "@/services/caixa-service";
 import { useAuth } from "@/context/AuthContext";
 import { CustomHeader } from "@/components/CustomHeader";
-import SectionTitle from "@/components/SectionTitle";
 import { router } from "expo-router";
 import { ErrorMessage } from "@/components/ErrorMessage";
+import { UtilitiesService } from "@/utils/utilities-service";
 
 
 export default function Settings() {
@@ -25,13 +25,17 @@ export default function Settings() {
   const snapPoints = useMemo(() => ['75%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [bottomSheetType, setBottomSheetType] = useState<'empresa' | 'caixa' | null>(null);
+  const [firstLetter, setFirstLetter] = useState<string>("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setFirstLetter(UtilitiesService.getFirstLetter(selectedEmpresa?.RAZAO_EMP))
+  }, []);
 
 
-  const fetchEmpresasAtivas = async () => {
+  async function fetchEmpresasAtivas(){
     setLoading(true);
     setError(null);
 
@@ -47,7 +51,7 @@ export default function Settings() {
     }
   };
 
-  const fetchCaixas = async () => {
+  async function fetchCaixas(){
     if(!selectedEmpresa) {
       setError('Nenhuma empresa foi selecionada.');
       return;
@@ -84,20 +88,22 @@ export default function Settings() {
     );
   }
 
-  const openBottomSheet = (type: 'empresa' | 'caixa') => {
+  const openBottomSheet = async (type: 'empresa' | 'caixa') => {
     setBottomSheetType(type);
-    bottomSheetRef.current?.expand();
   
     if (type === 'empresa') {
-      fetchEmpresasAtivas();
+      await fetchEmpresasAtivas();
     } else {
-      fetchCaixas();
+      await fetchCaixas();
     }
+
+    bottomSheetRef.current?.expand();
   };
 
   const handleSelectEmpresa = async (empresa: Company) => {
     await updateEmpresa(empresa);
     bottomSheetRef.current?.close();
+    setFirstLetter(UtilitiesService.getFirstLetter(empresa.RAZAO_EMP));
   };
 
   const handleSelectCaixa = async (caixa: Caixa) => {
@@ -124,10 +130,11 @@ export default function Settings() {
 
         <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 80}}>
           <View style={styles.profile}>
-            <Image
-              source={{uri: 'https://images.unsplash.com/photo-1589282741585-30ab896335cd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
-              style={styles.image}
-            />
+            <View style={styles.letter}>
+              <Text style={{fontSize: 36, color: colors.slate[500], fontWeight: 300}}>
+                {firstLetter}
+              </Text>
+            </View>
 
             <Text style={styles.selectedEmpresaTitle}>
               {selectedEmpresa?.RAZAO_EMP || "-"}
@@ -279,11 +286,11 @@ const styles = StyleSheet.create({
     marginBottom: 26
   },
   profile: {
-    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
-    gap: 5,
+    alignItems: 'center',
     padding: 20,
-    marginBottom: 25
+    marginHorizontal: 15
   },
   contentContainer: {
     display: 'flex',
@@ -322,27 +329,33 @@ const styles = StyleSheet.create({
   selectedEmpresaTitle: { 
     textAlign: "center",
     fontSize: 18,
-    fontWeight: 600,
+    fontWeight: 500,
+    marginBottom: 6,
     color: colors.slate[800]
   },
   selectedCaixaTitle: {
     textAlign: "center",
-    fontSize: 12,
     color: colors.slate[500]
   },
   image: { 
-    width: 90, 
-    height: 90, 
-    borderRadius: 50,
+    width: '100%',
+    aspectRatio: 1260 / 750,
+    resizeMode: 'contain',
     marginBottom: 10
   },
   actionsContainer: {
-    marginHorizontal: 15,
-    paddingVertical: 10, 
-    borderRadius: 16, 
-    borderWidth: 1,
-    borderColor: colors.slate[200],
-    backgroundColor: colors.slate[100],
-    overflow: "hidden"
+    paddingVertical: 15,
+    marginTop: 15
+  },
+  letter: {
+    alignItems: "center", 
+    justifyContent: "center", 
+    width: 100, 
+    height: 100, 
+    backgroundColor: "#FFF", 
+    borderRadius: 60,
+    borderWidth: 1, 
+    borderColor: colors.slate[300],
+    marginBottom: 15 
   }
 });

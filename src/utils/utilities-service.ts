@@ -30,4 +30,23 @@ export class UtilitiesService {
         dayNamesShort: ['Dom.', 'Seg.', 'Ter.', 'Qua.', 'Qui.', 'Sex.', 'Sab.'],
         today: "Hoje"
     };
+
+    static getFirstLetter = (empresa?: string) => {
+        if (empresa) {
+          const words = empresa.split(' ');
+          
+          const primeIndex = words.findIndex(word => word.toLowerCase() === "prime");
+          if (primeIndex !== -1 && words[primeIndex + 1]) {
+            return words[primeIndex + 1].charAt(0).toUpperCase();
+          }
+      
+          const oticoIndex = words.findIndex(word => word.toLowerCase() === "otico");
+          if (oticoIndex !== -1 && words[oticoIndex + 1]) {
+            return words[oticoIndex + 1].charAt(0).toUpperCase();
+          }
+      
+          return words[0].charAt(0).toUpperCase();
+        }
+        return '';
+    };
 }

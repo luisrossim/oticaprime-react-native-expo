@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
         color: colors.slate[500]
     },
     label: {
-        fontSize: 15,
         color: colors.slate[700]
     }
 })

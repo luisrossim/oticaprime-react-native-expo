@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "oticaprime-app",
-    "slug": "oticaprime-app",
+    "name": "ATIP View",
+    "slug": "atip-view",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -32,7 +32,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "5632d9b7-d4c3-45cf-b3ec-e08b89eaac3b"
+        "projectId": "0ffd9503-029e-4734-b67b-2599d239aee2"
       }
     }
   }

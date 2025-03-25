@@ -56,8 +56,7 @@ export default function CaixaHistorico() {
             setError("Parâmetros inválidos.");
             return;
         }
-
-        setLoading(true);
+        
         setError(null);
 
         if (pagina === 1) {
@@ -353,8 +352,7 @@ export default function CaixaHistorico() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FFF",
-        paddingBottom: 25
+        backgroundColor: "#FFF"
     },
     title: {
         fontSize: 32,

@@ -81,7 +81,9 @@ export default function Caixa() {
         >
           <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
             <PageTitle title="Caixa" size="large" />
-            <Text style={{color: colors.slate[500], fontWeight: 300}}>Análise de saldo, lançamentos, recebimentos de crediário e outras informações do caixa.</Text>
+            <Text style={{color: colors.slate[700], fontWeight: 300}}>
+              Análise de saldo, lançamentos, recebimentos de crediário e outras informações do caixa.
+            </Text>
 
             {error && (
               <ErrorMessage error={error} />

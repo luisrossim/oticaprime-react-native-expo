@@ -106,7 +106,7 @@ export default function Login() {
                             ÓTICA PRIME
                         </Text>
                         <Text style={styles.titleFooter}>
-                            {'\u00A9'} ATIP INF. 2025 v.1.2
+                            {'\u00A9'} ATIP INFORMÁTICA 2025 v.1.2
                         </Text>
                     </View>
                 </View>
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: "100%",
-        height: 240,
+        height: 200,
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: colors.gray[100]

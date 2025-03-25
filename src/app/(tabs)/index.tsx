@@ -10,7 +10,8 @@ import { EmpresaReports } from '@/models/company';
 import { EmpresaService } from '@/services/empresa-service';
 import { colors } from '@/utils/constants/colors';
 import { UtilitiesService } from '@/utils/utilities-service';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Text, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
@@ -29,10 +30,12 @@ export default function Index() {
     const [chartData2, setChartData2] = useState<{ month: string; value: number }[]>([]);
     
 
-    useEffect(() => {
-        setClickedValue(null);
-        fetchReports();
-    }, [selectedRange, selectedEmpresa])
+    useFocusEffect(
+        useCallback(() => {
+            setClickedValue(null);
+            fetchReports();
+        }, [selectedRange, selectedEmpresa])
+    );
 
 
    const fetchReports = async () => {
@@ -115,7 +118,9 @@ export default function Index() {
                     >
                         <View style={{paddingHorizontal: 15, marginBottom: 10}}>
                             <PageTitle title="Dashboard" size="large" />
-                            <Text style={{color: colors.slate[500], fontWeight: 300}}>Acompanhe o desempenho da sua empresa através de gráficos interativos.</Text>
+                            <Text style={{color: colors.slate[700], fontWeight: 300}}>
+                                Acompanhe o desempenho da sua empresa através de gráficos interativos.
+                            </Text>
                         </View>
 
                         <ChartContainer
@@ -179,9 +184,9 @@ export default function Index() {
                                                     fontSize: 9
                                                 },
                                                 propsForDots: {
-                                                    r: "4",
+                                                    r: "5",
                                                     fill: "#fff",
-                                                    strokeWidth: "1",
+                                                    strokeWidth: "0.5",
                                                     stroke: colors.green[600],
                                                 },
                                                 fillShadowGradientFrom: colors.green[500],

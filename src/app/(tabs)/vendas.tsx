@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     modalSubTitle: {
-        color: colors.slate[500], 
+        color: colors.slate[700], 
         fontWeight: 300,
         marginBottom: 24,
     },

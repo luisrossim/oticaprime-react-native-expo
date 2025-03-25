@@ -46,7 +46,7 @@ export function CustomBarChart({data}: CustomBarChartProps) {
               <TouchableOpacity 
                 key={index} 
                 onPress={() => setSelectedIndex(index)} 
-                activeOpacity={0.7} 
+                activeOpacity={1} 
                 style={styles.item}
               >
                 <Animated.View 

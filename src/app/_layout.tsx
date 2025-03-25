@@ -29,7 +29,7 @@ function MainLayout() {
     return (
         <DateFilterProvider>
             <DashboardFilterProvider>
-                <StatusBar barStyle="default" backgroundColor="#FFF" />
+                <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
             
                 <Stack>
                     <Stack.Screen 
