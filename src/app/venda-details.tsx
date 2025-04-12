@@ -7,7 +7,6 @@ import { Venda } from '@/models/venda';
 import { Feather } from '@expo/vector-icons';
 import { VendaDetailsItem } from '@/components/VendaDetailsItem';
 import { UtilitiesService } from '@/utils/utilities-service';
-import { PageTitle } from '@/components/PageTitle';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { CustomHeader } from '@/components/CustomHeader';
@@ -137,8 +136,11 @@ export default function VendaDetails() {
                                             </View>
                                         ))}
                                     </View>
-                                ) : (
-                                    <Text style={styles.emptyText}>Nenhum item encontrado para esta venda.</Text>
+                                ) 
+                                : (
+                                    <Text style={styles.emptyText}>
+                                        Nenhum item encontrado para esta venda.
+                                    </Text>
                                 )
                             }
                         </View>
@@ -171,8 +173,11 @@ export default function VendaDetails() {
                                             </Text>
                                         </View>
                                     </View>
-                                ) : (
-                                    <Text style={styles.emptyText}>Nenhuma forma de pagamento encontrada.</Text>
+                                ) 
+                                : (
+                                    <Text style={styles.emptyText}>
+                                        Nenhuma forma de pagamento encontrada.
+                                    </Text>
                                 )
                             }
                         </View>

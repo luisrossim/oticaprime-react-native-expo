@@ -24,7 +24,7 @@ export default function Layout(){
                     tabBarShowLabel: true,
                     animation: "shift",
                     tabBarActiveTintColor: "#FFF",
-                    tabBarInactiveTintColor: colors.slate[600],
+                    tabBarInactiveTintColor: colors.slate[500],
                     tabBarStyle: { backgroundColor: colors.slate[900] },
                     tabBarButton: (props) => (
                         <Pressable {...props} android_ripple={{ borderless: false, color: "transparent" }}>

@@ -14,7 +14,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, onP
         <View style={styles.buttonContainer}>
           <Feather 
             name={icon as keyof typeof Feather.glyphMap} 
-            size={18}
+            size={16}
             color={colors.slate[700]}
             style={[styles.buttonIcon]}
           />

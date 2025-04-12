@@ -11,10 +11,7 @@ import { CaixaService } from '@/services/caixa-service';
 import { CaixaAnalitico, CaixaLancamentosHistorico } from '@/models/caixa';
 import { LineDetail } from '@/components/LineDetail';
 import SectionTitle from '@/components/SectionTitle';
-import { PageTitle } from '@/components/PageTitle';
 import { UtilitiesService } from '@/utils/utilities-service';
-import { FilterInfoPage } from '@/components/FilterInfoPage';
-import { LoadingIndicator } from '@/components/LoadingIndicator';
 
 type IconName = "arrow-up" | "arrow-down" | "circle";
 
@@ -47,6 +44,7 @@ export default function CaixaHistorico() {
         setIsCompleted(false);
         fetchCaixaHistorico(1);
     }, [])
+
 
     const fetchCaixaHistorico = async (pagina: number) => {
         if (loading || isFetchingMore) return;
@@ -109,7 +107,8 @@ export default function CaixaHistorico() {
         }
     };
 
-     const handleDateText = (): string => {
+
+    const handleDateText = (): string => {
         if (!dateFilter) {
         return "?";
         }
@@ -124,23 +123,25 @@ export default function CaixaHistorico() {
         return `${dataInicial} - ${dataFinal}`;
     };
 
+
     const getIconConfig = (record: CaixaLancamentosHistorico): { name: IconName, backgroundColor: string } => {
         if (record.FLAG_SOMAR.includes('S')) {
             if (record.DEB_CRED.includes('D')) {
-                return { name: "arrow-up", backgroundColor: colors.red[600] };
+                return { name: "arrow-up", backgroundColor: colors.red[500] };
             } else {
-                return { name: "arrow-down", backgroundColor: colors.emerald[600] };
+                return { name: "arrow-down", backgroundColor: colors.green[500] };
             }
         } 
-        return { name: "circle", backgroundColor: colors.slate[400] };
+        return { name: "circle", backgroundColor: colors.slate[300] };
     };
+
 
     const ItemHistorico = React.memo(({ item, onPress }: { item: CaixaLancamentosHistorico, onPress: (item: CaixaLancamentosHistorico) => void }) => {
         const { name, backgroundColor } = getIconConfig(item);
     
         return (
-            <TouchableOpacity style={styles.card} onPress={() => onPress(item)}>
-                <View style={styles.cardContent}>
+            <TouchableOpacity style={styles.lancamentoCard} onPress={() => onPress(item)}>
+                <View style={styles.lancamentoCardContent}>
                     <View style={styles.iconColumn}>
                         <Feather 
                             name={name}
@@ -149,20 +150,20 @@ export default function CaixaHistorico() {
                         />
                     </View>
         
-                    <View style={styles.infoColumn}>
-                        <Text style={styles.vendedor}>{item.NOME_USU}</Text>
+                    <View style={styles.lancamentoColumns}>
+                        <Text style={styles.usuarioLancamento}>{item.NOME_USU}</Text>
         
-                        <Text style={styles.valor}>
+                        <Text style={styles.valorLancamento}>
                             {UtilitiesService.formatarValor(item.VALOR)}
                         </Text>
         
-                        <Text style={styles.formaPagamento}>
+                        <Text style={styles.movimentoLancamento}>
                             {item.TIPO_MOVIMENTO}
                         </Text>
                     </View>
         
-                    <View style={styles.dateColumn}>
-                        <Text style={styles.dataVenda}>
+                    <View style={styles.dateLancamento}>
+                        <Text style={styles.dateLancamentoText}>
                             {new Date(item.DATA).toLocaleDateString()}
                         </Text>
                     </View>
@@ -201,72 +202,68 @@ export default function CaixaHistorico() {
 
             {loading ? (
                 <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
-                    <ActivityIndicator size="large" color={colors.sky[500]} style={{padding: 40}} />
+                    <ActivityIndicator size="large" color={colors.slate[500]} style={{padding: 40}} />
                 </View>
             ) : (
                 <FlatList
                     ListHeaderComponent={
-                        <View>
-                            <View style={styles.cardSection}>
-                                <SectionTitle title={`Saldo em ${UtilitiesService.formatDateToUpper(String(dateFilter?.dataFinal))}`} />
+                        <View style={{gap: 50, marginTop: 60}}>
+                            <View>
+                                <SectionTitle 
+                                    title={`Saldo em ${UtilitiesService.formatDateToUpper(String(dateFilter?.dataFinal))}`} 
+                                />
 
                                 <Text style={styles.totalValue}>
                                     {UtilitiesService.formatarValor(analitico?.saldoFinal || 0)}
                                 </Text>
-                                
-                                <View style={{marginTop: 30}}>
-                                    <SectionTitle title={`Resumo de ${handleDateText()}`} />
-
-                                    <LineDetail
-                                        label="Saída"
-                                        value={analitico?.saldoAtual.debito || 0}
-                                        isBRL={true}
-                                    />
-
-                                    <LineDetail
-                                        label="Entrada"
-                                        value={analitico?.saldoAtual.credito || 0}
-                                        isBRL={true}
-                                    />
-
-                                    <LineDetail
-                                        label="Saldo"
-                                        value={analitico?.saldoAtual.saldo || 0}
-                                        isBRL={true}
-                                    />
-
-                                    <View style={{marginTop: 40}}>
-                                        <SectionTitle 
-                                            title={`Resumo até ${UtilitiesService.formatDateToUpper(String(dateFilter?.dataInicial))}`} 
-                                        />
-
-                                        <LineDetail
-                                            label="Saída"
-                                            value={analitico?.saldoAnterior.debito || 0}
-                                            isBRL={true}
-                                        />
-                                        <LineDetail
-                                            label="Entrada"
-                                            value={analitico?.saldoAnterior.credito || 0}
-                                            isBRL={true}
-                                        />
-                                        <LineDetail
-                                            label="Saldo"
-                                            value={analitico?.saldoAnterior.saldo || 0}
-                                            isBRL={true}
-                                        />
-                                    </View>
-                                </View>
                             </View>
 
-                            <View style={{paddingTop: 50, marginBottom: 10}}>
-                                <SectionTitle title='Lançamentos' />
-                                <View style={{paddingHorizontal: 18, marginTop: 10}}>
-                                    <FilterInfoPage 
-                                        totalInfo={`${totalLancamentos || 0} lançamentos`} 
-                                        icon='repeat'
-                                    />  
-                                </View>     
+                            <View>
+                                <SectionTitle title={`Resumo de ${handleDateText()}`} />
+
+                                <LineDetail
+                                    label="Saída"
+                                    value={analitico?.saldoAtual.debito || 0}
+                                    isBRL={true}
+                                />
+
+                                <LineDetail
+                                    label="Entrada"
+                                    value={analitico?.saldoAtual.credito || 0}
+                                    isBRL={true}
+                                />
+
+                                <LineDetail
+                                    label="Saldo"
+                                    value={analitico?.saldoAtual.saldo || 0}
+                                    isBRL={true}
+                                />
+                            </View>
+
+                            <View>
+                                <SectionTitle 
+                                    title={`Resumo até ${UtilitiesService.formatDateToUpper(String(dateFilter?.dataInicial))}`} 
+                                />
+
+                                <LineDetail
+                                    label="Saída"
+                                    value={analitico?.saldoAnterior.debito || 0}
+                                    isBRL={true}
+                                />
+                                <LineDetail
+                                    label="Entrada"
+                                    value={analitico?.saldoAnterior.credito || 0}
+                                    isBRL={true}
+                                />
+                                <LineDetail
+                                    label="Saldo"
+                                    value={analitico?.saldoAnterior.saldo || 0}
+                                    isBRL={true}
+                                />
+                            </View>
+
+                            <View>
+                                <SectionTitle title={`Lançamentos no caixa (${totalLancamentos})`} />   
                             </View>
                         </View>
                     }
@@ -277,20 +274,33 @@ export default function CaixaHistorico() {
                     maxToRenderPerBatch={20}
                     showsVerticalScrollIndicator={false}
                     ListFooterComponent={
-                        isFetchingMore ? (
-                            <ActivityIndicator size="large" color={colors.slate[500]} style={{padding: 40}} />
-                        ) : !isCompleted && historico.length > 0 ? (
+                        isFetchingMore 
+                        ? (
+                            <ActivityIndicator 
+                                size="large" 
+                                color={colors.slate[500]} 
+                                style={{padding: 40}} 
+                            />
+                        ) 
+                        : !isCompleted && historico.length > 0 ? (
                             <TouchableOpacity 
                                 style={styles.loadMoreButton}
                                 onPress={carregarMaisHistorico} 
                             >
-                                <Feather size={25} color={colors.slate[700]} name="plus" />
+                                <Feather 
+                                    size={25} 
+                                    color={colors.slate[700]} 
+                                    name="plus" 
+                                />
                             </TouchableOpacity>
-                        ) : null
+                        ) 
+                        : null
                     }
                     ListEmptyComponent={() => (
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>Nenhum registro encontrado.</Text>
+                            <Text style={styles.emptyText}>
+                                Nenhum registro encontrado.
+                            </Text>
                         </View>
                     )}
                     renderItem={renderItem}
@@ -307,25 +317,49 @@ export default function CaixaHistorico() {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Detalhes</Text>
+                                <Text style={styles.modalTitle}>
+                                    Detalhes
+                                </Text>
                                 <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                                    <Feather name="x" size={20} style={styles.iconModal} />
+                                    <Feather 
+                                        name="x" 
+                                        size={20} 
+                                        style={styles.iconModal} 
+                                    />
                                 </TouchableOpacity>
                             </View>
 
                             <View style={{marginBottom: 20, gap: 5}}>
-                                <View style={{alignItems: "center", gap: 5, flexDirection: "row"}}>
-                                    <Feather name="user" size={14} color={colors.slate[500]} />
-                                    <Text style={styles.modalText}>{selectedItem.NOME_USU}</Text>
+                                <View style={styles.itemsCenter}>
+                                    <Feather 
+                                        name="user" 
+                                        size={14} 
+                                        color={colors.slate[500]} 
+                                    />
+                                    <Text style={styles.modalText}>
+                                        {selectedItem.NOME_USU}
+                                    </Text>
                                 </View>
-                                <View style={{alignItems: "center", gap: 5, flexDirection: "row"}}>
-                                    <Feather name="calendar" size={14} color={colors.slate[500]} />
-                                    <Text style={styles.modalText}>{new Date(selectedItem.DATA).toLocaleDateString()}</Text>
+
+                                <View style={styles.itemsCenter}>
+                                    <Feather
+                                        name="calendar"
+                                        size={14} 
+                                        color={colors.slate[500]} 
+                                    />
+                                    <Text style={styles.modalText}>
+                                        {new Date(selectedItem.DATA).toLocaleDateString()}
+                                    </Text>
                                 </View>
-                                <Text style={styles.modalText}>{UtilitiesService.formatarValor(selectedItem.VALOR)}</Text>
+
+                                <Text style={styles.modalText}>
+                                    {UtilitiesService.formatarValor(selectedItem.VALOR)}
+                                </Text>
                             </View>
 
-                            <Text style={styles.modalText}>{selectedItem.HISTORICO}</Text>
+                            <Text style={styles.modalText}>
+                                {selectedItem.HISTORICO}
+                            </Text>
                         </View>
                     </View>
                 </Modal>
@@ -340,21 +374,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#FFF"
     },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        marginBottom: 12
-    },
-    error: {
-        fontSize: 16,
-        color: 'red',
-        textAlign: 'center',
-    },
-    loading: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
     emptyContainer: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -365,13 +384,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: colors.slate[500],
     },
-    card: {
+    lancamentoCard: {
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: colors.slate[200]
     },
-    cardContent: {
+    lancamentoCardContent: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -388,52 +407,39 @@ const styles = StyleSheet.create({
         padding: 40,
         backgroundColor: colors.slate[100]
     },
-    gridContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        width: "100%",
-    },
-    gridItem: {
-        flex: 1,
-        fontSize: 12,
-        textAlign: "center",
-    },
     iconColumn: {
         width: '18%',
         justifyContent: 'flex-start',
         alignItems: 'flex-start'
     },
-    infoColumn: {
+    lancamentoColumns: {
         width: '57%',
         justifyContent: 'center',
         gap: 3
     },
-    dateColumn: {
-        width: '25%',
-        justifyContent: 'flex-end',
-        alignItems: "flex-end",
-        alignSelf: 'flex-start'
-    },
-    vendedor: {
+    usuarioLancamento: {
         fontWeight: 'bold',
         fontSize: 15,
         color: colors.slate[800]
     },
-    formaPagamento: {
+    movimentoLancamento: {
         fontSize: 11,
         fontWeight: 300,
         color: colors.slate[700],
         marginTop: 5
     },
-    valor: {
+    valorLancamento: {
         fontSize: 15,
         fontWeight: 300,
         color: colors.slate[700]
     },
-    dataVenda: {
+    dateLancamento: {
+        width: '25%',
+        justifyContent: 'flex-end',
+        alignItems: "flex-end",
+        alignSelf: 'flex-start'
+    },
+    dateLancamentoText: {
         fontSize: 13,
         fontWeight: 300,
         color: colors.slate[700]
@@ -471,16 +477,19 @@ const styles = StyleSheet.create({
     iconModal: {
         color: colors.slate[500],
         backgroundColor: colors.slate[100],
-        padding: 5
-    },
-    cardSection: {
-        marginTop: 40
+        padding: 5,
+        borderRadius: 100
     },
     totalValue: {
         fontSize: 30,
         color: colors.slate[800],
         fontWeight: 500,
-        marginVertical: 6,
+        marginTop: 6,
         paddingHorizontal: 18
     },
+    itemsCenter: {
+        alignItems: "center", 
+        gap: 5, 
+        flexDirection: "row"
+    }
 });
