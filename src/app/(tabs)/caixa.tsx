@@ -70,7 +70,7 @@ export default function Caixa() {
   }
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, backgroundColor: "#FFF"}}>
       {error ? (
         <ErrorMessage error={error} />
       ) 
@@ -79,32 +79,21 @@ export default function Caixa() {
           style={styles.container}
           contentContainerStyle={{ paddingBottom: 100 }}
         >
-          <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
+          <View style={{paddingHorizontal: 18}}>
             <PageTitle title="Caixa" size="large" />
-            <Text style={{color: colors.slate[700], fontWeight: 300}}>
-              Análise de saldo, lançamentos, recebimentos de crediário e outras informações do caixa.
-            </Text>
-
-            {error && (
-              <ErrorMessage error={error} />
-            )}
           </View>
 
           {caixaDetails && (
-            <View>
-              <View style={styles.caixaSection}>
-                <SectionTitle title="ANALÍTICO DO CAIXA" />
+            <View style={{ gap: 60 }}>
+              <LineDetailButton
+                label="Saldo e Lançamentos"
+                onPress={() => {router.push("/caixa-historico")}}
+              />
 
-                <LineDetailButton
-                  label="Saldo e Lançamentos"
-                  onPress={() => {router.push("/caixa-historico")}}
-                />
-              </View>
+              <View>
+                <SectionTitle title="Total recebido em crediário" />
 
-              <View style={styles.caixaSection}>
-                <SectionTitle title="TOTAL DE RECEBIMENTO DE CREDIÁRIO" />
-
-                <View style={{ paddingHorizontal: 15 }}>
+                <View style={{ paddingHorizontal: 18 }}>
                   <Text style={styles.totalValue}>
                     {UtilitiesService.formatarValor(
                       caixaDetails.TOTAL_RECEBIDO
@@ -130,14 +119,13 @@ export default function Caixa() {
                 <LineChart
                   total={caixaDetails.TOTAL_RECEBIDO}
                   values={caixaDetails.FORMAS_PAGAMENTO}
-                  type="recebimentos"
                 />
               </View>
 
-              <View style={styles.caixaSection}>
-                <SectionTitle title="ANALÍTICO DE VENDAS" />
+              <View>
+                <SectionTitle title="Analítico de vendas" />
 
-                <View style={{ paddingHorizontal: 20 }}>
+                <View style={{ paddingHorizontal: 18 }}>
                   <Text style={styles.totalValue}>
                     {UtilitiesService.formatarValor(
                       caixaDetails.VENDAS.TOTAL_VALOR_VENDAS || 0
@@ -168,21 +156,17 @@ export default function Caixa() {
                 <LineChart
                   total={caixaDetails.VENDAS.TOTAL_VALOR_VENDAS}
                   values={caixaDetails.VENDAS.FORMAS_PAGAMENTO_VENDAS}
-                  type="vendas"
                 />
               </View>
 
-              <View style={styles.caixaSection}>
-                <SectionTitle title="TOTAL DE CONTAS A RECEBER PENDENTES" />
+              <View>
+                <SectionTitle title="Total de contas a receber pendentes" />
 
-                <View style={{ paddingHorizontal: 15 }}>
+                <View style={{ paddingHorizontal: 18 }}>
                   <Text style={styles.totalValue}>
                     {UtilitiesService.formatarValor(
                       caixaDetails.TOTAL_CONTAS_RECEBER || 0
                     )}
-                  </Text>
-                  <Text style={styles.tip}>
-                    *de acordo com a data de vencimento
                   </Text>
                 </View>
               </View>
@@ -198,7 +182,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingVertical: 50,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFF"
   },
   caixaDetailsHeader: {
     marginTop: 10,
@@ -207,11 +191,7 @@ const styles = StyleSheet.create({
   caixaSection: {
     marginTop: 10,
     marginBottom: 30,
-    marginHorizontal: 15,
-    borderWidth: 1,
-    borderColor: colors.slate[200],
-    borderRadius: 16,
-    overflow: "hidden"
+    marginHorizontal: 15
   },
   lineContainer: {
     flexDirection: "column",
@@ -219,40 +199,26 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     width: "100%",
     borderBottomWidth: 0.5,
-    borderBottomColor: colors.gray[300],
+    borderBottomColor: colors.slate[300],
   },
   value: {
-    color: colors.gray[500],
+    color: colors.slate[500],
     fontWeight: 400,
   },
   label: {
     fontSize: 13,
-    color: colors.gray[500],
+    color: colors.slate[500],
   },
   totalValue: {
-    fontSize: 32,
-    color: colors.gray[900],
-    marginTop: 15,
-    marginBottom: 5
-  },
-  navBar: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 45,
-    backgroundColor: colors.purple[600],
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    zIndex: 10,
-  },
-  navBarTitle: {
-    color: colors.fuchsia[200],
-    fontWeight: 600,
+    fontSize: 30,
+    color: colors.slate[800],
+    fontWeight: 500,
+    marginVertical: 13
   },
   tip: {
-    color: colors.gray[500], 
-    fontWeight: 300, 
+    color: colors.slate[500], 
+    fontWeight: 300,
+    fontSize: 13,
     paddingBottom: 20
   }
 });

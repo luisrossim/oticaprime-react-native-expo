@@ -31,22 +31,32 @@ export class UtilitiesService {
         today: "Hoje"
     };
 
-    static getFirstLetter = (empresa?: string) => {
-        if (empresa) {
-          const words = empresa.split(' ');
-          
-          const primeIndex = words.findIndex(word => word.toLowerCase() === "prime");
-          if (primeIndex !== -1 && words[primeIndex + 1]) {
-            return words[primeIndex + 1].charAt(0).toUpperCase();
-          }
-      
-          const oticoIndex = words.findIndex(word => word.toLowerCase() === "otico");
-          if (oticoIndex !== -1 && words[oticoIndex + 1]) {
-            return words[oticoIndex + 1].charAt(0).toUpperCase();
-          }
-      
-          return words[0].charAt(0).toUpperCase();
+    static handleEmpresaName = (razaoSocial: string): string => {
+        const match = razaoSocial.match(/(?:OTICO)\s+(.+)/i);
+        
+        if (match) {
+            let nome = match[1];
+        
+            if (nome.length > 18) {
+            nome = nome.substring(0, 18) + ".";
+            }
+            return nome;
         }
-        return '';
+        
+        return "Nenhuma empresa";
     };
+
+    static handleCaixaName = (nome: string): string => {
+        const res = (nome?.includes("COFRE") ? "CAIXA 2" : "CAIXA 1")
+        return res;
+    }
+
+    static formatDateToUpper = (dateStr: string): string => {
+        const [day, month, year] = dateStr.split("/");
+      
+        const monthIndex = parseInt(month, 10) - 1;
+        const monthName = this.monthNamesUpper[monthIndex];
+      
+        return `${day} ${monthName} ${year}`;
+      };
 }

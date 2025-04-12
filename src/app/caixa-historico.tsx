@@ -109,17 +109,20 @@ export default function CaixaHistorico() {
         }
     };
 
-    const handleDateText = (): string => {
+     const handleDateText = (): string => {
         if (!dateFilter) {
-            return "-";
+        return "?";
         }
-
-        if (dateFilter?.dataInicial == dateFilter?.dataFinal) {
-            return String(dateFilter?.dataInicial);
+    
+        const dataInicial = UtilitiesService.formatDateToUpper(String(dateFilter.dataInicial));
+        const dataFinal = UtilitiesService.formatDateToUpper(String(dateFilter.dataFinal));
+    
+        if (dateFilter.dataInicial === dateFilter.dataFinal) {
+        return dataInicial;
         }
-
-        return `${String(dateFilter?.dataInicial)} até ${String(dateFilter?.dataFinal)}`
-    }
+    
+        return `${dataInicial} - ${dataFinal}`;
+    };
 
     const getIconConfig = (record: CaixaLancamentosHistorico): { name: IconName, backgroundColor: string } => {
         if (record.FLAG_SOMAR.includes('S')) {
@@ -205,82 +208,65 @@ export default function CaixaHistorico() {
                     ListHeaderComponent={
                         <View>
                             <View style={styles.cardSection}>
-                                <View style={{backgroundColor: colors.blue[600], padding: 40, gap: 10}}>
-                                    <Text style={{color: colors.cyan[300], textAlign: "center"}}>
-                                        {selectedCaixa?.DESC_CAI}
-                                    </Text>  
+                                <SectionTitle title={`Saldo em ${UtilitiesService.formatDateToUpper(String(dateFilter?.dataFinal))}`} />
 
-                                    <Text style={{textAlign: "center", fontSize: 32, fontWeight: 500, color: colors.cyan[200]}}>
-                                        {UtilitiesService.formatarValor(analitico?.saldoFinal || 0)}
-                                    </Text>
+                                <Text style={styles.totalValue}>
+                                    {UtilitiesService.formatarValor(analitico?.saldoFinal || 0)}
+                                </Text>
+                                
+                                <View style={{marginTop: 30}}>
+                                    <SectionTitle title={`Resumo de ${handleDateText()}`} />
 
-                                    <View style={{alignItems: "center"}}>
-                                        <Text style={{color: colors.cyan[300]}}>
-                                            {String(dateFilter?.dataFinal)}
-                                        </Text>
-                                    </View> 
-                                </View>
-
-                                <View>
-                                    <SectionTitle 
-                                        title="ATUAL"
-                                        subtitle={handleDateText()}
-                                    />
                                     <LineDetail
-                                        label="SAÍDA"
+                                        label="Saída"
                                         value={analitico?.saldoAtual.debito || 0}
                                         isBRL={true}
-                                        color={colors.red[600]}
                                     />
+
                                     <LineDetail
-                                        label="ENTRADA"
+                                        label="Entrada"
                                         value={analitico?.saldoAtual.credito || 0}
                                         isBRL={true}
-                                        color={colors.emerald[600]}
                                     />
+
                                     <LineDetail
                                         label="Saldo"
                                         value={analitico?.saldoAtual.saldo || 0}
                                         isBRL={true}
-                                        color={colors.blue[600]}
                                     />
-                                </View>
 
-                                <View>
-                                    <SectionTitle 
-                                        title="ANTERIOR" 
-                                        subtitle={`até ${dateFilter?.dataInicial}`}
-                                    />
-                                    <LineDetail
-                                        label="SAÍDA"
-                                        value={analitico?.saldoAnterior.debito || 0}
-                                        isBRL={true}
-                                        color={colors.red[600]}
-                                    />
-                                    <LineDetail
-                                        label="ENTRADA"
-                                        value={analitico?.saldoAnterior.credito || 0}
-                                        isBRL={true}
-                                        color={colors.emerald[600]}
-                                    />
+                                    <View style={{marginTop: 40}}>
+                                        <SectionTitle 
+                                            title={`Resumo até ${UtilitiesService.formatDateToUpper(String(dateFilter?.dataInicial))}`} 
+                                        />
+
                                         <LineDetail
-                                        label="SALDO"
-                                        value={analitico?.saldoAnterior.saldo || 0}
-                                        isBRL={true}
-                                        color={colors.blue[600]}
-                                    />
+                                            label="Saída"
+                                            value={analitico?.saldoAnterior.debito || 0}
+                                            isBRL={true}
+                                        />
+                                        <LineDetail
+                                            label="Entrada"
+                                            value={analitico?.saldoAnterior.credito || 0}
+                                            isBRL={true}
+                                        />
+                                        <LineDetail
+                                            label="Saldo"
+                                            value={analitico?.saldoAnterior.saldo || 0}
+                                            isBRL={true}
+                                        />
+                                    </View>
                                 </View>
                             </View>
 
-                            <View style={{paddingHorizontal: 20, paddingTop: 50, marginBottom: 10}}>
-                                <PageTitle 
-                                    title="Lançamentos" 
-                                    size="large" 
-                                />
-                                <FilterInfoPage 
-                                    totalInfo={`${totalLancamentos || 0} lançamentos`} 
-                                    icon='repeat'
-                                />       
+                            <View style={{paddingTop: 50, marginBottom: 10}}>
+                                <SectionTitle title='Lançamentos' />
+                                <View style={{paddingHorizontal: 18, marginTop: 10}}>
+                                    <FilterInfoPage 
+                                        totalInfo={`${totalLancamentos || 0} lançamentos`} 
+                                        icon='repeat'
+                                    />  
+                                </View>     
                             </View>
                         </View>
                     }
@@ -377,13 +363,13 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: colors.gray[500],
+        color: colors.slate[500],
     },
     card: {
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200]
+        borderBottomColor: colors.slate[200]
     },
     cardContent: {
         flexDirection: 'row',
@@ -400,7 +386,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 40,
-        backgroundColor: colors.gray[100]
+        backgroundColor: colors.slate[100]
     },
     gridContainer: {
         flexDirection: "row",
@@ -434,25 +420,23 @@ const styles = StyleSheet.create({
     vendedor: {
         fontWeight: 'bold',
         fontSize: 15,
-        color: colors.gray[800]
-    },
-    cliente: {
-        fontSize: 15,
-        color: colors.gray[500]
+        color: colors.slate[800]
     },
     formaPagamento: {
-        fontSize: 12,
-        color: colors.gray[500],
+        fontSize: 11,
+        fontWeight: 300,
+        color: colors.slate[700],
         marginTop: 5
     },
     valor: {
         fontSize: 15,
-        color: colors.gray[500]
+        fontWeight: 300,
+        color: colors.slate[700]
     },
     dataVenda: {
         fontSize: 13,
-        color: colors.gray[500],
-        fontWeight: 300
+        fontWeight: 300,
+        color: colors.slate[700]
     },
     modalContainer: {
         flex: 1,
@@ -471,7 +455,7 @@ const styles = StyleSheet.create({
         fontWeight: 500
     },
     modalText: {
-        color: colors.gray[500]
+        color: colors.slate[500]
     },
     closeButton: {
         borderRadius: 4,
@@ -487,15 +471,16 @@ const styles = StyleSheet.create({
     iconModal: {
         color: colors.slate[500],
         backgroundColor: colors.slate[100],
-        borderRadius: 60,
         padding: 5
     },
     cardSection: {
-        marginTop: 20,
-        marginHorizontal: 15,
-        borderWidth: 1,
-        borderColor: colors.slate[200],
-        borderRadius: 16,
-        overflow: "hidden"
-    }
+        marginTop: 40
+    },
+    totalValue: {
+        fontSize: 30,
+        color: colors.slate[800],
+        fontWeight: 500,
+        marginVertical: 6,
+        paddingHorizontal: 18
+    },
 });

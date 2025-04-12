@@ -33,12 +33,12 @@ export function LineDetail({label, value, isBRL, color}: LineDetailProps) {
 
 export const LineDetailButton: React.FC<LineDetailButtonProps> = ({ label, onPress }) => {
     return (
-        <TouchableOpacity style={styles.lineContainerButton} onPress={onPress}>
+        <TouchableOpacity style={styles.lineContainer} onPress={onPress}>
             <View style={styles.lineContent}>
                 <Text style={styles.label}>
                     {label}
                 </Text>
-                <Feather name="chevron-right" size={20} color={colors.slate[400]} />
+                <Feather name="chevron-right" size={20} color={colors.slate[500]} />
             </View>
         </TouchableOpacity>
     )
@@ -47,25 +47,24 @@ export const LineDetailButton: React.FC<LineDetailButtonProps> = ({ label, onPre
 const styles = StyleSheet.create({
     lineContainer: {
         flexDirection: "column",
-        padding: 15,
+        paddingVertical: 12,
         width: "100%",
         borderBottomWidth: 0.5,
-        borderBottomColor: colors.slate[300]
-    },
-    lineContainerButton: {
-        flexDirection: "column",
-        padding: 15,
-        width: "100%"
+        borderBottomColor: colors.slate[200]
     },
     lineContent: {
         flexDirection: "row", 
         alignItems: "center", 
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        paddingHorizontal: 18
     },
     value: {
-        color: colors.slate[500]
+        color: colors.slate[700],
+        fontWeight: 300
     },
     label: {
-        color: colors.slate[700]
+        fontSize: 16,
+        fontWeight: 500,
+        color: colors.slate[900]
     }
 })

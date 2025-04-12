@@ -15,7 +15,20 @@ interface RecebimentoDetailsLineProps {
 export const RecebimentoDetailsItem = (props: RecebimentoDetailsItemProps) => {
     return (
         <View style={styles.recebimentoDetailsItem}>
-            <FontAwesome6 name={props.icon} size={15} color={colors.indigo[800]} style={styles.icon} />
+             <View style={{
+                width: 30,
+                height: 30,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: colors.cyan[300],
+                borderRadius: 100,
+            }}>
+                <FontAwesome6
+                    name={props.icon}
+                    size={14}
+                    color={colors.indigo[900]}
+                />
+            </View>
             <Text style={styles.recebimentoDetailsText}>
                 {props.detail}
             </Text>
@@ -26,10 +39,10 @@ export const RecebimentoDetailsItem = (props: RecebimentoDetailsItemProps) => {
 export const RecebimentoDetailsLine = (props: RecebimentoDetailsLineProps) => {
     return (
         <View style={styles.recebimentoDetailsLine}>
-            <Text style={{color: colors.slate[700], fontWeight: 500}}>
-                {props.label}:
+            <Text style={{color: colors.slate[900], fontWeight: 600, fontSize: 15}}>
+                {props.label}
             </Text>
-            <Text style={{fontSize: 13, color: colors.slate[500]}}>
+            <Text style={{fontSize: 13, color: colors.slate[700], fontWeight: 300}}>
                 {props.value}
             </Text>
         </View>
@@ -41,8 +54,8 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 15,
-        paddingHorizontal: 15,
+        gap: 10,
+        paddingHorizontal: 18,
         marginBottom: 10
     },
     recebimentoDetailsLine: {
@@ -50,21 +63,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: "space-between",
-        paddingHorizontal: 15,
-        paddingVertical: 10,
+        paddingHorizontal: 18,
+        paddingVertical: 12,
         borderBottomWidth: 1,
         borderBottomColor: colors.slate[100]
     },
     recebimentoDetailsText: {
         flex: 1,
-        color: colors.gray[700]
+        color: colors.slate[700],
+        fontWeight: 500
     },
     icon: {
-        textAlign: "center",
-        padding: 10,
-        width: 35,
-        height: 35,
-        backgroundColor: colors.sky[300],
-        borderRadius: 50
+        width: 30,
+        height: 30
     }
 })

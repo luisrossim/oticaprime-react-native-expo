@@ -5,7 +5,7 @@ export function LoadingIndicator() {
     return (
         <View style={styles.overlay}>
             <View style={styles.loading}>
-                <ActivityIndicator size="large" color={colors.sky[500]} />
+                <ActivityIndicator size="large" color={colors.blue[500]} />
             </View>
         </View>
     );
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(255, 255, 255, 1)",
+        backgroundColor: "rgba(255, 255, 255, 0.0)",
         justifyContent: "center",
         alignItems: "center",
         zIndex: 999,

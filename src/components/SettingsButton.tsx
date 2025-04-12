@@ -5,19 +5,18 @@ import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 type SettingsButtonProps = {
   title: string;
   icon: string;
-  iconColor: string;
   onPress: () => void;
 };
 
-export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, iconColor, onPress }) => {
+export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, onPress }) => {
     return (
       <TouchableOpacity style={styles.button} onPress={onPress}>
         <View style={styles.buttonContainer}>
           <Feather 
             name={icon as keyof typeof Feather.glyphMap} 
             size={18}
-            color="#FFF"
-            style={[styles.buttonIcon, {backgroundColor: iconColor}]}
+            color={colors.slate[700]}
+            style={[styles.buttonIcon]}
           />
 
           <Text style={styles.buttonLabel}>
@@ -28,7 +27,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ title, icon, ico
         <Feather 
           name="chevron-right" 
           size={18} 
-          color={colors.slate[400]} 
+          color={colors.slate[500]} 
         />
       </TouchableOpacity>
     );
@@ -40,7 +39,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate[100]
   },
   buttonContainer: {
     alignItems: 'center', 
@@ -53,6 +54,6 @@ const styles = StyleSheet.create({
   },
   buttonLabel: {
     fontWeight: 500,
-    color: colors.slate[700]
+    color: colors.slate[800]
   }
 });

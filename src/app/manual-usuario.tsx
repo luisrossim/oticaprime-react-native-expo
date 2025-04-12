@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, StyleSheet, SafeAreaView, View } from 'react-native';
 import { CustomHeader } from '@/components/CustomHeader';
-import { Feather } from '@expo/vector-icons';
 import { colors } from '@/utils/constants/colors';
 
 export default function ManualUsuario() {
@@ -10,9 +9,8 @@ export default function ManualUsuario() {
             <CustomHeader title={"Manual do usuário"} />
 
             <View style={styles.info}>
-                <Feather name="code" size={14} />
                 <Text>
-                    Em desenvolvimento.
+                    Em desenvolvimento
                 </Text>
             </View>
         </SafeAreaView>

@@ -5,14 +5,13 @@ import { Feather } from '@expo/vector-icons';
 
 interface ChartHeaderProps {
   title: string;
-  selectedRange: number;
   icon: string;
   iconColor: string;
   backgroundColor: string;
   children: React.ReactNode;
 }
 
-export function ChartContainer({ title, selectedRange, icon, iconColor, backgroundColor, children }: ChartHeaderProps) {
+export function ChartContainer({ title, icon, iconColor, backgroundColor, children }: ChartHeaderProps) {
   return (
     <View style={styles.chartContainer}>
         <View style={styles.chartAlign}>
@@ -26,9 +25,6 @@ export function ChartContainer({ title, selectedRange, icon, iconColor, backgrou
                 <View>
                     <Text style={styles.title}>
                       {title}
-                    </Text>
-                    <Text style={styles.subTitle}>
-                      {selectedRange} MESES
                     </Text>
                 </View>
             </View>
@@ -47,6 +43,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     borderWidth: 1, 
     borderColor: colors.slate[200], 
+    backgroundColor: "#FFF",
     borderRadius: 16, 
     margin: 15,
     overflow: "hidden"
@@ -69,13 +66,13 @@ const styles = StyleSheet.create({
   },
   chartShareIcon: {
     alignSelf: "flex-start",
-    color: colors.slate[400]
+    color: colors.slate[400],
+    marginTop: 7
   },
   title: {
-    color: colors.slate[700],
+    color: colors.slate[900],
     fontWeight: 500,
-    fontSize: 16,
-    marginBottom: 2
+    fontSize: 17
   },
   subTitle: {
     fontSize: 11,

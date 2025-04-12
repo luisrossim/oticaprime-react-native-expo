@@ -68,23 +68,25 @@ export default function RecebimentoDetails() {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
-            <CustomHeader title={"Detalhes do Recebimento"} />
+            <CustomHeader title={"Detalhes do recebimento"} />
 
             {error ? (
                 <ErrorMessage error={error} />
             ) : (
-                <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
+                <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
                     <View style={styles.header}>
                         <Feather 
                             name="arrow-down-right" 
                             size={32} 
                             style={styles.iconElement} 
                         />
-                        <PageTitle title={`Recebimento #${id}`} size="small" />
+                        <Text style={{color: colors.cyan[200], fontWeight: 500, fontSize: 16}}>
+                            Recebimento #{id}
+                        </Text>
                     </View>
 
                     <View style={styles.cardSection}>
-                        <SectionTitle title="INFORMAÇÕES" />
+                        <SectionTitle title="Informações gerais" />
                         <View style={styles.section}>
                             <RecebimentoDetailsLine 
                                 label="Cliente"
@@ -118,7 +120,7 @@ export default function RecebimentoDetails() {
                     </View>
 
                     <View style={styles.cardSection}>
-                        <SectionTitle title="DOCUMENTO" />
+                        <SectionTitle title="Documento" />
                         <View style={styles.section}>
                             <RecebimentoDetailsItem 
                                 icon="file" 
@@ -132,7 +134,7 @@ export default function RecebimentoDetails() {
                     </View>
 
                     <View style={styles.cardSection}>
-                        <SectionTitle title="VENDA" />
+                        <SectionTitle title="Venda relacionada" />
                         <LineDetailButton 
                             label='Detalhes da venda'
                             onPress={handleNavigateToVendas}
@@ -146,30 +148,25 @@ export default function RecebimentoDetails() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        paddingVertical: 50,
-        backgroundColor: "#FFF",
+        flex: 1
     },
     header: { 
-        flexDirection: "column", 
         alignItems: 'center',
         marginBottom: 30,
-        paddingHorizontal: 15,
-        gap: 10
+        paddingHorizontal: 18,
+        gap: 15,
+        backgroundColor: colors.indigo[600],
+        paddingVertical: 40
     },
     iconElement: {
-        backgroundColor: colors.indigo[600],
-        borderRadius: 60,
-        color: colors.cyan[200],
-        padding: 10,
-        marginBottom: 2
+        color: colors.cyan[200]
     },
     section: {
         paddingTop: 10
     },
     recebimentoText: {
         fontSize: 16,
-        color: colors.gray[800],
+        color: colors.slate[800],
         marginVertical: 5,
         fontWeight: '500',
     },
@@ -190,11 +187,6 @@ const styles = StyleSheet.create({
     },
     cardSection: {
         marginTop: 10,
-        marginBottom: 30,
-        marginHorizontal: 15,
-        borderWidth: 1,
-        borderColor: colors.slate[200],
-        borderRadius: 16,
-        overflow: "hidden"
+        marginBottom: 40
     }
 });

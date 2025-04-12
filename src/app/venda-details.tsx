@@ -67,7 +67,7 @@ export default function VendaDetails() {
             {error ? (
                   <ErrorMessage error={error} />
             ) : (
-                <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
+                <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 100}}>
                     <View style={styles.header}>
                         <Feather 
                             name={
@@ -78,49 +78,60 @@ export default function VendaDetails() {
                             size={32} 
                             style={styles.iconElement} 
                         />
-                        <PageTitle title={`Venda #${id}`} size="small" />
+                        <Text style={{color: colors.lime[200], fontWeight: 600, fontSize: 16}}>
+                            Venda #{id}
+                        </Text>
                     </View>
 
                     <View style={styles.cardSection}>
-                        <SectionTitle title="INFORMAÇÕES" />
-                        <View style={{paddingVertical: 10, gap: 10}}>
+                        <SectionTitle title="Informações gerais" />
+                        <View style={{paddingTop: 15, gap: 10}}>
                             <VendaDetailsItem icon="user-tie" detail={venda!.NOME_VEND} />
                             <VendaDetailsItem icon="user" detail={venda!.NOME_CLI} />
-                            <VendaDetailsItem icon="user-nurse" detail={venda!.NOME_MEDICO} />
+                            <VendaDetailsItem icon="user-nurse" detail={venda?.NOME_MEDICO || '-'} />
                             <VendaDetailsItem icon="calendar-day" detail={new Date(venda!.DATA_VEN).toLocaleDateString()} />
                             <VendaDetailsItem icon="sack-dollar" detail={handlePaymentLabel(venda!.TOTAL_VEN, venda!.NOME_TPV)} />
                             <VendaDetailsItem icon="building" detail={venda!.RAZAO_EMP} />
                         </View>
                     </View>
 
-                    <View style={styles.cardSection}>
+                    <View style={[styles.cardSection, {backgroundColor: colors.slate[100], paddingVertical: 30}]}>
                         <View style={styles.vendaDetails}>
-                            <SectionTitle title="ITENS" />
+                            <SectionTitle title="Itens da venda" />
 
                             { venda!.ITENS.length > 0 
                                 ? (
-                                    <View style={{ gap: 20, padding: 15}}>
+                                    <View style={{ gap: 20, marginTop: 16 }}>
                                         {venda!.ITENS.map((item, index) => (
-                                            <View key={`${index}`} style={styles.itemDetails}>
-                                                <Feather 
-                                                    style={[styles.itemIcon, {alignSelf: "center"}]} 
-                                                    size={16} 
-                                                    name="shopping-bag" 
-                                                    color={colors.lime[200]} 
-                                                />
+                                           <View key={`${index}`} style={{flex: 1}}>
+                                                <Text style={styles.itemNome}>
+                                                    {item.NOME_PRO}
+                                                </Text>
 
-                                                <View style={{flex: 1}}>
-                                                    <Text style={styles.itemNome}>
-                                                        {item.NOME_PRO}
+                                                <View style={styles.itemDetail}>
+                                                    <Text style={styles.itemInfo}>
+                                                        {item.QUANT} {item.UNIDADE_MEDIDA}
                                                     </Text>
                                                     <Text style={styles.itemInfo}>
-                                                        {item.QUANT} {item.UNIDADE_MEDIDA} - {UtilitiesService.formatarValor(item.VALOR)}
+                                                        {UtilitiesService.formatarValor(item.VALOR)}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={styles.itemDetail}>
+                                                    <Text style={styles.itemInfo}>
+                                                        Desconto
                                                     </Text>
                                                     <Text style={styles.itemInfo}>
-                                                        Desconto: {UtilitiesService.formatarValor(item.DESCONTO)}
+                                                        - {UtilitiesService.formatarValor(item.DESCONTO)}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={styles.itemDetail}>
+                                                    <Text style={styles.itemInfo}>
+                                                        Total
                                                     </Text>
                                                     <Text style={styles.itemInfo}>
-                                                        Total: {UtilitiesService.formatarValor(item.VALOR_TOTAL)}
+                                                        {UtilitiesService.formatarValor(item.VALOR_TOTAL)}
                                                     </Text>
                                                 </View>
                                             </View>
@@ -135,11 +146,11 @@ export default function VendaDetails() {
 
                     <View style={styles.cardSection}>
                         <View style={styles.vendaDetails}>
-                            <SectionTitle title="FORMAS DE PAGAMENTO" />
+                            <SectionTitle title="Formas de pagamento" />
 
                             { venda!.FORMAS_PAGAMENTO.length > 0 
                                 ? (
-                                    <View style={{ gap: 10, padding: 15}}>
+                                    <View style={{ gap: 10, padding: 18}}>
                                         { venda!.FORMAS_PAGAMENTO.map((item, index) => (
                                             <View key={`${index}`} style={styles.paymentRow}>
                                                 <Text style={styles.paymentText}>
@@ -175,23 +186,18 @@ export default function VendaDetails() {
 
 const styles = StyleSheet.create({
     container: { 
-        flex: 1, 
-        paddingVertical: 50,
-        backgroundColor: "#FFF",
+        flex: 1
     },
     header: { 
-        flexDirection: "column", 
         alignItems: 'center',
         marginBottom: 30,
-        paddingHorizontal: 15,
-        gap: 10
+        paddingHorizontal: 18,
+        gap: 15,
+        backgroundColor: colors.emerald[600],
+        paddingVertical: 40
     },
     iconElement: {
-        backgroundColor: colors.emerald[600],
-        borderRadius: 60,
-        color: colors.lime[200],
-        padding: 10,
-        marginBottom: 2
+        color: colors.lime[200]
     },
     vendaDetails: {
         flexDirection: 'column'
@@ -207,41 +213,37 @@ const styles = StyleSheet.create({
         justifyContent: "space-between"
     },
     paymentValueTotal: {
-        color: colors.gray[800],
+        color: colors.slate[800],
         fontWeight: 600
     },
     paymentText: {
         flex: 1,
-        color: colors.gray[700]
+        color: colors.slate[700]
     },
     paymentTextTotal: {
         flex: 1,
         fontWeight: 600,
-        color: colors.gray[700]
+        color: colors.slate[700]
     },
     paymentValue: {
-        color: colors.gray[700],
-    },
-    itemDetails: {
-        flex: 1,
-        gap: 15,
-        flexDirection: "row"
+        color: colors.slate[700],
     },
     itemIcon: {
-        padding: 10,
+        padding: 8,
         backgroundColor: colors.slate[600],
-        borderRadius: 50
+        borderRadius: 100
     },
     itemNome: {
-        color: colors.gray[700],
-        fontWeight: 500,
+        color: colors.slate[700],
+        fontWeight: 600,
+        paddingHorizontal: 18,
         marginBottom: 3
     },
     itemInfo: {
         fontSize: 13,
         fontWeight: 300,
         paddingVertical: 2,
-        color: colors.gray[500]
+        color: colors.slate[700]
     },
     totalContainer: {
         flexDirection: 'row',
@@ -253,18 +255,18 @@ const styles = StyleSheet.create({
     },
     totalLabel: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: 600,
     },
     totalValue: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: 600,
         color: '#28a745',
     },
     emptyText: {
-        color: colors.gray[500],
+        color: colors.slate[500],
         fontWeight: 300,
         marginVertical: 15,
-        paddingHorizontal: 15
+        paddingHorizontal: 18
     },
     error: {
         fontSize: 16,
@@ -278,11 +280,12 @@ const styles = StyleSheet.create({
     },
     cardSection: {
         marginTop: 10,
-        marginBottom: 30,
-        marginHorizontal: 15,
-        borderWidth: 1,
-        borderColor: colors.slate[200],
-        borderRadius: 16,
-        overflow: "hidden"
+        marginBottom: 30
+    },
+    itemDetail: {
+        flex: 1, 
+        flexDirection: "row", 
+        justifyContent: "space-between", 
+        paddingHorizontal: 18
     }
 });

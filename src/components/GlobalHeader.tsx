@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { colors } from "@/utils/constants/colors";
-import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Modal } from "react-native";
+import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Modal, Image } from "react-native";
 import { useEmpresaCaixa } from "@/context/EmpresaCaixaContext";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import { DateFilter } from "@/models/dates";
 import { useDateFilter } from "@/context/DateFilterContext";
 import { dashboardFilterData } from "@/models/data/dashboardFilter";
 import { useDashboardFilter } from "@/context/DashboardFilterContext";
+import { usePathname } from 'expo-router';
 
 LocaleConfig.locales['pt-br'] = UtilitiesService.ptBR
 LocaleConfig.defaultLocale = 'pt-br';
@@ -26,10 +27,9 @@ export function GlobalHeader() {
     const [modalDateVisible, setModalDateVisible] = useState(false);
     const [modalChartVisible, setModalChartVisible] = useState(false);
 
-    const [firstLetter, setFirstLetter] = useState<string>("");
-
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const pathname = usePathname();
 
     
     const openModalDate = () => {
@@ -54,38 +54,28 @@ export function GlobalHeader() {
         ? Object.keys(markedDates).sort()[0]
         : new Date().toISOString().split("T")[0];
 
-        const handleEmpresaNome = (razaoSocial: string | undefined): string => {
-            if (!razaoSocial) return "";
-
-            const match = razaoSocial.match(/(?:OTICO)\s+(.+)/i);
-            if (match) {
-              let nome = match[1];
-          
-              if (nome.length > 18) {
-                nome = nome.substring(0, 18) + ".";
-              }
-              return nome;
-            }
-          
+    const handeRangeText = (): string => {
+        if (!selectedRange){
             return "";
-          };
+        }
 
-    const handleCaixaName = (nome: string | undefined): string => {
-        const res = (nome?.includes("COFRE") ? "(CAIXA 2)" : "(CAIXA 1)")
-        return res;
+        return `${String(selectedRange)} MESES`
     }
 
     const handleDateText = (): string => {
         if (!dateFilter) {
-            return "";
+          return "?";
         }
-
-        if (dateFilter?.dataInicial == dateFilter?.dataFinal) {
-            return String(dateFilter?.dataInicial);
+      
+        const dataInicial = UtilitiesService.formatDateToUpper(String(dateFilter.dataInicial));
+        const dataFinal = UtilitiesService.formatDateToUpper(String(dateFilter.dataFinal));
+      
+        if (dateFilter.dataInicial === dateFilter.dataFinal) {
+          return dataInicial;
         }
-
-        return `${String(dateFilter?.dataInicial)} até ${String(dateFilter?.dataFinal)}`
-    }
+      
+        return `${dataInicial} - ${dataFinal}`;
+    };
 
     const handleDateSelect = (date: string) => {
         if (!selectedStartDate || selectedEndDate) {
@@ -96,7 +86,7 @@ export function GlobalHeader() {
                     selected: true, 
                     startingDay: true, 
                     endingDay: true, 
-                    color: colors.blue[500], 
+                    color: colors.blue[400], 
                     textColor: "white" 
                 },
             });
@@ -120,7 +110,7 @@ export function GlobalHeader() {
                     selected: true,
                     color: formattedDate === realStart || formattedDate === realEnd 
                         ? colors.blue[600]
-                        : colors.blue[400],
+                        : colors.blue[500],
                     textColor: "white",
                     startingDay: formattedDate === realStart,
                     endingDay: formattedDate === realEnd,
@@ -161,45 +151,54 @@ export function GlobalHeader() {
         <SafeAreaView>
             <View style={styles.container}>
                 <View style={styles.subcontainer}>
-                    <View style={styles.letter}>
-                        <Text style={{color: colors.slate[500]}}>{UtilitiesService.getFirstLetter(selectedEmpresa?.RAZAO_EMP)}</Text>
+                    <View style={{backgroundColor: colors.blue[700], justifyContent: "center", padding: 7, borderRadius: 60}}>
+                        <Image source={require("@/assets/company.png")} style={styles.companyIcon} />
                     </View>
 
                     <View style={styles.profileContainer}>
                         <View style={{flexDirection: "row", alignItems: "center", gap: 3}}>
                             <Text style={styles.profileText}>
-                                {selectedEmpresa ? handleEmpresaNome(selectedEmpresa?.RAZAO_EMP) : ""}
+                                { selectedEmpresa?.RAZAO_EMP 
+                                    ? UtilitiesService.handleEmpresaName(selectedEmpresa.RAZAO_EMP) 
+                                    : "?"
+                                }
                             </Text>
+                            
                             <Text style={styles.profileSubText}>
-                                {selectedCaixa ? handleCaixaName(selectedCaixa?.DESC_CAI) : ""}
+                                { selectedCaixa?.DESC_CAI 
+                                    ? UtilitiesService.handleCaixaName(selectedCaixa.DESC_CAI) 
+                                    : "?"
+                                }
                             </Text>
                         </View>
                         <Text style={styles.dateText}>
-                            {handleDateText()}
+                            {pathname === '/' ? handeRangeText() : handleDateText()}
                         </Text>
                     </View>
                 </View>
 
                 <View style={styles.globalHeaderActions}>
-                    <TouchableOpacity 
-                        onPress={openModalChart} 
-                        style={{padding: 8}}
-                    >
-                        <Feather name="bar-chart-2" size={19} color={colors.gray[500]} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity 
-                        onPress={openModalDate} 
-                        style={{padding: 8}}
-                    >
-                        <Feather name="calendar" size={19} color={colors.gray[500]} />
-                    </TouchableOpacity>
+                    {pathname === '/' ? (
+                        <TouchableOpacity 
+                            onPress={openModalChart} 
+                            style={{padding: 8}}
+                        >
+                            <Feather name="bar-chart-2" size={20} color={colors.slate[600]} />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity 
+                            onPress={openModalDate} 
+                            style={{padding: 8}}
+                        >
+                            <Feather name="calendar" size={20} color={colors.slate[600]} />
+                        </TouchableOpacity>
+                    )}
 
                     <TouchableOpacity 
                         onPress={() => router.push("/settings")} 
                         style={{paddingVertical: 8, paddingLeft: 8}}
                     >
-                        <Feather name="settings" size={19} color={colors.gray[500]} />
+                        <Feather name="settings" size={20} color={colors.slate[600]} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -302,7 +301,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: 1,
         borderBottomColor: colors.slate[200],
-        paddingHorizontal: 15,
+        paddingHorizontal: 18,
         paddingTop: 35,
         paddingBottom: 12,
         backgroundColor: "#FFF"
@@ -316,26 +315,22 @@ const styles = StyleSheet.create({
     profileContainer: {
         flexDirection: "column", 
         alignItems: "flex-start", 
-        gap: 1
+        gap: 2
     },
     profileText: {
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: 600,
-        color: colors.gray[700]
+        color: colors.slate[800]
     },
     profileSubText: {
-        fontSize: 10, 
+        fontSize: 11, 
         fontWeight: 400,
-        color: colors.gray[500]
-    },
-    image: { 
-        width: 32, 
-        height: 32, 
-        borderRadius: 60
+        color: colors.slate[500]
     },
     globalHeaderActions: {
         flexDirection: "row", 
-        alignItems: "center"
+        alignItems: "center",
+        gap: 5
     },
     modalBackground: {
         flex: 1,
@@ -371,7 +366,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 12,
         color: colors.cyan[100],
-        backgroundColor: colors.blue[600],
+        backgroundColor: colors.blue[700],
         borderRadius: 60
     },
     footerDisabledButton: {
@@ -379,50 +374,45 @@ const styles = StyleSheet.create({
         textAlign: "center",
         paddingHorizontal: 20,
         paddingVertical: 10,
-        color: colors.gray[400],
+        color: colors.slate[400],
         backgroundColor: "white",
         borderRadius: 6
     },
     modalTitle: {
         fontSize: 22,
         fontWeight: 600,
-        color: colors.gray[800],
+        color: colors.slate[800],
         marginBottom: 6,
     },
     modalSubTitle: {
         fontWeight: 300,
-        color: colors.slate[700], 
+        color: colors.slate[500], 
         marginBottom: 24,
     },
     optionLabel: {
-        color: colors.gray[500]
+        color: colors.slate[500]
     },
     optionLabelSelected: {
-        color: colors.blue[50]
+        color: colors.cyan[50]
     },
     optionSelected: {
-        backgroundColor: colors.blue[600],
+        backgroundColor: colors.blue[700],
         borderRadius: 60
     },
     option: {
         width: "100%",
         paddingHorizontal: 12,
-        padding: 12,
-        marginVertical: 2
+        padding: 13,
+        marginVertical: 2,
+        borderRadius: 60
     },
     dateText: {
         fontWeight: 500,
         color: colors.blue[600],
         fontSize: 11
     },
-    letter: {
-        width: 32, 
-        height: 32, 
-        borderRadius: 60, 
-        alignItems: "center", 
-        justifyContent: "center", 
-        borderWidth: 0.5, 
-        borderColor: colors.slate[500], 
-        backgroundColor: "#FFF"
-    }
+    companyIcon: {
+        width: 18,
+        height: 18
+    },
 });

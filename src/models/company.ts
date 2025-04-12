@@ -10,7 +10,31 @@ export interface TotalVendasMensal {
     QUANTIDADE_VENDAS: number
 }
 
+export interface AnaliseVendedoresMensal {
+    ANO: number
+    MES: number
+    COD_VEND: number
+    NOME_VEND: string
+    TOTAL_VENDAS: number
+    QUANTIDADE_VENDAS: number
+}
+
+export interface AnaliseVendedor {
+    COD_VEND: number
+    NOME_VEND: string
+    TOTAL_VENDAS: number
+    QUANTIDADE_VENDAS: number
+}
+
+export interface AnaliseAgrupada {
+    ANO: number,
+    MES: number,
+    TOTAL_VENDAS: number,
+    QUANTIDADE_VENDAS: number
+    VENDEDORES: AnaliseVendedor[]
+}
+
 export interface EmpresaReports {
     empresa: Company
-    totalVendasMensal: TotalVendasMensal[]
+    relatorio: AnaliseAgrupada[]
 }

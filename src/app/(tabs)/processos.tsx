@@ -281,18 +281,18 @@ const styles = StyleSheet.create({
         marginVertical: 10
     },
     label: {
-        color: colors.gray[500]
+        color: colors.slate[500]
     },
     itemContainer: {
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200]
+        borderBottomColor: colors.slate[200]
     },
     loadMoreButton: {
         justifyContent: 'center',
         alignItems: 'center',
         padding: 40,
-        backgroundColor: colors.gray[100]
+        backgroundColor: colors.slate[100]
     },
     scrollToTopButton: {
         position: 'absolute',
@@ -314,13 +314,13 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: colors.gray[500],
+        color: colors.slate[500],
     },
     itemListCard: {
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200]
+        borderBottomColor: colors.slate[200]
     },
     itemListCardContent: {
         flexDirection: 'row',
@@ -353,14 +353,16 @@ const styles = StyleSheet.create({
     title: {
         fontWeight: 600,
         fontSize: 15,
-        color: colors.gray[800]
+        color: colors.slate[900]
     },
     subTitle: {
-        color: colors.gray[500]
+        fontSize: 12,
+        color: colors.slate[700],
+        fontWeight: 300
     },
     dateText: {
         fontSize: 13,
-        color: colors.gray[500],
+        color: colors.slate[700],
         fontWeight: 300
     },
     modalContainer: {
@@ -380,7 +382,7 @@ const styles = StyleSheet.create({
         fontWeight: 500
     },
     modalText: {
-        color: colors.gray[500]
+        color: colors.slate[500]
     },
     closeButton: {
         borderRadius: 4,

@@ -269,7 +269,7 @@ export default function Vendas() {
                             ListEmptyComponent={() => (
                                 (loading) 
                                     ? (
-                                        <ActivityIndicator size="large" color={colors.cyan[500]} style={{padding: 40}} />
+                                        <ActivityIndicator size="large" color={colors.green[500]} style={{padding: 40}} />
                                     ) 
                                     : (
                                         <View style={styles.emptyContainer}>
@@ -294,7 +294,6 @@ export default function Vendas() {
                             <View style={styles.modalOverlay}>
                                 <View style={styles.modalContainer}>
                                     <Text style={styles.modalTitle}>Forma de pagamento</Text>
-                                    <Text style={styles.modalSubTitle}>Selecione uma forma de pagamento específica ou todas.</Text>
                                     <FlatList
                                         data={formasPagamento}
                                         keyExtractor={(item) => String(item.CODIGO)}
@@ -349,13 +348,13 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: colors.gray[500],
+        color: colors.slate[500],
     },
     vendaCard: {
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200]
+        borderBottomColor: colors.slate[200]
     },
     cardContent: {
         flexDirection: 'row',
@@ -386,33 +385,34 @@ const styles = StyleSheet.create({
         padding: 10
     },
     vendedor: {
-        fontWeight: 'bold',
+        fontWeight: 600,
         fontSize: 15,
-        color: colors.gray[800]
+        color: colors.slate[800]
     },
     cliente: {
-        fontSize: 15,
-        color: colors.gray[500]
+        color: colors.slate[700],
+        fontWeight: 300
     },
     formaPagamento: {
-        fontSize: 12,
-        color: colors.gray[500],
+        fontSize: 11,
+        color: colors.slate[700],
+        fontWeight: 300,
         marginTop: 5
     },
     valor: {
-        fontSize: 15,
-        color: colors.gray[500]
+        color: colors.slate[700],
+        fontWeight: 300
     },
     dataVenda: {
         fontSize: 13,
-        color: colors.gray[500],
+        color: colors.slate[700],
         fontWeight: 300
     },
     loadMoreButton:{
         justifyContent: 'center',
         alignItems: 'center',
         padding: 40,
-        backgroundColor: colors.gray[100]
+        backgroundColor: colors.slate[100]
     },
     navBar: {
         position: 'absolute',
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     selectButtonText: {
         fontSize: 12,
         fontWeight: 500,
-        color: colors.slate[500],
+        color: colors.slate[500]
     },
     modalOverlay: {
         flex: 1,
@@ -465,13 +465,8 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 22,
         fontWeight: 600,
-        color: colors.gray[800],
-        marginBottom: 6,
-    },
-    modalSubTitle: {
-        color: colors.slate[700], 
-        fontWeight: 300,
-        marginBottom: 24,
+        color: colors.slate[800],
+        marginBottom: 12
     },
     formaPagamentoItem: {
         flexDirection: "row",
@@ -480,7 +475,7 @@ const styles = StyleSheet.create({
         padding: 10
     },
     formaPagamentoText: {
-        color: colors.gray[500],
+        color: colors.slate[500],
     },
     buttons: {
         marginTop: 25,
@@ -504,7 +499,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 12,
         color: colors.cyan[100],
-        backgroundColor: colors.blue[600],
+        backgroundColor: colors.blue[700],
         borderRadius: 60
     },
     modalButtonText: {

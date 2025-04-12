@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { CustomHeader } from "@/components/CustomHeader";
 import { router } from "expo-router";
 import { ErrorMessage } from "@/components/ErrorMessage";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { UtilitiesService } from "@/utils/utilities-service";
 
 
@@ -22,17 +23,12 @@ export default function Settings() {
   const [empresas, setEmpresas] = useState<Company[]>([]);
   const [caixas, setCaixas] = useState<Caixa[]>([]);
 
-  const snapPoints = useMemo(() => ['75%'], []);
+  const snapPoints = useMemo(() => ['80%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [bottomSheetType, setBottomSheetType] = useState<'empresa' | 'caixa' | null>(null);
-  const [firstLetter, setFirstLetter] = useState<string>("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setFirstLetter(UtilitiesService.getFirstLetter(selectedEmpresa?.RAZAO_EMP))
-  }, []);
 
 
   async function fetchEmpresasAtivas(){
@@ -103,7 +99,6 @@ export default function Settings() {
   const handleSelectEmpresa = async (empresa: Company) => {
     await updateEmpresa(empresa);
     bottomSheetRef.current?.close();
-    setFirstLetter(UtilitiesService.getFirstLetter(empresa.RAZAO_EMP));
   };
 
   const handleSelectCaixa = async (caixa: Caixa) => {
@@ -128,49 +123,55 @@ export default function Settings() {
       <SafeAreaView style={{flex: 1}}>
         <CustomHeader title="Configurações" />
 
+        {loading && (
+          <LoadingIndicator />
+        )}
+
         <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 80}}>
-          <View style={styles.profile}>
-            <View style={styles.letter}>
-              <Text style={{fontSize: 36, color: colors.slate[500], fontWeight: 300}}>
-                {firstLetter}
-              </Text>
+          <ImageBackground source={require("@/assets/background-config.png")} style={styles.cardProfile}>
+            <View style={{flexDirection: "row", alignItems: "center", gap: 5}}>
+              <Image source={require("@/assets/company.png")} style={styles.companyIcon} />
+              <Text style={{color: "#FFF", fontSize: 10, marginTop: 4, fontWeight: 300}}>ÓTICA PRIME</Text>
             </View>
 
-            <Text style={styles.selectedEmpresaTitle}>
-              {selectedEmpresa?.RAZAO_EMP || "-"}
-            </Text>
-
-            <Text style={styles.selectedCaixaTitle}>
-              {selectedCaixa?.DESC_CAI || "-"}
-            </Text>
-          </View>
+            <View style={{marginBottom: 10, gap: 5}}>
+              <Text style={styles.empText}>
+                { selectedEmpresa
+                  ? selectedEmpresa.RAZAO_EMP
+                  : "Nenhuma empresa"
+                }
+              </Text>
+              <Text style={styles.caixaText}>
+                { selectedCaixa?.DESC_CAI 
+                  ? UtilitiesService.handleCaixaName(selectedCaixa.DESC_CAI) 
+                  : "Nenhum caixa"
+                }
+              </Text>
+            </View>
+          </ImageBackground>
 
           <View style={styles.actionsContainer}>
             <SettingsButton
               icon="briefcase"
               title="Selecionar empresa"
-              iconColor={colors.slate[600]}
               onPress={() => openBottomSheet('empresa')}
             />
 
             <SettingsButton
               icon="box"
               title="Selecionar caixa"
-              iconColor={colors.slate[600]}
               onPress={() => openBottomSheet('caixa')}
             />
 
             <SettingsButton
               icon="book"
               title="Manual do usuário"
-              iconColor={colors.slate[600]}
               onPress={() => {router.navigate('/manual-usuario')}}
             />
 
             <SettingsButton 
               icon="log-out" 
               title="Sair" 
-              iconColor={colors.red[500]}
               onPress={handleLogout}
             />  
           </View>
@@ -206,12 +207,12 @@ export default function Settings() {
                       onPress={() => handleSelectEmpresa(empresa)}
                       style={[
                         styles.optionButtonContainer,
-                        selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedOptionButtonEmpresa,
+                        selectedEmpresa?.COD_EMP === empresa.COD_EMP && styles.selectedOptionButton,
                       ]}
                     >
                       <Text style={
                         selectedEmpresa?.COD_EMP === empresa.COD_EMP 
-                          ? styles.selectedOptionTextEmpresa 
+                          ? styles.selectedOptionText
                           : styles.optionButtonText
                         }
                       >
@@ -246,12 +247,12 @@ export default function Settings() {
                       onPress={() => handleSelectCaixa(caixa)}
                       style={[
                         styles.optionButtonContainer,
-                        selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedOptionButtonCaixa,
+                        selectedCaixa?.DESC_CAI === caixa.DESC_CAI && styles.selectedOptionButton,
                       ]}
                     >
                       <Text style={
                         selectedCaixa?.DESC_CAI === caixa.DESC_CAI 
-                          ? styles.selectedOptionTextCaixa 
+                          ? styles.selectedOptionText
                           : styles.optionButtonText
                         }
                       >
@@ -282,15 +283,17 @@ const styles = StyleSheet.create({
     marginBottom: 5
   },
   bottomSubTitle: { 
-    color: colors.slate[500], 
+    color: colors.slate[500],
+    fontWeight: 300,
     marginBottom: 26
   },
-  profile: {
+  cardProfile: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    marginHorizontal: 15
+    padding: 25,
+    gap: 60,
+    marginHorizontal: 15,
+    backgroundColor: colors.blue[700],
+    borderRadius: 10
   },
   contentContainer: {
     display: 'flex',
@@ -307,55 +310,32 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     backgroundColor: colors.slate[100]
   },
-  selectedOptionButtonEmpresa: {
-    backgroundColor: colors.blue[600]
+  selectedOptionButton: {
+    backgroundColor: colors.blue[700]
   },
-  selectedOptionButtonCaixa: {
-    backgroundColor: colors.purple[600]
-  },
-  selectedOptionTextEmpresa: {
+  selectedOptionText: {
     color: colors.cyan[100],
-    fontWeight: 600
-  },
-  selectedOptionTextCaixa: {
-    color: colors.fuchsia[100],
+    fontSize: 12,
     fontWeight: 600
   },
   optionButtonText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 500,
     color: colors.slate[500]
-  },
-  selectedEmpresaTitle: { 
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: 500,
-    marginBottom: 6,
-    color: colors.slate[800]
-  },
-  selectedCaixaTitle: {
-    textAlign: "center",
-    color: colors.slate[500]
-  },
-  image: { 
-    width: '100%',
-    aspectRatio: 1260 / 750,
-    resizeMode: 'contain',
-    marginBottom: 10
   },
   actionsContainer: {
-    paddingVertical: 15,
-    marginTop: 15
+    marginTop: 20
   },
-  letter: {
-    alignItems: "center", 
-    justifyContent: "center", 
-    width: 100, 
-    height: 100, 
-    backgroundColor: "#FFF", 
-    borderRadius: 60,
-    borderWidth: 1, 
-    borderColor: colors.slate[300],
-    marginBottom: 15 
+  companyIcon: {
+    width: 20,
+    height: 20
+  },
+  empText: {
+    color: "#FFF",
+    fontWeight: 600
+  },
+  caixaText: {
+    color: "#FFF",
+    fontSize: 12
   }
 });

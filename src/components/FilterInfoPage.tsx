@@ -16,7 +16,7 @@ export const FilterInfoPage = (props: FilterInfoPageProps) => {
                     size={16} 
                     color={colors.slate[500]} 
                 />
-                <Text style={{color: colors.slate[500]}}>
+                <Text style={{ color: colors.slate[700], fontWeight: 300}}>
                     {props.totalInfo}
                 </Text>
             </View>
@@ -26,7 +26,7 @@ export const FilterInfoPage = (props: FilterInfoPageProps) => {
                     size={16} 
                     color={colors.slate[500]} 
                 />
-                <Text style={{color: colors.slate[500]}}>
+                <Text style={{ color: colors.slate[700], fontWeight: 300}}>
                     Mais recentes
                 </Text>
             </View>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, TouchableWithoutFeedback, Keyboard, ActivityIndicator, Alert, SafeAreaView } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { colors } from "@/utils/constants/colors";
 import CustomButton from "@/components/CustomButton";
@@ -52,73 +52,71 @@ export default function Login() {
     };
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                <ImageBackground 
-                    source={{ uri: "https://images.unsplash.com/photo-1639781895346-054825a58d4a?q=80&w=2127&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }} 
-                    style={styles.image}
-                    resizeMode="cover"
-                >
-                </ImageBackground>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.container}>
+                    <View style={styles.loginContainer}>
+                        <View style={{gap: 20}}>
+                            <View style={{marginBottom: 40}}>
+                                <Image source={require("@/assets/atip-logo.png")} style={styles.logo} />
+                            </View>
 
-                <View style={styles.loginContainer}>
-                    <View style={{gap: 20}}>
-                        <View>
-                            <Text style={styles.title}>Acessar</Text>
-                            <Text style={styles.subtitle}>Informe suas credenciais de acesso.</Text>
+                            <View>
+                                <Text style={styles.title}>Bem vindo!</Text>
+                                <Text style={styles.subtitle}>Informe suas credenciais de acesso.</Text>
+                            </View>
+
+                            <View style={{gap: 10}}>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="E-mail"
+                                    keyboardType="email-address"
+                                    value={email}
+                                    placeholderTextColor="#9ca3af"
+                                    autoCorrect={false}
+                                    spellCheck={false}
+                                    autoCapitalize="none"
+                                    onChangeText={setEmail}
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Senha"
+                                    placeholderTextColor="#9ca3af"
+                                    secureTextEntry={!passwordVisible}
+                                    value={password}
+                                    autoCorrect={false}
+                                    spellCheck={false}
+                                    autoCapitalize="none"
+                                    onChangeText={setPassword}
+                                />
+                            </View>
+
+                            {loading ? (
+                                    <ActivityIndicator size="small" color={colors.blue[500]} style={{padding: 15}} />
+                                ) : (
+                                    <CustomButton label="Acessar" onPress={handleLogin} />
+                                )
+                            }
                         </View>
 
-                        <View style={{gap: 10}}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="E-mail"
-                                keyboardType="email-address"
-                                value={email}
-                                placeholderTextColor="#999"
-                                autoCorrect={false}
-                                spellCheck={false}
-                                autoCapitalize="none"
-                                onChangeText={setEmail}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Senha"
-                                placeholderTextColor="#999"
-                                secureTextEntry={!passwordVisible}
-                                value={password}
-                                autoCorrect={false}
-                                spellCheck={false}
-                                autoCapitalize="none"
-                                onChangeText={setPassword}
-                            />
+                        <View style={{alignItems: "center", gap: 1}}>
+                            <Text style={styles.titleFooter}>
+                                ÓTICA PRIME
+                            </Text>
+                            <Text style={styles.titleFooter}>
+                                {'\u00A9'} ATIP INFORMÁTICA 2025 v.1.0.0
+                            </Text>
                         </View>
-
-                        {loading ? (
-                                <ActivityIndicator size="small" color={colors.blue[500]} style={{padding: 15}} />
-                            ) : (
-                                <CustomButton label="Acessar" onPress={handleLogin} />
-                            )
-                        }
-                    </View>
-
-                    <View style={{alignItems: "center", gap: 1}}>
-                        <Text style={styles.titleFooter}>
-                            ÓTICA PRIME
-                        </Text>
-                        <Text style={styles.titleFooter}>
-                            {'\u00A9'} ATIP INFORMÁTICA 2025 v.1.2
-                        </Text>
                     </View>
                 </View>
-            </View>
-        </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: "#fff"
+        flex: 1
     },
     loginContainer: {
         flex: 1, 
@@ -134,26 +132,24 @@ const styles = StyleSheet.create({
         marginBottom: 4
     },
     subtitle: {
-        fontWeight: "300",
-        color: colors.gray[500]
+        color: colors.slate[500]
     },
     input: {
         borderWidth: 1,
-        borderColor: colors.gray[300],
-        padding: 14,
+        borderColor: colors.slate[200],
+        backgroundColor: '#FFF',
+        padding: 16,
         borderRadius: 8,
         fontSize: 15
     },
-    image: {
-        width: "100%",
-        height: 200,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: colors.gray[100]
-    },
     titleFooter: {
         fontSize: 10,
-        color: colors.gray[400],
+        color: colors.slate[500],
         marginBottom: 3
+    },
+    logo: {
+        width: 50,
+        height: 50,
+        resizeMode: 'contain'
     }
 });

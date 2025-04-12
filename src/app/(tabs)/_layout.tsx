@@ -9,7 +9,7 @@ import * as NavigationBar from "expo-navigation-bar";
 export default function Layout(){
     useEffect(() => {
         if (Platform.OS === "android") {
-            NavigationBar.setBackgroundColorAsync(colors.gray[900]);
+            NavigationBar.setBackgroundColorAsync(colors.slate[900]);
         }
     }, []);
 
@@ -24,7 +24,7 @@ export default function Layout(){
                     tabBarShowLabel: true,
                     animation: "shift",
                     tabBarActiveTintColor: "#FFF",
-                    tabBarInactiveTintColor: colors.slate[500],
+                    tabBarInactiveTintColor: colors.slate[600],
                     tabBarStyle: { backgroundColor: colors.slate[900] },
                     tabBarButton: (props) => (
                         <Pressable {...props} android_ripple={{ borderless: false, color: "transparent" }}>

@@ -1,91 +1,116 @@
 import { FormasPagamentoTotal } from "@/models/caixa";
 import { colors } from "@/utils/constants/colors";
 import { UtilitiesService } from "@/utils/utilities-service";
-import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
 
 interface LineChartProps {
   total: number;
   values: FormasPagamentoTotal[];
-  type: 'recebimentos' | 'vendas';
 }
 
-export const LineChart: React.FC<LineChartProps> = ({ total, values, type }) => {
+export const LineChart: React.FC<LineChartProps> = ({ total, values }) => {
     return (
-        <View style={{flex: 1}}>
+      <View style={{ padding: 18, borderBottomWidth: 1, borderBottomColor: colors.slate[100] }}>
+        <View style={styles.segmentedBarContainer}>
+            <View style={styles.segmentedBar}>
             {values.map((item, index) => {
-                const percentagem = (item.VALOR_TOTAL / total) * 100;
+                const percentage = (item.VALOR_TOTAL / total) * 100;
+                const color = getColor(index);
 
                 return (
-                    <TouchableOpacity 
-                        key={index} 
-                        style={styles.lineContainer}
-                        onPress={() => router.push(type === 'recebimentos' ? '/recebimentos' : '/vendas')}
-                    >
-                        <View style={styles.rowContainer}>
-                            <View style={[styles.colorIndicator, { backgroundColor: getColor(index) }]} />
-                            <View style={styles.textContainer}>
-                                <View style={styles.headerRow}>
-                                    <Text style={styles.label}>
-                                        {`${item.DESCRICAO} (${item.QUANTIDADE})`}
-                                    </Text>
-                                    <Feather name="chevron-right" size={20} color={colors.slate[400]} />
-                                </View>
-                                <Text style={styles.subItemText}>
-                                    {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)} (${percentagem.toFixed(1)}%)`}
-                                </Text>
-                                <View style={[styles.line, { width: `${percentagem}%`, backgroundColor: getColor(index) }]} />
-                            </View>
-                        </View>
-                    </TouchableOpacity>
+                <View
+                    key={index}
+                    style={{
+                        width: `${percentage}%`,
+                        backgroundColor: color,
+                        height: 20,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        position: 'relative',
+                    }}
+                >
+                    {percentage > 8 && (
+                    <Text style={styles.segmentText}>
+                        {`${percentage.toFixed(0)}%`}
+                    </Text>
+                    )}
+                </View>
                 );
             })}
+            </View>
         </View>
+  
+        <View style={styles.legendContainer}>
+          {values.map((item, index) => {
+            return (
+                <View key={index} style={styles.legendItem}>
+                    <View style={[styles.legendColor, { backgroundColor: getColor(index) }]} />
+
+                    <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between", flex: 1}}>
+                        <Text style={styles.legendText}>
+                        {`${item.DESCRICAO} (${item.QUANTIDADE})`}
+                        </Text>
+
+                        <Text style={styles.legendValue}>
+                        {`${UtilitiesService.formatarValor(item.VALOR_TOTAL)}`}
+                        </Text>
+                    </View>
+                </View>
+            );
+          })}
+        </View>
+      </View>
     );
 };
+  
 
 
 const getColor = (index: number) => {
-    const cores = [colors.blue[500], colors.green[500], colors.pink[500], colors.red[500], colors.orange[500], colors.gray[500]];
+    const cores = [colors.blue[500], colors.green[500], colors.pink[500], colors.red[500], colors.orange[500], colors.slate[500]];
     return cores[index % cores.length];
 };
 
+
 const styles = StyleSheet.create({
-    lineContainer: {
-        padding: 20
+    segmentedBarContainer: {
+      marginBottom: 10,
     },
-    rowContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
+    segmentedBar: {
+      flexDirection: 'row',
+      height: 20,
+      borderRadius: 12,
+      overflow: 'hidden',
     },
-    colorIndicator: {
-        width: 15,
-        height: 15,
-        borderRadius: 60,
+    legendContainer: {
+      marginTop: 10,
+      gap: 10,
     },
-    textContainer: {
-        flex: 1,
+    legendItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
     },
-    headerRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+    legendColor: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
     },
-    label: {
-        fontWeight: 600,
-        color: colors.slate[700],
+    legendText: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: colors.slate[700],
     },
-    subItemText: {
-        fontSize: 13,
-        color: colors.slate[500],
+    legendValue: {
+        fontSize: 14,
+        fontWeight: 300,
+        color: colors.slate[600],
     },
-    line: {
-        height: 4,
-        borderRadius: 2,
-        marginTop: 5,
+    segmentText: {
+        color: "#FFF",
+        fontSize: 10,
+        fontWeight: "bold",
     },
 });
+  

@@ -1,40 +1,23 @@
-import { colors } from "@/utils/constants/colors";
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { Text, StyleSheet, View } from "react-native";
 
 interface SectionTitleProps {
     title: string;
-    subtitle?: string;
 }
 
-export default function SectionTitle({title, subtitle}: SectionTitleProps) {
+export default function SectionTitle({title}: SectionTitleProps) {
     return (
-        <View style={styles.container}>
+        <View style={{paddingHorizontal: 18}}>
             <Text style={styles.text}>
                 {title}
             </Text>
-
-            {subtitle && (
-                <Text style={styles.text}>
-                    {subtitle}
-                </Text>
-            )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: colors.slate[100],
-        paddingHorizontal: 15,
-        paddingVertical: 10
-    },
     text: {
-        color: colors.slate[500], 
-        fontSize: 11,
+        color: "#7c8ba2",
         fontWeight: 500
     },
 });

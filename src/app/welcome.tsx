@@ -19,27 +19,33 @@ export default function Welcome(){
   }, [selectedEmpresa, isFirstAccess]);
 
   return (
-    <View style={{flex: 1, paddingHorizontal: 20, backgroundColor: "#FFF"}}>
-      <SafeAreaView style={{flex: 1, marginVertical: 120, alignItems: "center", justifyContent: "space-between"}}>
-        <View style={{alignItems: "center", gap: 10}}>
-          <Text style={{fontSize: 38, fontWeight: 500, color: colors.slate[800]}}>
-            Bem vindo
-          </Text>
-          <Text style={{color: colors.slate[700], fontWeight: 300, textAlign: "center"}}>
-            Para acompanhar suas atividades, selecione uma empresa nas configurações.
-          </Text>
+    <SafeAreaView style={{flex: 1, backgroundColor: "#FFF"}}>
+      <View style={{flex: 1, paddingHorizontal: 20, backgroundColor: "#FFF"}}>
+        <View style={{flex: 1, marginVertical: 40, justifyContent: "center", gap: 40}}>
+          <View style={{alignItems: "center"}}>
+            <Image source={require("@/assets/welcome.png")} style={styles.logo} />
+          </View>
+
+          <View style={{gap: 10}}>
+            <Text style={{fontSize: 32, fontWeight: 600, color: colors.slate[800]}}>
+              Controle total, onde você estiver.
+            </Text>
+            <Text style={{color: colors.slate[500]}}>
+              Para acompanhar suas operações, selecione a sua empresa nas configurações. 
+            </Text>
+          </View>
+
+          <CustomButton label="Ir para configurações" icon={true} onPress={() => {router.push('/settings')}} />
         </View>
-        <Image source={require("@/assets/welcome.png")} style={styles.logo} />
-        <CustomButton label="Ir para configurações" icon={true} onPress={() => {router.push('/settings')}} />
-      </SafeAreaView>
-    </View>
+      </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   logo: {
-    width: 400,
-    height: 400,
+    width: 300,
+    height: 300,
     resizeMode: "contain",
   },
 });

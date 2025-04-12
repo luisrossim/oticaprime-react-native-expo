@@ -3,15 +3,16 @@ import { CustomBarChart } from '@/components/CustomBarChart';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
 import { PageTitle } from '@/components/PageTitle';
+import { VendedoresChart } from '@/components/VendedoresChart';
 import { useAuth } from '@/context/AuthContext';
 import { useDashboardFilter } from '@/context/DashboardFilterContext';
 import { useEmpresaCaixa } from '@/context/EmpresaCaixaContext';
-import { EmpresaReports } from '@/models/company';
+import { AnaliseVendedor, EmpresaReports } from '@/models/company';
 import { EmpresaService } from '@/services/empresa-service';
 import { colors } from '@/utils/constants/colors';
 import { UtilitiesService } from '@/utils/utilities-service';
 import { useFocusEffect } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, ScrollView, Text, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
@@ -28,6 +29,7 @@ export default function Index() {
     const [clickedValue, setClickedValue] = useState<{label: string, value: string} | null>(null); 
     const [chartData, setChartData] = useState<{ labels: string[], sales: number[] }>({ labels: [], sales: [] });
     const [chartData2, setChartData2] = useState<{ month: string; value: number }[]>([]);
+    const [chartData3, setChartData3] = useState<{ month: string; vendedores: AnaliseVendedor[] }[]>([]);
     
 
     useFocusEffect(
@@ -68,20 +70,25 @@ export default function Index() {
 
 
     function buildCharts(data: EmpresaReports) {
-       if (!data || !data.totalVendasMensal) return;
-    
-        const vendasMensais = data.totalVendasMensal.slice(-selectedRange);
-    
-        const labels = vendasMensais.map(item => UtilitiesService.monthNamesUpper[item.MES - 1]);
-        const salesData = vendasMensais.map(item => item.TOTAL_VENDAS);
+        if (!data || !data.relatorio) return;
 
-        const chartData = vendasMensais.map(item => ({
+        const labels = data.relatorio.map(item => UtilitiesService.monthNamesUpper[item.MES - 1]);
+        const sales = data.relatorio.map(item => item.TOTAL_VENDAS);
+        const dataChartValorVendas = {labels, sales}
+
+        const dataChartQuantidadeVendas = data.relatorio.map(item => ({
             month: `${UtilitiesService.monthNamesUpper[item.MES - 1]} ${String(item.ANO).slice(-2)}`,
             value: item.QUANTIDADE_VENDAS,
         }));
 
-        setChartData({ labels, sales: salesData });
-        setChartData2(chartData);
+        const dataChartVendedores = data.relatorio.map(item => ({
+            month: `${UtilitiesService.monthNamesUpper[item.MES - 1]} ${String(item.ANO).slice(-2)}`, 
+            vendedores: item.VENDEDORES
+        }))
+
+        setChartData(dataChartValorVendas);
+        setChartData2(dataChartQuantidadeVendas);
+        setChartData3(dataChartVendedores);
     }
 
     const formatValue = (value: number) => {
@@ -116,39 +123,32 @@ export default function Index() {
                         contentContainerStyle={{paddingBottom: 100}}
                         showsVerticalScrollIndicator={false}
                     >
-                        <View style={{paddingHorizontal: 15, marginBottom: 10}}>
+                        <View style={{paddingHorizontal: 18, marginBottom: 10}}>
                             <PageTitle title="Dashboard" size="large" />
-                            <Text style={{color: colors.slate[700], fontWeight: 300}}>
-                                Acompanhe o desempenho da sua empresa através de gráficos interativos.
-                            </Text>
                         </View>
 
                         <ChartContainer
                             title='Quantidade de vendas'
-                            selectedRange={selectedRange}
                             icon='shopping-bag'
                             iconColor={colors.cyan[200]}
-                            backgroundColor={colors.blue[600]}
+                            backgroundColor={colors.blue[500]}
                         >
                             {chartData2.length > 0 ? (
                                 <CustomBarChart data={chartData2} />
                             ) : (
-                                <View style={{alignItems: "center", paddingVertical: 80, borderWidth: 1, borderColor: colors.slate[200], marginHorizontal: 20}}>
-                                    <Text style={{color: colors.slate[500]}}>Sem registros</Text>
-                                </View>
+                                <Text style={styles.empty}>Sem registros</Text>
                             )}
                         </ChartContainer>
 
                         <ChartContainer
                             title='Receita de vendas'
-                            selectedRange={selectedRange}
                             icon='dollar-sign'
                             iconColor={colors.lime[200]}
-                            backgroundColor={colors.green[600]}
+                            backgroundColor={colors.green[500]}
                         >
                             {chartData.labels.length > 0 ? (
                                 <View style={{position: "relative"}}>
-                                    <View style={{paddingTop: 30}}>
+                                    <View style={{paddingTop: 20}}>
                                         <LineChart
                                             data={{
                                                 labels: chartData.labels,
@@ -187,7 +187,7 @@ export default function Index() {
                                                     r: "5",
                                                     fill: "#fff",
                                                     strokeWidth: "0.5",
-                                                    stroke: colors.green[600],
+                                                    stroke: colors.green[500],
                                                 },
                                                 fillShadowGradientFrom: colors.green[500],
                                                 fillShadowGradientTo: colors.green[500],
@@ -217,26 +217,16 @@ export default function Index() {
 
                         <ChartContainer
                             title='Análise dos vendedores'
-                            selectedRange={selectedRange}
                             icon='users'
-                            iconColor={colors.orange[200]}
-                            backgroundColor={colors.red[600]}
+                            iconColor={colors.pink[200]}
+                            backgroundColor={colors.purple[500]}
                         >
-                            <Text style={styles.empty}>
-                                Em breve
-                            </Text>
-                        </ChartContainer>
-
-                        <ChartContainer
-                            title='Formas de pagamento'
-                            selectedRange={selectedRange}
-                            icon='credit-card'
-                            iconColor={colors.gray[200]}
-                            backgroundColor={colors.slate[600]}
-                        >
-                            <Text style={styles.empty}>
-                                Em breve
-                            </Text>
+                            {chartData3.length > 0 ? (
+                                <VendedoresChart data={chartData3} />
+                            ) 
+                            : (
+                                <Text style={styles.empty}>Sem registros</Text>
+                            )}
                         </ChartContainer>
                     </ScrollView>
                 )
@@ -248,58 +238,11 @@ export default function Index() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingVertical: 50,
-        backgroundColor: "#FFF"
+        paddingVertical: 50
     },
     scrollToTopButton: {
         flexDirection: "row",
         justifyContent: "space-between"
-    },
-    navBar: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 45,
-        backgroundColor: colors.slate[700],
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        zIndex: 10
-    },
-    navBarTitle: {
-        color: colors.slate[400],
-        fontWeight: 600
-    },
-    valueDisplay: {
-        marginTop: 20,
-        padding: 10,
-        backgroundColor: colors.slate[100],
-        borderRadius: 5,
-        alignItems: 'center',
-    },
-    valueText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: colors.slate[900]
-    },
-    chartContainer: {
-        paddingTop: 30
-    },
-    chartHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 16,
-        gap: 8
-    },
-    title: {
-        color: colors.slate[700],
-        fontWeight: 500,
-        fontSize: 16,
-        marginBottom: 2
-    },
-    subTitle: {
-        fontSize: 11,
-        color: colors.slate[500],
     },
     selectedText: {
         color: colors.slate[500],
@@ -317,7 +260,7 @@ const styles = StyleSheet.create({
         width: 7,
         height: 7,
         borderRadius: 60,
-        backgroundColor: colors.green[600]
+        backgroundColor: colors.green[500]
     },
     empty: {
         textAlign: "center", 

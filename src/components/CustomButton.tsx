@@ -15,7 +15,7 @@ export default function CustomButton({ label, onPress, style, icon }: CustomButt
         <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
             <Text style={styles.text}>{label}</Text>
             {icon && (
-                <Feather name="chevron-right" color={colors.cyan[200]} size={16} />
+                <Feather name="chevron-right" color={colors.cyan[100]} size={16} />
             )}
         </TouchableOpacity>
     );
@@ -23,7 +23,7 @@ export default function CustomButton({ label, onPress, style, icon }: CustomButt
 
 const styles = StyleSheet.create({
     button: {
-        backgroundColor: colors.sky[900],
+        backgroundColor: colors.blue[700],
         paddingVertical: 16,
         paddingHorizontal: 22,
         borderRadius: 60,
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
         gap: 10
     },
     text: {
-        color: colors.cyan[200],
+        color: colors.cyan[100],
         fontSize: 15
     },
 });

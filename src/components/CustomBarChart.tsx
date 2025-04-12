@@ -57,8 +57,8 @@ export function CustomBarChart({data}: CustomBarChartProps) {
                         inputRange: [0, maxHeight],
                         outputRange: [0, 150], 
                       }),
-                      backgroundColor: colors.blue[600],
-                      opacity: selectedIndex === null || selectedIndex === index ? 1 : 0.4 
+                      backgroundColor: colors.blue[500],
+                      opacity: selectedIndex === null || selectedIndex === index ? 1 : 0.5
                     }
                   ]} 
                 />
@@ -141,6 +141,13 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 60,
-    backgroundColor: colors.blue[600]
+    backgroundColor: colors.blue[500]
+  },
+  empty: {
+    textAlign: "center", 
+    paddingBottom: 50, 
+    fontWeight: 300,
+    fontSize: 13,
+    color: colors.slate[500]
   }
 });
