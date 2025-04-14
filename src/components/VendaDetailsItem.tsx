@@ -16,7 +16,7 @@ export const VendaDetailsItem = (props: VendaDetailsItemProps) => {
                 justifyContent: "center",
                 alignItems: "center",
                 backgroundColor: colors.green[300],
-                borderRadius: 100,
+                borderRadius: 100
             }}>
                 <FontAwesome6
                     name={props.icon}
@@ -42,9 +42,8 @@ const styles = StyleSheet.create({
     },
     vendaDetailsText: {
         flex: 1,
-        fontSize: 13,
-        fontWeight: 500,
-        color: colors.slate[700]
+        fontWeight: 300,
+        color: colors.slate[800]
     },
     icon: {
         width: 30,

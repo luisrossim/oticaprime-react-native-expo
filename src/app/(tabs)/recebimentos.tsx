@@ -201,25 +201,22 @@ export default function Recebimentos() {
                         <Animated.FlatList
                             ListHeaderComponent={
                                 <View style={styles.headerContainer}>
-                                    <PageTitle 
-                                        title="Recebimentos de crediário" 
-                                        size="large" 
-                                    />
-
-                                    <FilterInfoPage
-                                        totalInfo={`${totalRecebimentos || 0} recebimentos`} 
-                                        icon='arrow-down-right'
-                                    />
+                                    <PageTitle title="Recebimentos de crediário" size="large" />
 
                                     <TouchableOpacity
                                         style={styles.selectButton}
                                         onPress={() => setIsModalVisible(true)}
                                     >
                                         <Text style={styles.selectButtonText}>
-                                            {selectedFormaPagamento ? selectedFormaPagamento.DESCRICAO : 'TODAS AS FORMAS DE PAGAMENTO'}
+                                            {selectedFormaPagamento 
+                                                ? selectedFormaPagamento.DESCRICAO 
+                                                : 'Todas as formas de pagamento'
+                                            }
                                         </Text>
-                                        <Feather name="chevron-down" size={18} color={colors.slate[400]} />
+                                        <Feather name="chevron-down" size={18} color={colors.indigo[600]} />
                                     </TouchableOpacity>
+
+                                    <FilterInfoPage info={`${totalRecebimentos || 0} recebimentos`} />
                                 </View>
                             }
                             ref={flatListRef}
@@ -366,7 +363,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.slate[200]
+        borderBottomColor: colors.slate[100]
     },
     itemListCardContent: {
         flexDirection: 'row',
@@ -424,19 +421,12 @@ const styles = StyleSheet.create({
     selectButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: "space-between",
-        borderWidth: 1,
-        borderColor: colors.slate[200],
-        backgroundColor: colors.slate[50],
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        marginTop: 10,
-        borderRadius: 60,
+        gap: 4,
+        paddingBottom: 4 
     },
     selectButtonText: {
-        fontSize: 12,
         fontWeight: 500,
-        color: colors.slate[500],
+        color: colors.indigo[600]
     },
     modalOverlay: {
         flex: 1,

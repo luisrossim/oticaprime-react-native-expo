@@ -6,8 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 interface LineDetailProps {
     label: string,
     value: number,
-    isBRL: boolean,
-    color?: string
+    isBRL: boolean
 }
 
 
@@ -16,14 +15,14 @@ interface LineDetailButtonProps {
     onPress: () => void
 }
 
-export function LineDetail({label, value, isBRL, color}: LineDetailProps) {
+export function LineDetail({label, value, isBRL}: LineDetailProps) {
     return (
         <View style={styles.lineContainer}>
             <View style={styles.lineContent}>
-                <Text style={[styles.label, color && {color: color}]}>
+                <Text style={styles.label}>
                     {label}
                 </Text>
-                <Text style={[styles.value, color && {color: color}]}>
+                <Text style={styles.value}>
                     {isBRL ? UtilitiesService.formatarValor(value) : value }
                 </Text>
             </View>

@@ -323,7 +323,7 @@ export default function CaixaHistorico() {
                                 <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
                                     <Feather 
                                         name="x" 
-                                        size={20} 
+                                        size={18} 
                                         style={styles.iconModal} 
                                     />
                                 </TouchableOpacity>
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.slate[200]
+        borderBottomColor: colors.slate[100]
     },
     lancamentoCardContent: {
         flexDirection: 'row',
@@ -476,9 +476,7 @@ const styles = StyleSheet.create({
     },
     iconModal: {
         color: colors.slate[500],
-        backgroundColor: colors.slate[100],
-        padding: 5,
-        borderRadius: 100
+        padding: 10
     },
     totalValue: {
         fontSize: 30,

@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { FormasPagamentoService } from '@/services/formas-pagamento-service';
 import { FormaPagamento } from '@/models/formaPagamento';
 import { FilterInfoPage } from '@/components/FilterInfoPage';
+import SectionTitle from '@/components/SectionTitle';
 
 export default function Vendas() {
     const [vendasPaginadas, setVendasPaginadas] = useState<VendaSummary[]>([]);
@@ -222,15 +223,7 @@ export default function Vendas() {
                         <Animated.FlatList
                             ListHeaderComponent={
                                 <View style={styles.headerContainer}>
-                                    <PageTitle 
-                                        title="Vendas" 
-                                        size="large" 
-                                    />
-
-                                    <FilterInfoPage
-                                        totalInfo={`${totalVendas || 0} vendas`} 
-                                        icon='dollar-sign'
-                                    />
+                                    <PageTitle title="Vendas" size="large" />
 
                                     <TouchableOpacity
                                         style={styles.selectButton}
@@ -239,11 +232,18 @@ export default function Vendas() {
                                         <Text style={styles.selectButtonText}>
                                             {selectedFormaPagamento 
                                                 ? selectedFormaPagamento.DESCRICAO 
-                                                : 'TODAS AS FORMAS DE PAGAMENTO'
+                                                : 'Todas as formas de pagamento'
                                             }
                                         </Text>
-                                        <Feather name="chevron-down" size={18} color={colors.slate[400]} />
+
+                                        <Feather 
+                                            name="chevron-down" 
+                                            size={18} 
+                                            color={colors.emerald[600]} 
+                                        />
                                     </TouchableOpacity>
+
+                                    <FilterInfoPage info={`${totalVendas || 0} vendas`} />
                                 </View>
                             }
                             ref={flatListRef}
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.slate[200]
+        borderBottomColor: colors.slate[100]
     },
     cardContent: {
         flexDirection: 'row',
@@ -436,19 +436,12 @@ const styles = StyleSheet.create({
     selectButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: "space-between",
-        borderWidth: 1,
-        borderColor: colors.slate[200],
-        backgroundColor: colors.slate[50],
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        marginTop: 10,
-        borderRadius: 60,
+        gap: 4,
+        paddingBottom: 4 
     },
     selectButtonText: {
-        fontSize: 12,
         fontWeight: 500,
-        color: colors.slate[500]
+        color: colors.emerald[600]
     },
     modalOverlay: {
         flex: 1,

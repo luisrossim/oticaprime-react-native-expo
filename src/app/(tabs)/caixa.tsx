@@ -184,41 +184,10 @@ const styles = StyleSheet.create({
     paddingVertical: 50,
     backgroundColor: "#FFF"
   },
-  caixaDetailsHeader: {
-    marginTop: 10,
-    marginBottom: 3,
-  },
-  caixaSection: {
-    marginTop: 10,
-    marginBottom: 30,
-    marginHorizontal: 15
-  },
-  lineContainer: {
-    flexDirection: "column",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    width: "100%",
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.slate[300],
-  },
-  value: {
-    color: colors.slate[500],
-    fontWeight: 400,
-  },
-  label: {
-    fontSize: 13,
-    color: colors.slate[500],
-  },
   totalValue: {
     fontSize: 30,
     color: colors.slate[800],
     fontWeight: 500,
     marginVertical: 13
-  },
-  tip: {
-    color: colors.slate[500], 
-    fontWeight: 300,
-    fontSize: 13,
-    paddingBottom: 20
   }
 });

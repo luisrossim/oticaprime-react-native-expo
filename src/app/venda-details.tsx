@@ -29,6 +29,7 @@ export default function VendaDetails() {
         fetchVenda();
     }, [vendaId]);
 
+
     const fetchVenda = async () => {
         setLoading(true);
 
@@ -48,16 +49,17 @@ export default function VendaDetails() {
         }
     };
 
+
     const handlePaymentLabel = (total: number, tipo: string) => {
         const totalFormatado = UtilitiesService.formatarValor(total);
         return `${totalFormatado} (${tipo})`
     }
 
-
  
     if (loading) {
         return <LoadingIndicator />;
     }
+
  
     return (
         <SafeAreaView style={{flex: 1, backgroundColor: "#FFF"}}>
@@ -66,7 +68,11 @@ export default function VendaDetails() {
             {error ? (
                   <ErrorMessage error={error} />
             ) : (
-                <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 100}}>
+                <ScrollView 
+                    style={styles.container} 
+                    showsVerticalScrollIndicator={false} 
+                    contentContainerStyle={{paddingBottom: 100}}
+                >
                     <View style={styles.header}>
                         <Feather 
                             name={
@@ -77,32 +83,50 @@ export default function VendaDetails() {
                             size={32} 
                             style={styles.iconElement} 
                         />
-                        <Text style={{color: colors.lime[200], fontWeight: 600, fontSize: 16}}>
+                        <Text style={styles.headerText}>
                             Venda #{id}
                         </Text>
                     </View>
 
-                    <View style={styles.cardSection}>
-                        <SectionTitle title="Informações gerais" />
-                        <View style={{paddingTop: 15, gap: 10}}>
-                            <VendaDetailsItem icon="user-tie" detail={venda!.NOME_VEND} />
-                            <VendaDetailsItem icon="user" detail={venda!.NOME_CLI} />
-                            <VendaDetailsItem icon="user-nurse" detail={venda?.NOME_MEDICO || '-'} />
-                            <VendaDetailsItem icon="calendar-day" detail={new Date(venda!.DATA_VEN).toLocaleDateString()} />
-                            <VendaDetailsItem icon="sack-dollar" detail={handlePaymentLabel(venda!.TOTAL_VEN, venda!.NOME_TPV)} />
-                            <VendaDetailsItem icon="building" detail={venda!.RAZAO_EMP} />
+                    <View style={{marginTop: 10, gap: 50}}>
+                        <View>
+                            <SectionTitle title="Informações gerais" />
+                            <View style={{paddingTop: 15, gap: 12}}>
+                                <VendaDetailsItem 
+                                    icon="user-tie" 
+                                    detail={venda!.NOME_VEND} 
+                                />
+                                <VendaDetailsItem 
+                                    icon="user" 
+                                    detail={venda!.NOME_CLI} 
+                                />
+                                <VendaDetailsItem 
+                                    icon="user-nurse" 
+                                    detail={venda?.NOME_MEDICO || '-'} 
+                                />
+                                <VendaDetailsItem 
+                                    icon="calendar-day" 
+                                    detail={new Date(venda!.DATA_VEN).toLocaleDateString()} 
+                                />
+                                <VendaDetailsItem 
+                                    icon="sack-dollar" 
+                                    detail={handlePaymentLabel(venda!.TOTAL_VEN, venda!.NOME_TPV)} 
+                                />
+                                <VendaDetailsItem 
+                                    icon="building" 
+                                    detail={venda!.RAZAO_EMP} 
+                                />
+                            </View>
                         </View>
-                    </View>
 
-                    <View style={[styles.cardSection, {backgroundColor: colors.slate[100], paddingVertical: 30}]}>
-                        <View style={styles.vendaDetails}>
-                            <SectionTitle title="Itens da venda" />
+                        <View style={{backgroundColor: colors.slate[100], paddingVertical: 30}}>
+                            <View style={styles.vendaDetails}>
+                                <SectionTitle title="Itens da venda" />
 
-                            { venda!.ITENS.length > 0 
-                                ? (
+                                { venda!.ITENS.length > 0 ? (
                                     <View style={{ gap: 20, marginTop: 16 }}>
                                         {venda!.ITENS.map((item, index) => (
-                                           <View key={`${index}`} style={{flex: 1}}>
+                                            <View key={`${index}`} style={{flex: 1}}>
                                                 <Text style={styles.itemNome}>
                                                     {item.NOME_PRO}
                                                 </Text>
@@ -141,45 +165,45 @@ export default function VendaDetails() {
                                     <Text style={styles.emptyText}>
                                         Nenhum item encontrado para esta venda.
                                     </Text>
-                                )
-                            }
+                                )}
+                            </View>
                         </View>
-                    </View>
 
-                    <View style={styles.cardSection}>
-                        <View style={styles.vendaDetails}>
-                            <SectionTitle title="Formas de pagamento" />
+                        <View>
+                            <View style={styles.vendaDetails}>
+                                <SectionTitle title="Formas de pagamento" />
 
-                            { venda!.FORMAS_PAGAMENTO.length > 0 
-                                ? (
-                                    <View style={{ gap: 10, padding: 18}}>
-                                        { venda!.FORMAS_PAGAMENTO.map((item, index) => (
-                                            <View key={`${index}`} style={styles.paymentRow}>
-                                                <Text style={styles.paymentText}>
-                                                    {item.DESCRICAO}
+                                { venda!.FORMAS_PAGAMENTO.length > 0 
+                                    ? (
+                                        <View style={{ gap: 10, padding: 18}}>
+                                            { venda!.FORMAS_PAGAMENTO.map((item, index) => (
+                                                <View key={`${index}`} style={styles.pagamentoRow}>
+                                                    <Text style={styles.pagamentoText}>
+                                                        {item.DESCRICAO}
+                                                    </Text>
+                                                    <Text style={styles.pagamentoTextValor}>
+                                                        {UtilitiesService.formatarValor(item.VALOR)}
+                                                    </Text>
+                                                </View>
+                                            ))}
+
+                                            <View style={styles.pagamentoRow}>
+                                                <Text style={styles.pagamentoTotal}>
+                                                    TOTAL
                                                 </Text>
-                                                <Text style={styles.paymentValue}>
-                                                    {UtilitiesService.formatarValor(item.VALOR)}
+                                                <Text style={styles.pagamentoTotalValor}>
+                                                    {UtilitiesService.formatarValor(venda!.TOTAL_VEN)}
                                                 </Text>
                                             </View>
-                                        ))}
-
-                                        <View style={styles.paymentRowTotal}>
-                                            <Text style={styles.paymentTextTotal}>
-                                                TOTAL
-                                            </Text>
-                                            <Text style={styles.paymentValueTotal}>
-                                                {UtilitiesService.formatarValor(venda!.TOTAL_VEN)}
-                                            </Text>
                                         </View>
-                                    </View>
-                                ) 
-                                : (
-                                    <Text style={styles.emptyText}>
-                                        Nenhuma forma de pagamento encontrada.
-                                    </Text>
-                                )
-                            }
+                                    ) 
+                                    : (
+                                        <Text style={styles.emptyText}>
+                                            Nenhuma forma de pagamento encontrada.
+                                        </Text>
+                                    )
+                                }
+                            </View>
                         </View>
                     </View>
                 </ScrollView>
@@ -207,36 +231,28 @@ const styles = StyleSheet.create({
     vendaDetails: {
         flexDirection: 'column'
     },
-    paymentRow: {
+    pagamentoRow: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between"
     },
-    paymentRowTotal: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between"
-    },
-    paymentValueTotal: {
+    pagamentoTotalValor: {
         color: colors.slate[800],
         fontWeight: 600
     },
-    paymentText: {
+    pagamentoText: {
         flex: 1,
-        color: colors.slate[700]
+        fontWeight: 300,
+        color: colors.slate[800]
     },
-    paymentTextTotal: {
+    pagamentoTotal: {
         flex: 1,
         fontWeight: 600,
-        color: colors.slate[700]
+        color: colors.slate[800]
     },
-    paymentValue: {
-        color: colors.slate[700],
-    },
-    itemIcon: {
-        padding: 8,
-        backgroundColor: colors.slate[600],
-        borderRadius: 100
+    pagamentoTextValor: {
+        fontWeight: 300,
+        color: colors.slate[800],
     },
     itemNome: {
         color: colors.slate[700],
@@ -250,47 +266,21 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         color: colors.slate[700]
     },
-    totalContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 15,
-        paddingVertical: 10,
-        borderTopWidth: 2,
-        borderColor: '#000',
-    },
-    totalLabel: {
-        fontSize: 18,
-        fontWeight: 600,
-    },
-    totalValue: {
-        fontSize: 18,
-        fontWeight: 600,
-        color: '#28a745',
-    },
     emptyText: {
         color: colors.slate[500],
         fontWeight: 300,
         marginVertical: 15,
         paddingHorizontal: 18
     },
-    error: {
-        fontSize: 16,
-        color: 'red',
-        textAlign: 'center',
-    },
-    loading: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    cardSection: {
-        marginTop: 10,
-        marginBottom: 30
-    },
     itemDetail: {
         flex: 1, 
         flexDirection: "row", 
         justifyContent: "space-between", 
         paddingHorizontal: 18
+    },
+    headerText: {
+        color: colors.lime[200], 
+        fontWeight: 600, 
+        fontSize: 16
     }
 });

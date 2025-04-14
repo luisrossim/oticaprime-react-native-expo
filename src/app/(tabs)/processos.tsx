@@ -163,14 +163,8 @@ export default function Processos() {
                         <Animated.FlatList
                             ListHeaderComponent={
                                 <View style={styles.headerContainer}>
-                                    <PageTitle 
-                                        title="Processos liberados" 
-                                        size="large" 
-                                    />
-                                    <FilterInfoPage
-                                        totalInfo={`${totalProcessos || 0} processos`} 
-                                        icon='check-circle'
-                                    />
+                                    <PageTitle title="Processos liberados" size="large" />
+                                    <FilterInfoPage info={`${totalProcessos || 0} processos`} />
                                 </View>
                             }
                             ref={flatListRef}
@@ -320,7 +314,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: colors.slate[200]
+        borderBottomColor: colors.slate[100]
     },
     itemListCardContent: {
         flexDirection: 'row',
@@ -401,8 +395,6 @@ const styles = StyleSheet.create({
     },
     iconModal: {
         color: colors.slate[500],
-        backgroundColor: colors.slate[100],
-        borderRadius: 60,
-        padding: 5
+        padding: 10
     }
 });

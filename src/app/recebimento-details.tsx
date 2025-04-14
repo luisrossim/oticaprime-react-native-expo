@@ -10,10 +10,10 @@ import { Recebimento } from '@/models/recebimento';
 import { RecebimentosService } from '@/services/recebimentos-service';
 import SectionTitle from '@/components/SectionTitle';
 import { Feather } from '@expo/vector-icons';
-import { PageTitle } from '@/components/PageTitle';
 import { UtilitiesService } from '@/utils/utilities-service';
-import { RecebimentoDetailsItem, RecebimentoDetailsLine } from '@/components/RecebimentoDetailsItem';
+import { RecebimentoDetailsLine } from '@/components/RecebimentoDetailsItem';
 import { LineDetailButton } from '@/components/LineDetail';
+import { IconText } from '@/components/IconText';
 
 export default function RecebimentoDetails() {
     const { id, sequencia } = useLocalSearchParams();
@@ -73,73 +73,88 @@ export default function RecebimentoDetails() {
             {error ? (
                 <ErrorMessage error={error} />
             ) : (
-                <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+                <ScrollView 
+                    style={styles.container} 
+                    showsVerticalScrollIndicator={false} 
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                >
                     <View style={styles.header}>
                         <Feather 
                             name="arrow-down-right" 
                             size={32} 
                             style={styles.iconElement} 
                         />
-                        <Text style={{color: colors.cyan[200], fontWeight: 500, fontSize: 16}}>
+                        <Text style={styles.headerText}>
                             Recebimento #{id}
                         </Text>
                     </View>
 
-                    <View style={styles.cardSection}>
-                        <SectionTitle title="Informações gerais" />
-                        <View style={styles.section}>
-                            <RecebimentoDetailsLine 
-                                label="Cliente"
-                                value={`${limitarNome(recebimento!.NOME_CLI)}`} 
-                            />
-                            <RecebimentoDetailsLine 
-                                label="Vencimento"
-                                value={new Date(recebimento!.VENCTO_CTR).toLocaleDateString()} 
-                            />
-                            <RecebimentoDetailsLine 
-                                label="Valor da conta"
-                                value={UtilitiesService.formatarValor(recebimento!.VALOR_CTR)} 
-                            />
-                            <RecebimentoDetailsLine 
-                                label="Desconto"
-                                value={UtilitiesService.formatarValor(recebimento!.DESCONTO_CONCEDIDO)} 
-                            />
-                            <RecebimentoDetailsLine 
-                                label="Acréscimo"
-                                value={UtilitiesService.formatarValor(recebimento!.ACRESCIMO_RECEBIDO)} 
-                            />
-                            <RecebimentoDetailsLine 
-                                label="Pago em"
-                                value={new Date(recebimento!.DTPAGTO_CTR).toLocaleDateString()} 
-                            />
-                            <RecebimentoDetailsLine 
-                                label="Valor pago"
-                                value={UtilitiesService.formatarValor(recebimento!.VLRPAGO_CTR)} 
-                            />
-                        </View>
-                    </View>
 
-                    <View style={styles.cardSection}>
-                        <SectionTitle title="Documento" />
-                        <View style={styles.section}>
-                            <RecebimentoDetailsItem 
-                                icon="file" 
-                                detail={`N° ${recebimento!.NUMDOCUMENTO_CTR}`} 
-                            />
-                            <RecebimentoDetailsItem 
-                                icon="ellipsis" 
-                                detail={`SEQUÊNCIA ${recebimento!.SEQUENCIA_CTR}`} 
-                            />
-                        </View>
-                    </View>
+                    {recebimento ? (
+                        <View style={{marginTop: 10, gap: 50}}>
+                            <View>
+                                <SectionTitle title="Informações gerais" />
+                                <View style={styles.section}>
+                                    <RecebimentoDetailsLine 
+                                        label="Cliente"
+                                        value={`${limitarNome(recebimento.NOME_CLI)}`} 
+                                    />
+                                    <RecebimentoDetailsLine 
+                                        label="Vencimento"
+                                        value={new Date(recebimento.VENCTO_CTR).toLocaleDateString()} 
+                                    />
+                                    <RecebimentoDetailsLine 
+                                        label="Valor da conta"
+                                        value={UtilitiesService.formatarValor(recebimento.VALOR_CTR)} 
+                                    />
+                                    <RecebimentoDetailsLine 
+                                        label="Desconto"
+                                        value={UtilitiesService.formatarValor(recebimento.DESCONTO_CONCEDIDO)} 
+                                    />
+                                    <RecebimentoDetailsLine 
+                                        label="Acréscimo"
+                                        value={UtilitiesService.formatarValor(recebimento.ACRESCIMO_RECEBIDO)} 
+                                    />
+                                    <RecebimentoDetailsLine 
+                                        label="Pago em"
+                                        value={new Date(recebimento!.DTPAGTO_CTR).toLocaleDateString()} 
+                                    />
+                                    <RecebimentoDetailsLine 
+                                        label="Valor pago"
+                                        value={UtilitiesService.formatarValor(recebimento.VLRPAGO_CTR)} 
+                                    />
+                                </View>
+                            </View>
 
-                    <View style={styles.cardSection}>
-                        <SectionTitle title="Venda relacionada" />
-                        <LineDetailButton 
-                            label='Detalhes da venda'
-                            onPress={handleNavigateToVendas}
-                        />
+
+                            <View>
+                                <SectionTitle title="Venda relacionada" />
+                                <LineDetailButton 
+                                    label='Detalhes da venda'
+                                    onPress={handleNavigateToVendas}
+                                />
+                            </View>
+
+
+                            <View>
+                                <SectionTitle title="Documento e sequência" />
+                                <View style={[styles.section, {gap: 8, marginTop: 2}]}>
+                                    <IconText 
+                                        icon="file" 
+                                        text={`${recebimento.NUMDOCUMENTO_CTR}`} 
+                                    />
+                                    <IconText 
+                                        icon="ellipsis" 
+                                        text={`SEQUÊNCIA ${recebimento.SEQUENCIA_CTR}`} 
+                                    />
+                                </View>
+                            </View>
                         </View>
+                    ) : (
+                        <Text style={styles.empty}>
+                            Ocorreu um erro ao exibir detalhes do recebimento.
+                        </Text>
+                    )}
                 </ScrollView>
             )}
         </SafeAreaView>
@@ -158,35 +173,22 @@ const styles = StyleSheet.create({
         backgroundColor: colors.indigo[600],
         paddingVertical: 40
     },
+    headerText: {
+        color: colors.cyan[200], 
+        fontWeight: 500, 
+        fontSize: 16
+    },
     iconElement: {
         color: colors.cyan[200]
     },
     section: {
         paddingTop: 10
     },
-    recebimentoText: {
-        fontSize: 16,
-        color: colors.slate[800],
-        marginVertical: 5,
-        fontWeight: '500',
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.green[600],
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        marginTop: 20,
-        justifyContent: 'center',
-    },
-    buttonText: {
-        color: "#FFF",
-        marginLeft: 8,
-        fontSize: 16,
-    },
-    cardSection: {
-        marginTop: 10,
-        marginBottom: 40
+    empty: {
+        textAlign: "center",
+        paddingHorizontal: 18,
+        fontWeight: 300,
+        fontSize: 13,
+        color: colors.slate[500]
     }
 });
